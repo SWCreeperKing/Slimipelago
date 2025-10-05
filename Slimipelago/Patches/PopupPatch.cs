@@ -17,7 +17,7 @@ public static class PopupPatch
     [HarmonyPatch(typeof(PopupDirector), "QueueForPopup"), HarmonyPrefix]
     public static bool StopPopups() => false;
     
-    private static GameObject CreateItemPopup(Sprite sprite, string itemDialogue, string item, string otherPlayer)
+    private static GameObject CreateItemPopup(Sprite sprite, string itemDialogue, string item, string otherPlayer, Action onPopup)
     {
         var popup = Instantiate(SRSingleton<SceneContext>.Instance.GadgetDirector.gadgetPopupPrefab);
         Destroy(popup.GetComponent<BlueprintPopupUI>());
@@ -28,6 +28,7 @@ public static class PopupPatch
         panel.GetChild(2).GetComponent<TextMeshProUGUI>().text = "Archipelago";
         panel.GetChild(3).GetChild(0).GetComponent<TextMeshProUGUI>().text = itemDialogue;
         panel.GetChild(4).GetComponent<TextMeshProUGUI>().text = otherPlayer;
+        onPopup?.Invoke();
         return popup;
     }
 
@@ -44,24 +45,25 @@ public static class PopupPatch
             if (!PopupDatas.Any()) return;
             var newData = PopupDatas.Dequeue();
             Core.Log.Msg($"Popup Queue: [{PopupDatas.Count}]");
-            CurrentPopup = CreateItemPopup(newData.Sprite, newData.ItemDialogue, newData.Item, newData.OtherPlayer);
+            CurrentPopup = CreateItemPopup(newData.Sprite, newData.ItemDialogue, newData.Item, newData.OtherPlayer, newData.OnPopup);
             DeadTime = 0;
         }
         
         if (CurrentPopup is null) return;
         DeadTime += Time.deltaTime;
         
-        if (DeadTime <= 5) return;
+        if (DeadTime <= 3) return;
         Destroy(CurrentPopup);
         CurrentPopup = null;
         DeadTime = 0;
     }
 }
 
-public readonly struct ApPopupData(Sprite sprite, string itemDialogue, string item, string otherPlayer)
+public readonly struct ApPopupData(Sprite sprite, string itemDialogue, string item, string otherPlayer, Action onPopup = null)
 {
     public readonly Sprite Sprite = sprite;
     public readonly string ItemDialogue = itemDialogue;
     public readonly string Item = item;
     public readonly string OtherPlayer = otherPlayer;
+    public readonly Action OnPopup = onPopup;
 }

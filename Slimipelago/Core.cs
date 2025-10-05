@@ -8,6 +8,7 @@ using UnityEngine.UI;
 using static Identifiable;
 using static Slimipelago.Patches.JetpackPatch;
 using static Slimipelago.Patches.PlayerModelPatch;
+using static Slimipelago.Patches.PlayerStatePatch;
 using Object = UnityEngine.Object;
 
 [assembly: MelonInfo(typeof(Slimipelago.Core), "Slimipelago", "1.0.0", "SW_CreeperKing", null)]
@@ -29,6 +30,7 @@ public class Core : MelonMod
 
     public static MelonLogger.Instance Log;
     public static bool TestNotItemBought = true;
+    public static Task TrapReset;
 
     public override void OnInitializeMelon()
     {
@@ -37,6 +39,7 @@ public class Core : MelonMod
         CreateSprite("trap", "APSR_Trap");
         CreateSprite("progressive", "APSR_Progressive");
         CreateSprite("useful", "APSR_Useful");
+        CreateSprite("got_trap", "APSR_Got_Trap");
 
         Log.Msg("Assets Loaded");
 
@@ -119,9 +122,13 @@ public class Core : MelonMod
 
         KeyRegistry.AddKey(KeyCode.Semicolon, () => MakeMarker("normal"));
         KeyRegistry.AddKey(KeyCode.Quote, () => MakeMarker("trap"));
-        KeyRegistry.AddKey(KeyCode.F9, () =>
-        {
-        });
+        KeyRegistry.AddKey(KeyCode.F9, BanishPlayer);
+        KeyRegistry.AddKey(KeyCode.F8,
+            () =>
+            {
+                PopupPatch.AddItemToQueue(new ApPopupData(Spritemap["got_trap"], "WOOPS!", "WOOPS!", "From debug keys",
+                    Woops));
+            });
     }
 
     public override void OnUpdate()
@@ -136,7 +143,7 @@ public class Core : MelonMod
         {
             transform =
             {
-                parent = PlayerStatePatch.PlayerInWorld.GetComponent<PlayerDisplayOnMap>().transform.parent,
+                parent = PlayerInWorld.GetComponent<PlayerDisplayOnMap>().transform.parent,
             }
         };
         gobj.AddComponent<RegionMember>();
@@ -144,4 +151,37 @@ public class Core : MelonMod
         var obj = gobj.AddComponent<ItemDisplayOnMap>();
         obj.Image.overrideSprite = Spritemap[id];
     }
+
+    public static void Woops()
+    {
+        if (TrapReset is not null) return;
+        try
+        {
+            var beforePos = PlayerInWorld.transform.position;
+            var pos = PlayerInWorld.transform.position;
+            pos.y += 300;
+            PlayerInWorld.transform.position = pos;
+            TrapReset = Task.Run(async () =>
+            {
+                try
+                {
+                    await Task.Delay(5000);
+                    PlayerInWorld.transform.position = beforePos;
+                    TrapReset = null;
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e);
+                }
+            });
+        }
+        catch (Exception e)
+        {
+            Log.Error(e);
+        }
+    }
+
+    public static void BanishPlayer()
+        => PlayerInWorld.transform.SetPositionAndRotation(new Vector3(90.9811f, 20, -140.8849f),
+            Quaternion.Euler(0, 19.227f, 0));
 }
