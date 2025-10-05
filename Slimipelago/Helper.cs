@@ -1,5 +1,4 @@
 using System.Reflection;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Slimipelago;
@@ -64,4 +63,4 @@ public static class Helper
 }
 
 [AttributeUsage(AttributeTargets.Class)]
-public class HarmonyPatchAll : Attribute;
+public class PatchAll : Attribute;

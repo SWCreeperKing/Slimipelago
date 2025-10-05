@@ -2,7 +2,7 @@ using HarmonyLib;
 
 namespace Slimipelago.Patches;
 
-[HarmonyPatchAll]
+[PatchAll]
 public static class JournalPatch
 {
     public static bool EnableJournals = true;

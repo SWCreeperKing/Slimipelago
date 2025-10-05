@@ -2,7 +2,7 @@ using HarmonyLib;
 
 namespace Slimipelago.Patches;
 
-[HarmonyPatchAll]
+[PatchAll]
 public static class VacuumPatch
 {
     [HarmonyPatch(typeof(Vacuumable), "TryConsume"), HarmonyPrefix]

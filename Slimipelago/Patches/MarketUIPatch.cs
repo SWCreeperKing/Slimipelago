@@ -1,11 +1,10 @@
-using System.Reflection;
 using HarmonyLib;
 using MelonLoader;
 using UnityEngine;
 
 namespace Slimipelago.Patches;
 
-[HarmonyPatchAll]
+[PatchAll]
 public static class MarketUIPatch
 {
     [HarmonyPatch(typeof(MarketUI), "Start"), HarmonyPostfix]
@@ -53,7 +52,7 @@ public class MarketItem : MonoBehaviour
         if (SwitchTimer < 3) return;
         SwitchTimer = 0;
 
-        Entry.itemIcon.overrideSprite = Track ? null : Core.Spritemap[Core.MarketItems[Plort.id]];
+        Entry.itemIcon.overrideSprite = Track ? null : GameLoader.Spritemap[Core.MarketItems[Plort.id]];
         Track = !Track;
     }
 }

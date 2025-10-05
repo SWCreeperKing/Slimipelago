@@ -1,6 +1,6 @@
 namespace Slimipelago.Patches;
 
-[HarmonyPatchAll]
+[PatchAll]
 public static class SlimeSpawnPatch
 {
     public static void Patch(DirectedSlimeSpawner __instance)

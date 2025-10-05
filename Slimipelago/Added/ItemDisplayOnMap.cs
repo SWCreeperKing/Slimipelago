@@ -1,6 +1,6 @@
-using HarmonyLib;
 using MonomiPark.SlimeRancher.Regions;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace Slimipelago.Patches;
@@ -11,6 +11,7 @@ public class ItemDisplayOnMap : DisplayOnMap
     public MapMarker Marker;
     public ZoneDirector.Zone Zone = ZoneDirector.Zone.RANCH;
     public Vector3 Pos;
+    public UnityAction OnPress;
 
     public override void Awake()
     {
@@ -28,9 +29,15 @@ public class ItemDisplayOnMap : DisplayOnMap
             var rect = gobj.GetComponent<RectTransform>();
             rect.sizeDelta = new Vector2(50, 50);
 
-            Image.sprite = Core.Spritemap["normal"];
+            Image.sprite = GameLoader.Spritemap["normal"];
             Marker = gobj.AddComponent<ItemMapMarker>();
             Marker.gameObject.SetActive(true);
+
+            if (OnPress is not null)
+            {
+                var button = gobj.AddComponent<Button>();
+                button.onClick.AddListener(OnPress);
+            }
 
             var marker = GameObject.Find("HUD Root/Map/MapUI/UIContainer/Panel/Scroll View/Viewport/Content/Markers");
             gobj.transform.parent = marker.transform;
@@ -43,10 +50,6 @@ public class ItemDisplayOnMap : DisplayOnMap
                 map.GetPrivateField<Vector2>($"{(isRegionDesert ? "desert" : "world")}MarkerPositionMin");
             var markerPosMax =
                 map.GetPrivateField<Vector2>($"{(isRegionDesert ? "desert" : "world")}MarkerPositionMax");
-
-            Pos = PlayerStatePatch.PlayerInWorld.transform.position;
-            Core.Log.Msg(
-                $"[{map is not null}], player: [{Pos}], [{cof}] : [{markerPosMin}]-[{markerPosMax}]");
 
             Pos = gobj.transform.localPosition = map.CallPrivateMethod<Vector2>("GetMapPosClamped",
                 Pos, cof, markerPosMin, markerPosMax);

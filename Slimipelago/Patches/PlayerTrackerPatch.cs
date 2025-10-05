@@ -2,7 +2,7 @@ using HarmonyLib;
 
 namespace Slimipelago.Patches;
 
-[HarmonyPatchAll]
+[PatchAll]
 public static class PlayerTrackerPatch
 {
     public static HashSet<ZoneDirector.Zone> AllowedZones = [ZoneDirector.Zone.REEF];

@@ -1,14 +1,10 @@
-using System.Reflection.Emit;
 using HarmonyLib;
-using MelonLoader;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
-using static Slimipelago.Core;
 
 namespace Slimipelago.Patches;
 
-[HarmonyPatchAll]
+[PatchAll]
 public static class MainMenuPatch
 {
     public static GameObject ContinueButton;

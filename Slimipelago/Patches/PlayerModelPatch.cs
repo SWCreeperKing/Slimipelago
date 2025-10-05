@@ -3,7 +3,7 @@ using MonomiPark.SlimeRancher.DataModel;
 
 namespace Slimipelago.Patches;
 
-[HarmonyPatchAll]
+[PatchAll]
 public static class PlayerModelPatch
 {
     public static PlayerModel Model;

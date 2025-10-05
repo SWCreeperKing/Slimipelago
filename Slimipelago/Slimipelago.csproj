@@ -269,6 +269,7 @@
 		<Compile Include="Added\MethodExtends.cs" />
 		<Compile Include="ApSlimeClient.cs" />
 		<Compile Include="Core.cs" />
+		<Compile Include="GameLoader.cs" />
 		<Compile Include="Helper.cs" />
 		<Compile Include="Invisinator.cs" />
 		<Compile Include="KeyRegistry.cs" />
@@ -282,6 +283,7 @@
 		<Compile Include="Patches\PlayerTrackerPatch.cs" />
 		<Compile Include="Patches\PopupPatch.cs" />
 		<Compile Include="Patches\SlimeSpawnPatch.cs" />
+		<Compile Include="Patches\SprintStaminaPatch.cs" />
 		<Compile Include="Patches\TranslationPatch.cs" />
 		<Compile Include="Patches\VacuumPatch.cs" />
 	</ItemGroup>

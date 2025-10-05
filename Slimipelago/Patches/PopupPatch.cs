@@ -7,7 +7,7 @@ using static UnityEngine.Object;
 
 namespace Slimipelago.Patches;
 
-[HarmonyPatchAll]
+[PatchAll]
 public static class PopupPatch
 {
     private static double DeadTime;

@@ -2,7 +2,7 @@ using HarmonyLib;
 
 namespace Slimipelago.Patches;
 
-[HarmonyPatchAll]
+[PatchAll]
 public static class TranslationPatch
 {
     [HarmonyPatch(typeof(MessageBundle), "Xlate"), HarmonyPrefix]
