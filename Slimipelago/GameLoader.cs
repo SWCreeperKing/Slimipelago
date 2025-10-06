@@ -36,7 +36,7 @@ public static class GameLoader
             new Vector2(0.5f, 0.5f));
     }
     
-    public static void MakeMarker(string id, Vector3 position, UnityAction onPressed = null)
+    public static ItemDisplayOnMap MakeMarker(string id, Vector3 position, UnityAction onPressed = null)
     {
         GameObject gobj = new($"Archipelago Marker Display ({id})")
         {
@@ -53,5 +53,7 @@ public static class GameLoader
         obj.OnPress = onPressed;
         gobj.SetActive(true);
         obj.Image.overrideSprite = Spritemap[id];
+
+        return obj;
     }
 }

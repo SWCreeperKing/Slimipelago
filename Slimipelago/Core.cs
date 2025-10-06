@@ -11,7 +11,6 @@ using static Slimipelago.Patches.PlayerStatePatch;
 [assembly: MelonInfo(typeof(Slimipelago.Core), "Slimipelago", "1.0.0", "SW_CreeperKing", null)]
 [assembly: MelonGame("Monomi Park", "Slime Rancher")]
 
-// icon: Redriel
 namespace Slimipelago;
 
 public class Core : MelonMod
@@ -68,17 +67,18 @@ public class Core : MelonMod
         KeyRegistry.AddKey(KeyCode.J, () =>
         {
             if (Model is null || Jetpack is null) return;
+            //
+            // if (Model.upgrades.Contains(PlayerState.Upgrade.JETPACK))
+            // {
+            //     Model.upgrades.Remove(PlayerState.Upgrade.JETPACK);
+            // }
+            // else
+            // {
+            //     Model.upgrades.Add(PlayerState.Upgrade.JETPACK);
+            // }
 
-            if (Model.upgrades.Contains(PlayerState.Upgrade.JETPACK))
-            {
-                Model.upgrades.Remove(PlayerState.Upgrade.JETPACK);
-            }
-            else
-            {
-                Model.upgrades.Add(PlayerState.Upgrade.JETPACK);
-            }
-
-            Model.hasJetpack = !Model.hasJetpack;
+            // Model.hasJetpack = !Model.hasJetpack;
+            EnableJetpack = !EnableJetpack;
             Log.Msg("Toggled Jetpack");
         });
 

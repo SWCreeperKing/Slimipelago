@@ -16,9 +16,17 @@ public static class JournalPatch
     }
 
     [HarmonyPatch(typeof(JournalEntry), "Activate"), HarmonyPrefix]
-    public static void Activate(JournalEntry __instance)
+    public static bool ActivateJournal(JournalEntry __instance)
     {
-        if (!Entries.Add(__instance.entryKey)) return;
+        if (!Entries.Add(__instance.entryKey)) return false;
         Core.Log.Msg($"new log this session: [{__instance.entryKey}]");
+        return false;
+    }
+
+    [HarmonyPatch(typeof(MapDataEntry), "Activate"), HarmonyPrefix]
+    public static bool ActivateMapDataEntry(MapDataEntry __instance)
+    {
+        Core.Log.Msg($"Map activated: [{__instance.zone}]");
+        return false;
     }
 }

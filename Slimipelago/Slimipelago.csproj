@@ -277,6 +277,7 @@
 		<Compile Include="Patches\JournalPatch.cs" />
 		<Compile Include="Patches\MainMenuPatch.cs" />
 		<Compile Include="Patches\MarketUIPatch.cs" />
+		<Compile Include="Patches\OptionsPatch.cs" />
 		<Compile Include="Patches\PersonalUpgradePatch.cs" />
 		<Compile Include="Patches\PlayerModelPatch.cs" />
 		<Compile Include="Patches\PlayerStatePatch.cs" />

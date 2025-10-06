@@ -14,16 +14,17 @@ public static class PlayerModelPatch
     {
         Model = __instance;
         
-        if (Model.upgrades.Contains(PlayerState.Upgrade.JETPACK))
-        {
-            Model.upgrades.Remove(PlayerState.Upgrade.JETPACK);
-        }
+        // if (Model.upgrades.Contains(PlayerState.Upgrade.JETPACK))
+        // {
+        //     Model.upgrades.Remove(PlayerState.Upgrade.JETPACK);
+        // }
 
-        Model.hasJetpack = false;
+        // Model.hasJetpack = false;
         
         Core.Log.Msg("PlayerInit");
     }
 
     [HarmonyPatch(typeof(PlayerModel), "Recover"), HarmonyPrefix]
     public static bool Regen(PlayerModel __instance) => EnableRecovery;
+
 }
