@@ -12,10 +12,11 @@ public class ItemDisplayOnMap : DisplayOnMap
     public ZoneDirector.Zone Zone = ZoneDirector.Zone.RANCH;
     public Vector3 Pos;
     public UnityAction OnPress;
+    public RegionRegistry.RegionSetId Region = RegionRegistry.RegionSetId.HOME;
 
     public override void Awake()
     {
-        Core.Log.Msg("Marker Wakeup");
+        // Core.Log.Msg("Marker Wakeup");
         try
         {
             var mainMap = SRSingleton<Map>.Instance;
@@ -42,17 +43,19 @@ public class ItemDisplayOnMap : DisplayOnMap
             var marker = GameObject.Find("HUD Root/Map/MapUI/UIContainer/Panel/Scroll View/Viewport/Content/Markers");
             gobj.transform.parent = marker.transform;
 
-            var map = mainMap.mapUI;
-            var isRegionDesert = base.GetRegionSetId() == RegionRegistry.RegionSetId.DESERT;
-
-            var cof = map.GetPrivateField<Vector4>($"{(isRegionDesert ? "desert" : "main")}Coefficients");
-            var markerPosMin =
-                map.GetPrivateField<Vector2>($"{(isRegionDesert ? "desert" : "world")}MarkerPositionMin");
-            var markerPosMax =
-                map.GetPrivateField<Vector2>($"{(isRegionDesert ? "desert" : "world")}MarkerPositionMax");
-
-            Pos = gobj.transform.localPosition = map.CallPrivateMethod<Vector2>("GetMapPosClamped",
-                Pos, cof, markerPosMin, markerPosMax);
+            // var map = mainMap.mapUI;
+            // var isRegionDesert = Region == RegionRegistry.RegionSetId.DESERT;
+            //
+            // var cof = map.GetPrivateField<Vector4>($"{(isRegionDesert ? "desert" : "main")}Coefficients");
+            // var markerPosMin =
+            //     map.GetPrivateField<Vector2>($"{(isRegionDesert ? "desert" : "world")}MarkerPositionMin");
+            // var markerPosMax =
+            //     map.GetPrivateField<Vector2>($"{(isRegionDesert ? "desert" : "world")}MarkerPositionMax");
+            //
+            // Pos = gobj.transform.localPosition = map.CallPrivateMethod<Vector2>("GetMapPos", Pos, cof);
+            //
+            // Pos = gobj.transform.localPosition = map.CallPrivateMethod<Vector2>("GetMapPosClamped",
+            //     Pos, cof, markerPosMin, markerPosMax);
         }
         catch (Exception e)
         {
@@ -72,4 +75,6 @@ public class ItemDisplayOnMap : DisplayOnMap
         Marker.transform.localPosition = Pos;
         Marker.transform.localScale= Vector3.one;
     }
+
+    public override RegionRegistry.RegionSetId GetRegionSetId() => Region;
 }

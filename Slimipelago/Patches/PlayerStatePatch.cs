@@ -9,6 +9,8 @@ public static class PlayerStatePatch
     public static PlayerState PlayerState;
     public static GameObject PlayerInWorld = null;
     public static Rigidbody PlayerInWorldBody;
+    public static Map PlayerMap;
+    
     public static Vector3 PlayerPos => PlayerInWorld.transform.position;
     
     [HarmonyPatch(typeof(PlayerState), "Awake"), HarmonyPostfix]
@@ -21,8 +23,9 @@ public static class PlayerStatePatch
     }
 
     [HarmonyPatch(typeof(Map), "Start"), HarmonyPostfix]
-    public static void MapAlive()
+    public static void MapAlive(Map __instance)
     {
+        PlayerMap = __instance;
         GameLoader.LoadMapMarkers();
         Core.Log.Msg("Map Alive");
     }

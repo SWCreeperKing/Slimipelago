@@ -1,4 +1,5 @@
 using HarmonyLib;
+using MonomiPark.SlimeRancher.Regions;
 
 namespace Slimipelago.Patches;
 
@@ -12,6 +13,8 @@ public static class JournalPatch
     public static bool Start(JournalEntry __instance)
     {
         __instance.gameObject.SetActive(EnableJournals);
+        var region = __instance.GetComponentInParent<Region>();
+        GameLoader.MakeMarker("log", __instance.transform.position, null, region.setId);
         return false;
     }
 
@@ -27,6 +30,14 @@ public static class JournalPatch
     public static bool ActivateMapDataEntry(MapDataEntry __instance)
     {
         Core.Log.Msg($"Map activated: [{__instance.zone}]");
+        return false;
+    }
+    
+    [HarmonyPatch(typeof(MapDataEntry), "Start"), HarmonyPrefix]
+    public static bool MapMarker(MapDataEntry __instance)
+    {
+        var region = __instance.GetComponentInParent<Region>();
+        GameLoader.MakeMarker("map", __instance.transform.position, null, region.setId);
         return false;
     }
 }
