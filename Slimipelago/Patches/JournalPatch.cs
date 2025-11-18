@@ -23,14 +23,11 @@ public static class JournalPatch
     {
         var hash = __instance.transform.position.HashPos();
         if (!ApSlimeClient.LocationsFound.Add(hash)) return false;
-        // if (!Entries.Add(__instance.entryKey)) return false;
-        // Core.Log.Msg($"new log this session: [{__instance.entryKey}]");
         var color = GameLoader.MarkerDictionary[hash].Image.color;
         color.a /= 4;
         GameLoader.MarkerDictionary[hash].Image.color = color;
         
         PopupPatch.AddItemToQueue(new ApPopupData(GameLoader.Spritemap["normal"], "Log Found", ApSlimeClient.LocationDictionary[hash]));
-        // return false;
         return true;
     }
 

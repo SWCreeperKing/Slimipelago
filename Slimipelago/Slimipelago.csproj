@@ -274,11 +274,9 @@
 		<Compile Include="Helper.cs" />
 		<Compile Include="Invisinator.cs" />
 		<Compile Include="KeyRegistry.cs" />
-		<Compile Include="Patches\GordoPatch.cs" />
 		<Compile Include="Patches\JetpackPatch.cs" />
 		<Compile Include="Patches\JournalPatch.cs" />
 		<Compile Include="Patches\MainMenuPatch.cs" />
-		<Compile Include="Patches\MarketUIPatch.cs" />
 		<Compile Include="Patches\OptionsPatch.cs" />
 		<Compile Include="Patches\PersonalUpgradePatch.cs" />
 		<Compile Include="Patches\PlayerModelPatch.cs" />
@@ -286,12 +284,8 @@
 		<Compile Include="Patches\PlayerTrackerPatch.cs" />
 		<Compile Include="Patches\PodPatch.cs" />
 		<Compile Include="Patches\PopupPatch.cs" />
-		<Compile Include="Patches\SlimeGatePatch.cs" />
-		<Compile Include="Patches\SlimeKeyPatch.cs" />
-		<Compile Include="Patches\SlimeSpawnPatch.cs" />
 		<Compile Include="Patches\SprintStaminaPatch.cs" />
 		<Compile Include="Patches\TranslationPatch.cs" />
-		<Compile Include="Patches\VacuumPatch.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
