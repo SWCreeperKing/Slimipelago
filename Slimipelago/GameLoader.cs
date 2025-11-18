@@ -8,9 +8,12 @@ namespace Slimipelago;
 
 public static class GameLoader
 {
-    private static readonly Queue<MapMarkerData> MarkerQueue = [];
+    public static readonly Dictionary<string, ItemDisplayOnMap> MarkerDictionary = [];
     public static readonly Vector3 Home = new(90.9811f, 14.7f, -140.8849f);
     public static Dictionary<string, Sprite> Spritemap = [];
+    
+    private static readonly Queue<MapMarkerData> MarkerQueue = [];
+    private const bool ReplaceNullOnClickWithId = true;
 
     public static void LoadSprites()
     {
@@ -75,6 +78,12 @@ public static class GameLoader
         var clampPos = map.CallPrivateMethod<Vector2>("GetMapPosClamped", position, cof, markerPosMin, markerPosMax);
 
         if (mapPos != clampPos) return null;
+        var posHash = position.HashPos();
+        
+        if (ReplaceNullOnClickWithId && onPressed is null)
+        {
+            onPressed = () => Core.Log.Msg($"Marker id: \"{posHash}\"");
+        }
         
         GameObject gobj = new($"Archipelago Marker Display ({id})")
         {
@@ -94,7 +103,13 @@ public static class GameLoader
         gobj.SetActive(true);
         obj.Image.overrideSprite = Spritemap[id];
 
+        MarkerDictionary[posHash] = obj;
         return obj;
+    }
+
+    public static void ResetData()
+    {
+        MarkerDictionary.Clear();
     }
 }
 

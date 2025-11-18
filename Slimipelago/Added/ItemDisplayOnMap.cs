@@ -19,7 +19,6 @@ public class ItemDisplayOnMap : DisplayOnMap
         // Core.Log.Msg("Marker Wakeup");
         try
         {
-            var mainMap = SRSingleton<Map>.Instance;
             // mainMap.OpenMap(ZoneDirector.Zone.NONE);
             
             SRSingleton<Map>.Instance.RegisterMarker(this);
@@ -73,7 +72,7 @@ public class ItemDisplayOnMap : DisplayOnMap
         if (!Marker.gameObject.activeSelf) return;
         if (Marker.transform.localPosition == Pos) return;
         Marker.transform.localPosition = Pos;
-        Marker.transform.localScale= Vector3.one;
+        Marker.transform.localScale = Vector3.one;
     }
 
     public override RegionRegistry.RegionSetId GetRegionSetId() => Region;

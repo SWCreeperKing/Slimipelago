@@ -4,7 +4,7 @@ using UnityEngine.Events;
 
 namespace Slimipelago.Patches;
 
-[PatchAll]
+// [PatchAll]
 public static class PersonalUpgradePatch
 {
     public static List<PurchaseUI.Purchasable> TestPurchasables = [];

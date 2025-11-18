@@ -21,16 +21,28 @@ public static class JournalPatch
     [HarmonyPatch(typeof(JournalEntry), "Activate"), HarmonyPrefix]
     public static bool ActivateJournal(JournalEntry __instance)
     {
-        if (!Entries.Add(__instance.entryKey)) return false;
-        Core.Log.Msg($"new log this session: [{__instance.entryKey}]");
-        return false;
+        var hash = __instance.transform.position.HashPos();
+        if (!ApSlimeClient.LocationsFound.Add(hash)) return false;
+        // if (!Entries.Add(__instance.entryKey)) return false;
+        // Core.Log.Msg($"new log this session: [{__instance.entryKey}]");
+        var color = GameLoader.MarkerDictionary[hash].Image.color;
+        color.a /= 4;
+        GameLoader.MarkerDictionary[hash].Image.color = color;
+        
+        PopupPatch.AddItemToQueue(new ApPopupData(GameLoader.Spritemap["normal"], "Log Found", ApSlimeClient.LocationDictionary[hash]));
+        // return false;
+        return true;
     }
 
     [HarmonyPatch(typeof(MapDataEntry), "Activate"), HarmonyPrefix]
-    public static bool ActivateMapDataEntry(MapDataEntry __instance)
+    public static void ActivateMapDataEntry(MapDataEntry __instance)
     {
         Core.Log.Msg($"Map activated: [{__instance.zone}]");
-        return false;
+        var hash = __instance.transform.position.HashPos();
+
+        var color = GameLoader.MarkerDictionary[hash].Image.color;
+        color.a /= 4;
+        GameLoader.MarkerDictionary[hash].Image.color = color;
     }
     
     [HarmonyPatch(typeof(MapDataEntry), "Start"), HarmonyPrefix]

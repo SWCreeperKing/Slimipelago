@@ -268,6 +268,7 @@
 		<Compile Include="Added\ItemMapMarker.cs" />
 		<Compile Include="Added\MethodExtends.cs" />
 		<Compile Include="ApSlimeClient.cs" />
+		<Compile Include="ApWorldShenanigans.cs" />
 		<Compile Include="Core.cs" />
 		<Compile Include="GameLoader.cs" />
 		<Compile Include="Helper.cs" />
@@ -286,6 +287,7 @@
 		<Compile Include="Patches\PodPatch.cs" />
 		<Compile Include="Patches\PopupPatch.cs" />
 		<Compile Include="Patches\SlimeGatePatch.cs" />
+		<Compile Include="Patches\SlimeKeyPatch.cs" />
 		<Compile Include="Patches\SlimeSpawnPatch.cs" />
 		<Compile Include="Patches\SprintStaminaPatch.cs" />
 		<Compile Include="Patches\TranslationPatch.cs" />

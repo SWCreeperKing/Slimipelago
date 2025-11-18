@@ -2,7 +2,7 @@ using HarmonyLib;
 
 namespace Slimipelago.Patches;
 
-[PatchAll]
+// [PatchAll]
 public static class JetpackPatch
 {
     public static EnergyJetpack Jetpack;

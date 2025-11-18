@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Slimipelago.Patches;
 
-[PatchAll]
+// [PatchAll]
 public static class MarketUIPatch
 {
     [HarmonyPatch(typeof(MarketUI), "Start"), HarmonyPostfix]
@@ -28,7 +28,6 @@ public static class MarketUIPatch
     }
 }
 
-[RegisterTypeInIl2Cpp]
 public class MarketItem : MonoBehaviour
 {
     public MarketUI.PlortEntry Plort;

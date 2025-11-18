@@ -59,7 +59,7 @@ public static class PopupPatch
     }
 }
 
-public readonly struct ApPopupData(Sprite sprite, string itemDialogue, string item, string otherPlayer, Action onPopup = null)
+public readonly struct ApPopupData(Sprite sprite, string itemDialogue, string item, string otherPlayer = "", Action onPopup = null)
 {
     public readonly Sprite Sprite = sprite;
     public readonly string ItemDialogue = itemDialogue;

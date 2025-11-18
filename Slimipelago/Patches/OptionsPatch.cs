@@ -12,6 +12,7 @@ public static class OptionsPatch
     [HarmonyPatch(typeof(OptionsUI), "Awake"), HarmonyPostfix]
     public static void ApInfo(OptionsUI __instance)
     {
+        if (SceneManager.GetActiveScene().name is not "MainMenu") return;
         __instance.modsTab.SetActive(true);
         __instance.videoTab.GetComponent<SRToggle>().isOn = false;
         __instance.modsTab.GetComponent<SRToggle>().isOn = true;
@@ -23,6 +24,7 @@ public static class OptionsPatch
     [HarmonyPatch(typeof(OptionsUI), "SetupMods"), HarmonyPrefix]
     public static bool SetupAp(OptionsUI __instance)
     {
+        if (SceneManager.GetActiveScene().name is not "MainMenu") return true;
         var modPanel = __instance.modsPanel.GetChild(0);
         var panel = new GameObject("Ap menu");
         panel.transform.parent = modPanel.transform;
@@ -34,8 +36,6 @@ public static class OptionsPatch
         layout.cellSize = new Vector2(700, 50);
         layout.spacing = new Vector2(20, 40);
         layout.constraintCount = 1;
-
-        Helper.CreateText($"Current Scene: [{SceneManager.GetActiveScene().name}]", Color.black, panel);
 
         var g1 = Helper.CreateHorizontalGroup(panel).gameObject;
         Helper.CreateText("Address:    ", Color.black, g1);

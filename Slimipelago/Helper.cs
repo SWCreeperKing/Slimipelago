@@ -130,7 +130,7 @@ public static class Helper
         button.targetGraphic = img;
 
         var child = new GameObject("Button Text (custom)");
-        var textObj = child.AddComponent<TextMeshProUGUI>();
+        var textObj = child.AddComponent<TextMeshProUGUI>();  
         textObj.text = text;
         textObj.autoSizeTextContainer = true;
         child.transform.parent = bGobj.transform;
@@ -138,6 +138,8 @@ public static class Helper
         bGobj.AddComponent<MeshButtonStyler>();
         return button;
     }
+
+    public static string HashPos(this Vector3 pos) => $"[x:{Math.Floor(pos.x)}|y:{Math.Floor(pos.y)}|z:{Math.Floor(pos.z)}]";
 }
 
 [AttributeUsage(AttributeTargets.Class)]

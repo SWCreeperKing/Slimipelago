@@ -20,6 +20,7 @@ public static class PlayerStatePatch
         PlayerInWorld = GameObject.Find("SimplePlayer");
         PlayerInWorldBody = PlayerInWorld.GetComponent<Rigidbody>();
         Core.Log.Msg("Player Awake");
+        GameLoader.ResetData();
     }
 
     [HarmonyPatch(typeof(Map), "Start"), HarmonyPostfix]
