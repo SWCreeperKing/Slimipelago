@@ -274,8 +274,10 @@
 		<Compile Include="Helper.cs" />
 		<Compile Include="Invisinator.cs" />
 		<Compile Include="KeyRegistry.cs" />
+		<Compile Include="Patches\Expansions\LabAccessPatch.cs" />
 		<Compile Include="Patches\JetpackPatch.cs" />
 		<Compile Include="Patches\JournalPatch.cs" />
+		<Compile Include="Patches\KillTutorialPatch.cs" />
 		<Compile Include="Patches\MainMenuPatch.cs" />
 		<Compile Include="Patches\OptionsPatch.cs" />
 		<Compile Include="Patches\PersonalUpgradePatch.cs" />

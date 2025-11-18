@@ -27,10 +27,10 @@ public static class PodPatch
         throw new ArgumentException($"Pod: [{name}] has no valid type");
     }
 
-    [HarmonyPatch(typeof(TreasurePod), "Activate"), HarmonyPrefix]
-    public static void OpenPod(TreasurePod __instance)
-    {
-        Core.Log.Msg(
-            $"pod [type: {GetType(__instance) switch { 0 => "I", 1 => "II", 2 => "III", 3 => "Cosmetic" }}] id: {__instance.transform.position.HashPos()}");
-    }
+    // [HarmonyPatch(typeof(TreasurePod), "Activate"), HarmonyPrefix]
+    // public static void OpenPod(TreasurePod __instance)
+    // {
+    //     Core.Log.Msg(
+    //         $"pod [type: {GetType(__instance) switch { 0 => "I", 1 => "II", 2 => "III", 3 => "Cosmetic" }}] id: {__instance.transform.position.HashPos()}");
+    // }
 }

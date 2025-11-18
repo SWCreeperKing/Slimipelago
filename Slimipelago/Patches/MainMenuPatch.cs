@@ -1,4 +1,5 @@
 using HarmonyLib;
+using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
 
@@ -10,10 +11,14 @@ public static class MainMenuPatch
     public static GameObject ContinueButton;
     public static GameObject LoadButton;
     public static GameObject NewGameButton;
+    [CanBeNull] public static event Action OnGamePotentialExit; 
 
     [HarmonyPatch(typeof(MainMenuUI), "Start"), HarmonyPostfix]
     public static void MenuPatch(MainMenuUI __instance)
     {
+        OnGamePotentialExit?.Invoke();
+        OnGamePotentialExit = null;
+        
         var container = __instance.GetChild(1);
         ContinueButton = container.GetChild(0);
         LoadButton = container.GetChild(1);

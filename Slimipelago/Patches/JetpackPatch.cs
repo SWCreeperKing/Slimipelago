@@ -12,6 +12,7 @@ public static class JetpackPatch
     public static void JetpackInit(EnergyJetpack __instance)
     {
         Jetpack = __instance;
+        MainMenuPatch.OnGamePotentialExit += () => Jetpack = null;
     }
     
     [HarmonyPatch(typeof(EnergyJetpack), "CanStart_Jetpack"), HarmonyPrefix]

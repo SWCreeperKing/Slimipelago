@@ -24,7 +24,6 @@ public class Core : MelonMod
     };
 
     public static MelonLogger.Instance Log;
-    public static bool TestNotItemBought = true;
     public static Task TrapReset;
 
     public override void OnInitializeMelon()
@@ -57,15 +56,6 @@ public class Core : MelonMod
         LoadSprites();
 
         Log.Msg("Assets Loaded");
-
-        PersonalUpgradePatch.TestPurchasables.Add(PersonalUpgradePatch.CreatePurchasable("Test Item",
-            Spritemap["normal"], "This is just a simple test", 1, () => { }, () => true, () => TestNotItemBought));
-
-        PersonalUpgradePatch.TestPurchasables.Add(PersonalUpgradePatch.CreatePurchasable("Test Trap Item",
-            Spritemap["trap"], "This is just a simple test", 1, () => { }, () => true, () => TestNotItemBought));
-
-        PersonalUpgradePatch.TestPurchasables.Add(PersonalUpgradePatch.CreatePurchasable("Test Progressive Item",
-            Spritemap["progressive"], "This is just a simple test", 1, () => { }, () => true, () => TestNotItemBought));
 
         var classesToPatch = Assembly.GetAssembly(typeof(Core))
                                      .GetTypes()

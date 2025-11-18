@@ -11,7 +11,7 @@ public static class GameLoader
     public static readonly Dictionary<string, ItemDisplayOnMap> MarkerDictionary = [];
     public static readonly Vector3 Home = new(90.9811f, 14.7f, -140.8849f);
     public static Dictionary<string, Sprite> Spritemap = [];
-    
+
     private static readonly Queue<MapMarkerData> MarkerQueue = [];
     private const bool ReplaceNullOnClickWithId = true;
 
@@ -79,12 +79,12 @@ public static class GameLoader
 
         if (mapPos != clampPos) return null;
         var posHash = position.HashPos();
-        
+
         if (ReplaceNullOnClickWithId && onPressed is null)
         {
             onPressed = () => Core.Log.Msg($"Marker id: \"{posHash}\"");
         }
-        
+
         GameObject gobj = new($"Archipelago Marker Display ({id})")
         {
             transform =
@@ -107,10 +107,17 @@ public static class GameLoader
         return obj;
     }
 
-    public static void ResetData()
+    public static void ChangeMarkerColor(string hash, Func<Color, Color> modify)
     {
-        MarkerDictionary.Clear();
+        if (!MarkerDictionary.TryGetValue(hash, out var marker))
+        {
+            Core.Log.Msg($"Marker for [{hash}] not found");
+            return;
+        }
+        marker.Image.color = modify(marker.Image.color);
     }
+
+    public static void ResetData() { MarkerDictionary.Clear(); }
 }
 
 public readonly struct MapMarkerData(

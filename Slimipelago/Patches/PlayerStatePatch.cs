@@ -1,5 +1,6 @@
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Slimipelago.Patches;
 
@@ -10,6 +11,7 @@ public static class PlayerStatePatch
     public static GameObject PlayerInWorld = null;
     public static Rigidbody PlayerInWorldBody;
     public static Map PlayerMap;
+    public static Button SaveAndQuitButton;
     
     public static Vector3 PlayerPos => PlayerInWorld.transform.position;
     
@@ -19,6 +21,17 @@ public static class PlayerStatePatch
         PlayerState = __instance;
         PlayerInWorld = GameObject.Find("SimplePlayer");
         PlayerInWorldBody = PlayerInWorld.GetComponent<Rigidbody>();
+        SaveAndQuitButton = GameObject.Find("HUD Root/PauseMenu/PauseUI/Buttons/QuitButton").GetComponent<Button>();
+
+        MainMenuPatch.OnGamePotentialExit += () =>
+        {
+            PlayerState = null;
+            PlayerInWorld = null;
+            PlayerInWorldBody = null;
+            PlayerMap = null;
+            SaveAndQuitButton = null;
+        };
+        
         Core.Log.Msg("Player Awake");
         GameLoader.ResetData();
     }

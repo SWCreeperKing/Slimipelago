@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using MonomiPark.SlimeRancher.Regions;
 using UnityEngine;
 using UnityEngine.Events;

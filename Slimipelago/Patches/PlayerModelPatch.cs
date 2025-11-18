@@ -13,6 +13,7 @@ public static class PlayerModelPatch
     public static void PlayerInit(PlayerModel __instance)
     {
         Model = __instance;
+        MainMenuPatch.OnGamePotentialExit += () => Model = null;
         
         // if (Model.upgrades.Contains(PlayerState.Upgrade.JETPACK))
         // {
