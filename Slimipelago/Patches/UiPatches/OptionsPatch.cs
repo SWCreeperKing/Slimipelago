@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-namespace Slimipelago.Patches;
+namespace Slimipelago.Patches.UiPatches;
 
 [PatchAll]
 public static class OptionsPatch
@@ -38,18 +38,18 @@ public static class OptionsPatch
         layout.constraintCount = 1;
 
         var g1 = Helper.CreateHorizontalGroup(panel).gameObject;
-        Helper.CreateText("Address:    ", Color.black, g1);
+        Helper.CreateText("Address:Port", Color.black, g1);
         Helper.CreateInputField("Ap Address", g1);
 
         var g2 = Helper.CreateHorizontalGroup(panel).gameObject;
-        Helper.CreateText("Password:  ", Color.black, g2);
+        Helper.CreateText("Password    ", Color.black, g2);
         Helper.CreateInputField("Ap Password", g2).contentType = InputField.ContentType.Password;
 
         var g3 = Helper.CreateHorizontalGroup(panel).gameObject;
-        Helper.CreateText("Slot name: ", Color.black, g3);
+        Helper.CreateText("Slot name    ", Color.black, g3);
         Helper.CreateInputField("Ap Slot", g3);
 
-        Helper.CreateButton("Connect", panel, () => Core.Log.Msg("TRY CONNECT"));
+        Helper.CreateButton("    Connect", panel, () => Core.Log.Msg("TRY CONNECT"));
         return false;
     }
 }

@@ -1,6 +1,6 @@
 using HarmonyLib;
 
-namespace Slimipelago.Patches;
+namespace Slimipelago.Patches.PlayerPatches;
 
 [PatchAll]
 public static class SprintStaminaPatch

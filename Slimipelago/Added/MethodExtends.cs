@@ -1,4 +1,4 @@
-namespace Slimipelago.Patches;
+namespace Slimipelago.Added;
 
 public static class MethodExtends
 {

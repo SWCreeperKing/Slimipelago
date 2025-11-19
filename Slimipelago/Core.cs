@@ -1,13 +1,14 @@
 ﻿using System.Reflection;
 using MelonLoader;
 using Slimipelago.Patches;
+using Slimipelago.Patches.UiPatches;
 using UnityEngine;
 using static Identifiable;
 using static Slimipelago.GameLoader;
-using static Slimipelago.Patches.JetpackPatch;
-using static Slimipelago.Patches.PlayerModelPatch;
-using static Slimipelago.Patches.PlayerStatePatch;
-using static Slimipelago.Patches.SprintStaminaPatch;
+using static Slimipelago.Patches.PlayerPatches.JetpackPatch;
+using static Slimipelago.Patches.PlayerPatches.PlayerModelPatch;
+using static Slimipelago.Patches.PlayerPatches.PlayerStatePatch;
+using static Slimipelago.Patches.PlayerPatches.SprintStaminaPatch;
 
 [assembly: MelonInfo(typeof(Slimipelago.Core), "Slimipelago", "1.0.0", "SW_CreeperKing", null)]
 [assembly: MelonGame("Monomi Park", "Slime Rancher")]
@@ -110,6 +111,7 @@ public class Core : MelonMod
             EnableJetpack = !EnableJetpack;
             Log.Msg("Toggled Jetpack");
         });
+        KeyRegistry.AddKey(KeyCode.O, () => Model?.ApplyUpgrade(PlayerState.Upgrade.ENERGY_3, true));
 
         var i = 0;
         string[] arr = ["normal", "trap", "progressive", "useful"];

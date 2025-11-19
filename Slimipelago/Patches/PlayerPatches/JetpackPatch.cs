@@ -1,8 +1,9 @@
 using HarmonyLib;
+using Slimipelago.Patches.UiPatches;
 
-namespace Slimipelago.Patches;
+namespace Slimipelago.Patches.PlayerPatches;
 
-// [PatchAll]
+[PatchAll]
 public static class JetpackPatch
 {
     public static EnergyJetpack Jetpack;

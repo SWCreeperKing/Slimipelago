@@ -275,19 +275,20 @@
 		<Compile Include="Invisinator.cs" />
 		<Compile Include="KeyRegistry.cs" />
 		<Compile Include="Patches\Expansions\LabAccessPatch.cs" />
-		<Compile Include="Patches\JetpackPatch.cs" />
-		<Compile Include="Patches\JournalPatch.cs" />
-		<Compile Include="Patches\KillTutorialPatch.cs" />
-		<Compile Include="Patches\MainMenuPatch.cs" />
-		<Compile Include="Patches\OptionsPatch.cs" />
-		<Compile Include="Patches\PersonalUpgradePatch.cs" />
-		<Compile Include="Patches\PlayerModelPatch.cs" />
-		<Compile Include="Patches\PlayerStatePatch.cs" />
-		<Compile Include="Patches\PlayerTrackerPatch.cs" />
-		<Compile Include="Patches\PodPatch.cs" />
-		<Compile Include="Patches\PopupPatch.cs" />
-		<Compile Include="Patches\SprintStaminaPatch.cs" />
-		<Compile Include="Patches\TranslationPatch.cs" />
+		<Compile Include="Patches\Interactables\JournalPatch.cs" />
+		<Compile Include="Patches\Interactables\MapFragmentPatch.cs" />
+		<Compile Include="Patches\Interactables\PodPatch.cs" />
+		<Compile Include="Patches\PlayerPatches\JetpackPatch.cs" />
+		<Compile Include="Patches\PlayerPatches\PlayerModelPatch.cs" />
+		<Compile Include="Patches\PlayerPatches\PlayerStatePatch.cs" />
+		<Compile Include="Patches\PlayerPatches\PlayerTrackerPatch.cs" />
+		<Compile Include="Patches\PlayerPatches\SprintStaminaPatch.cs" />
+		<Compile Include="Patches\UiPatches\KillTutorialPatch.cs" />
+		<Compile Include="Patches\UiPatches\MainMenuPatch.cs" />
+		<Compile Include="Patches\UiPatches\OptionsPatch.cs" />
+		<Compile Include="Patches\UiPatches\PersonalUpgradePatch.cs" />
+		<Compile Include="Patches\UiPatches\PopupPatch.cs" />
+		<Compile Include="Patches\UiPatches\TranslationPatch.cs" />
 	</ItemGroup>
 
 	<ItemGroup>

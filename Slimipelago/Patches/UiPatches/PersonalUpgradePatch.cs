@@ -1,9 +1,7 @@
 using HarmonyLib;
 using MonomiPark.SlimeRancher.DataModel;
-using UnityEngine;
-using UnityEngine.Events;
 
-namespace Slimipelago.Patches;
+namespace Slimipelago.Patches.UiPatches;
 
 [PatchAll]
 public static class PersonalUpgradePatch

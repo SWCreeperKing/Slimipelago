@@ -1,8 +1,9 @@
 using HarmonyLib;
+using Slimipelago.Patches.UiPatches;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Slimipelago.Patches;
+namespace Slimipelago.Patches.PlayerPatches;
 
 [PatchAll]
 public static class PlayerStatePatch

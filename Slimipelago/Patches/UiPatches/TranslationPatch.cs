@@ -1,6 +1,6 @@
 using HarmonyLib;
 
-namespace Slimipelago.Patches;
+namespace Slimipelago.Patches.UiPatches;
 
 [PatchAll]
 public static class TranslationPatch

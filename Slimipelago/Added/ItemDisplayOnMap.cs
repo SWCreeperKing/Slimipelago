@@ -1,10 +1,9 @@
-using JetBrains.Annotations;
 using MonomiPark.SlimeRancher.Regions;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-namespace Slimipelago.Patches;
+namespace Slimipelago.Added;
 
 public class ItemDisplayOnMap : DisplayOnMap
 {

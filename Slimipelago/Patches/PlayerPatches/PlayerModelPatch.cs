@@ -1,7 +1,8 @@
 using HarmonyLib;
 using MonomiPark.SlimeRancher.DataModel;
+using Slimipelago.Patches.UiPatches;
 
-namespace Slimipelago.Patches;
+namespace Slimipelago.Patches.PlayerPatches;
 
 [PatchAll]
 public static class PlayerModelPatch

@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
 
-namespace Slimipelago.Patches;
+namespace Slimipelago.Patches.UiPatches;
 
 [PatchAll]
 public static class MainMenuPatch

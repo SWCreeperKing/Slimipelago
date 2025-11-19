@@ -1,7 +1,7 @@
 using HarmonyLib;
 using MonomiPark.SlimeRancher.Regions;
 
-namespace Slimipelago.Patches;
+namespace Slimipelago.Patches.Interactables;
 
 [PatchAll]
 public static class PodPatch

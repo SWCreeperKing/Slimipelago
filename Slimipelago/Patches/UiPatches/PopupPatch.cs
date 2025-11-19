@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using static UnityEngine.Object;
 
-namespace Slimipelago.Patches;
+namespace Slimipelago.Patches.UiPatches;
 
 [PatchAll]
 public static class PopupPatch

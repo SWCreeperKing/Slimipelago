@@ -59,12 +59,18 @@ public static class ApWorldShenanigans
                  .Where(arr => arr.Length > 0)
                  .ToArray();
 
-        var interactables = csv.Where(arr => arr[0] != "" && arr[3] != "Secret Style")
-                               .Select(arr => arr.Take(7).ToArray())
-                               .ToArray();
-        var dlcInteractables = csv.Where(arr => arr[0] != "" && arr[3] == "Secret Style")
-                                  .Select(arr => arr.Take(7).ToArray())
-                                  .ToArray();
+        var rawInteractables = csv.Where(arr => arr[0] != "" && ApSlimeClient.Zones.Contains(arr[2]));
+
+        var interactables = rawInteractables
+                           .Where(arr => arr[3] != "Secret Style")
+                           .Select(arr => arr.Take(7).ToArray())
+                           .ToArray();
+
+        var dlcInteractables = rawInteractables
+                              .Where(arr => arr[3] == "Secret Style")
+                              .Select(arr => arr.Take(7).ToArray())
+                              .ToArray();
+
         var gates = csv.Where(arr => arr[8] != "").Select(arr => arr.Skip(8).Take(5).ToArray()).ToArray();
         var gordos = csv.Where(arr => arr[14] != "").Select(arr => arr.Skip(14).ToArray()).ToArray();
 
@@ -91,7 +97,7 @@ public static class ApWorldShenanigans
              ]
 
              location_dict = [
-             	*[items[0] for items in upgrades],
+             	*[items for items in upgrades],
              	*[items[0] for items in interactables],
              	*[items[0] for items in dlc_interactables],
              ]
@@ -100,7 +106,7 @@ public static class ApWorldShenanigans
         File.WriteAllText("output/Rules.py",
             $$"""
               # File is Auto-generated, see: https://github.com/SWCreeperKing/Slimipelago/blob/master/Slimipelago/ApWorldShenanigans.cs
-              
+
               def get_rule_map(player):
                   return {
                       {{string.Join(",\n\t\t", interactables.Concat(dlcInteractables).Select(arr => GenRule(arr[1], arr[3], arr[4], arr[5].Split(' ')[0])).Where(s => s != ""))}}
@@ -116,6 +122,11 @@ public static class ApWorldShenanigans
                   return state.has("Progressive Jetpack", player)
               """);
 
+        if (File.Exists("output/Slimerancher - Sheet1.csv"))
+        {
+            File.Delete("output/Slimerancher - Sheet1.csv");
+        }
+
         File.Move("Slimerancher - Sheet1.csv", "output/Slimerancher - Sheet1.csv");
         return;
 
@@ -125,14 +136,7 @@ public static class ApWorldShenanigans
 
             if (cracker.Contains("Treasure Cracker"))
             {
-                rules.Add($"has_cracker(state, player, {
-                    cracker switch
-                    {
-                        "Treasure Cracker" => "1",
-                        "Treasure Cracker Mk II" => "2",
-                        "Treasure Cracker Mk III" => "3"
-                    }
-                })");
+                rules.Add($"has_cracker(state, player, {Math.Min(1, cracker.Count(c => c == 'I'))})");
             }
 
             if (needsJetpack == "Yes")
@@ -142,16 +146,10 @@ public static class ApWorldShenanigans
 
             if (energyNeeded is not ("0" or "50" or "100"))
             {
-                rules.Add($"has_energy(state, player, {
-                    energyNeeded switch
-                    {
-                        "150" => "1",
-                        "200" => "2",
-                        "250" or "Unknown" => "3"
-                    }
-                })");
+                rules.Add(
+                    $"has_energy(state, player, {(energyNeeded[0] == '1' ? 0 : 2) + (energyNeeded[1] == '0' ? 0 : 1)})");
             }
-            
+
             return rules.Count == 0 ? "" : $"\"{location}\": lambda state: {string.Join(" and ", rules)}";
         }
     }

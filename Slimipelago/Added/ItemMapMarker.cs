@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Slimipelago.Patches;
+namespace Slimipelago.Added;
 
 public class ItemMapMarker : MapMarker
 {
