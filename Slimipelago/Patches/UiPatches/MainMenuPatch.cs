@@ -25,6 +25,7 @@ public static class MainMenuPatch
         NewGameButton = container.GetChild(2);
 
         ContinueButton.AddComponent<Invisinator>();
+        NewGameButton.gameObject.SetActive(false);
     }
 
     [HarmonyPatch(typeof(NewGameUI), "Start"), HarmonyPostfix]
@@ -34,7 +35,7 @@ public static class MainMenuPatch
         container.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Create New Archipelago Game";
 
         var infoPanel = container.GetChild(1);
-        infoPanel.GetChild(0).GetComponent<TextMeshProUGUI>().text = $"Slot: [{ApSlimeClient.PlayerName}]";
+        infoPanel.GetChild(0).GetComponent<TextMeshProUGUI>().text = $"Slot: [{ApSlimeClient.SlotName}]";
 
         var inputField = infoPanel.GetChild(1).GetComponent<SRInputField>();
         inputField.readOnly = true;
@@ -71,7 +72,7 @@ public static class MainMenuPatch
                 continue;
             }
 
-            name.text = ApSlimeClient.PlayerName;
+            name.text = ApSlimeClient.SlotName;
             hasAny = true;
             child.GetComponent<SRToggle>().Select();
         }
@@ -85,6 +86,6 @@ public static class MainMenuPatch
     public static void PostSummarySetData(GameSummaryPanel __instance, GameData.Summary gameSummary)
     {
         if (gameSummary.displayName != ApSlimeClient.GameUUID) return;
-        __instance.gameNameText.text = ApSlimeClient.PlayerName;
+        __instance.gameNameText.text = ApSlimeClient.SlotName;
     }
 }

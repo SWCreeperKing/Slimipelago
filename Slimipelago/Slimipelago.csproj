@@ -266,7 +266,7 @@
 	<ItemGroup>
 		<Compile Include="Added\ItemDisplayOnMap.cs" />
 		<Compile Include="Added\ItemMapMarker.cs" />
-		<Compile Include="Added\MethodExtends.cs" />
+		<Compile Include="Added\Playground.cs" />
 		<Compile Include="ApSlimeClient.cs" />
 		<Compile Include="ApWorldShenanigans.cs" />
 		<Compile Include="Core.cs" />
@@ -274,7 +274,8 @@
 		<Compile Include="Helper.cs" />
 		<Compile Include="Invisinator.cs" />
 		<Compile Include="KeyRegistry.cs" />
-		<Compile Include="Patches\Expansions\LabAccessPatch.cs" />
+		<Compile Include="Patches\Interactables\AccessDoorPatch.cs" />
+		<Compile Include="Patches\Interactables\InteractableController.cs" />
 		<Compile Include="Patches\Interactables\JournalPatch.cs" />
 		<Compile Include="Patches\Interactables\MapFragmentPatch.cs" />
 		<Compile Include="Patches\Interactables\PodPatch.cs" />

@@ -20,7 +20,7 @@ public static class OptionsPatch
         __instance.modsTab.transform.SetSiblingIndex(0);
         __instance.SelectModsTab();
     }
-    
+
     [HarmonyPatch(typeof(OptionsUI), "SetupMods"), HarmonyPrefix]
     public static bool SetupAp(OptionsUI __instance)
     {
@@ -28,7 +28,7 @@ public static class OptionsPatch
         var modPanel = __instance.modsPanel.GetChild(0);
         var panel = new GameObject("Ap menu");
         panel.transform.parent = modPanel.transform;
-        
+
         var layout = panel.AddComponent<GridLayoutGroup>();
         layout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
         layout.childAlignment = TextAnchor.MiddleCenter;
@@ -39,17 +39,53 @@ public static class OptionsPatch
 
         var g1 = Helper.CreateHorizontalGroup(panel).gameObject;
         Helper.CreateText("Address:Port", Color.black, g1);
-        Helper.CreateInputField("Ap Address", g1);
+        var address = Helper.CreateInputField("Ap Address", g1);
+        address.text = ApSlimeClient.AddressPort;
 
         var g2 = Helper.CreateHorizontalGroup(panel).gameObject;
         Helper.CreateText("Password    ", Color.black, g2);
-        Helper.CreateInputField("Ap Password", g2).contentType = InputField.ContentType.Password;
+        var password = Helper.CreateInputField("Ap Password", g2);
+        password.contentType = InputField.ContentType.Password;
+        password.text = ApSlimeClient.Password;
 
         var g3 = Helper.CreateHorizontalGroup(panel).gameObject;
         Helper.CreateText("Slot name    ", Color.black, g3);
-        Helper.CreateInputField("Ap Slot", g3);
+        var slot = Helper.CreateInputField("Ap Slot", g3);
+        slot.text = ApSlimeClient.SlotName;
 
-        Helper.CreateButton("    Connect", panel, () => Core.Log.Msg("TRY CONNECT"));
+        var connectButton = Helper.CreateButton(ApSlimeClient.Client.IsConnected ? "Disconnect" : "Connect", panel,
+            null, out var buttonText);
+        var errorText = Helper.CreateText("", Color.red, panel);
+        connectButton.onClick.AddListener(() =>
+        {
+            Core.Log.Msg("Try Connect");
+            try
+            {
+                if (!ApSlimeClient.Client.IsConnected)
+                {
+                    errorText.text = "";
+                    var error = ApSlimeClient.TryConnect(address.text, password.text, slot.text);
+
+                    if (error is null)
+                    {
+                        buttonText.text = "Disconnect";
+                    }
+                    else
+                    {
+                        errorText.text = string.Join("\n", error);
+                    }
+                }
+                else
+                {
+                    ApSlimeClient.Client.TryDisconnect();
+                    buttonText.text = "Connect";
+                }
+            }
+            catch (Exception e)
+            {
+                Core.Log.Error(e);
+            }
+        });
         return false;
     }
 }

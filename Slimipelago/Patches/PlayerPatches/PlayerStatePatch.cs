@@ -1,4 +1,5 @@
 using HarmonyLib;
+using JetBrains.Annotations;
 using Slimipelago.Patches.UiPatches;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,6 +14,9 @@ public static class PlayerStatePatch
     public static Rigidbody PlayerInWorldBody;
     public static Map PlayerMap;
     public static Button SaveAndQuitButton;
+    private static bool _FirstUpdate;
+
+    [CanBeNull] public static event Action OnFirstUpdate;
     
     public static Vector3 PlayerPos => PlayerInWorld.transform.position;
     
@@ -26,15 +30,26 @@ public static class PlayerStatePatch
 
         MainMenuPatch.OnGamePotentialExit += () =>
         {
+            OnFirstUpdate = null;
             PlayerState = null;
             PlayerInWorld = null;
             PlayerInWorldBody = null;
             PlayerMap = null;
             SaveAndQuitButton = null;
+            _FirstUpdate = false;
         };
-        
+
+        OnFirstUpdate += () => Core.Log.Msg("First Update");
         Core.Log.Msg("Player Awake");
         GameLoader.ResetData();
+    }
+
+    [HarmonyPatch(typeof(PlayerState), "Update"), HarmonyPostfix]
+    public static void Update()
+    {
+        if (_FirstUpdate) return;
+        OnFirstUpdate?.Invoke();
+        _FirstUpdate = true;
     }
 
     [HarmonyPatch(typeof(Map), "Start"), HarmonyPostfix]

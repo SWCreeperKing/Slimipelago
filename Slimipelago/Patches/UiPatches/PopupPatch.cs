@@ -35,7 +35,6 @@ public static class PopupPatch
     public static void AddItemToQueue(ApPopupData itemData)
     {
         PopupDatas.Enqueue(itemData);
-        Core.Log.Msg($"Popup Queue: [{PopupDatas.Count}]");
     }
 
     public static void UpdateQueue()
@@ -44,7 +43,6 @@ public static class PopupPatch
         {
             if (!PopupDatas.Any()) return;
             var newData = PopupDatas.Dequeue();
-            Core.Log.Msg($"Popup Queue: [{PopupDatas.Count}]");
             CurrentPopup = CreateItemPopup(newData.Sprite, newData.ItemDialogue, newData.Item, newData.OtherPlayer, newData.OnPopup);
             DeadTime = 0;
         }

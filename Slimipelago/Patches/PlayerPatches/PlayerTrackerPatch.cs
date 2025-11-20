@@ -23,7 +23,7 @@ public static class PlayerTrackerPatch
     [HarmonyPatch(typeof(PlayerZoneTracker), "OnEntered"), HarmonyPrefix]
     public static void AreaEntered(PlayerZoneTracker __instance, ZoneDirector.Zone zone)
     {
-        Core.Log.Msg($"Zone entered: [{zone}]");
+        // Core.Log.Msg($"Zone entered: [{zone}]");
         if (zone is ZoneDirector.Zone.NONE or ZoneDirector.Zone.RANCH) return;
         if (ZoneTypeToName.ContainsKey(zone) && AllowedZones.Contains(ZoneTypeToName[zone])) return;
         // Core.BanishPlayer();
