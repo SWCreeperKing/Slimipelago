@@ -23,8 +23,21 @@ public static class PodPatch
     }
 
     [HarmonyPatch(typeof(TreasurePod), "Activate"), HarmonyPrefix]
-    public static void OpenPod(TreasurePod __instance)
+    public static void OpenPod(TreasurePod __instance) { __instance.InteractableInteracted("Pod"); }
+
+    [HarmonyPatch(typeof(TreasurePod), "HasKey"), HarmonyPrefix]
+    public static bool HasKey(TreasurePod __instance, ref bool __result)
     {
-        __instance.InteractableInteracted("Pod");
+        __result = !__instance.needsUpgrade ||
+                   (ApSlimeClient.ItemCache.TryGetValue("Progressive Treasure Cracker", out var value) &&
+                    value >= (int)__instance.requiredUpgrade - 99);
+        return false;
+    }
+
+    [HarmonyPatch(typeof(TreasurePod), "HasAnyKey"), HarmonyPrefix]
+    public static bool HasAnyKey(TreasurePod __instance, ref bool __result)
+    {
+        __result = ApSlimeClient.ItemCache.TryGetValue("Progressive Treasure Cracker", out var value) && value > 0;
+        return false;
     }
 }

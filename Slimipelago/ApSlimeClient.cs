@@ -9,7 +9,11 @@ using Archipelago.MultiClient.Net.Models;
 using CreepyUtil.Archipelago;
 using CreepyUtil.Archipelago.ApClient;
 using JetBrains.Annotations;
+using MonomiPark.SlimeRancher.DataModel;
+using Newtonsoft.Json;
+using Slimipelago.Patches.Interactables;
 using Slimipelago.Patches.PlayerPatches;
+using static Slimipelago.Patches.PlayerPatches.PlayerModelPatch;
 
 namespace Slimipelago;
 
@@ -19,7 +23,7 @@ public static class ApSlimeClient
     public static Dictionary<string, string> LocationInfoDictionary = [];
     public static List<ItemInfo> Items = [];
     public static List<ItemInfo> ItemsWaiting = [];
-    public static Dictionary<string, int> ItemCache = [];
+    public static ConcurrentDictionary<string, int> ItemCache = [];
     public static ApClient Client = new();
 
     public static string AddressPort = "archipelago.gg:12345";
@@ -59,14 +63,11 @@ public static class ApSlimeClient
             Core.Log.Error("Lost Connection to Ap");
         };
 
-        Client.OnConnectionEvent += _ =>
-        {
-            GameUUID = (string)Client.SlotData["uuid"];
-        };
+        Client.OnConnectionEvent += _ => { GameUUID = (string)Client.SlotData["uuid"]; };
 
         Client.OnConnectionErrorReceived += (e, s) => { Core.Log.Error(e); };
     }
-    
+
     [CanBeNull]
     public static string[] TryConnect(string addressPort, string password, string slotName)
     {
@@ -83,11 +84,11 @@ public static class ApSlimeClient
     {
         if (Client is null) return;
         Client.UpdateConnection();
-        
+
         if (!Client.IsConnected) return;
         ItemsWaiting.AddRange(Client.GetOutstandingItems()!);
-        
-        if (PlayerModelPatch.Model is null) return;
+
+        if (!PlayerStatePatch.FirstUpdate) return;
         foreach (var item in ItemsWaiting)
         {
             ProcessItem(item);
@@ -101,7 +102,14 @@ public static class ApSlimeClient
 
     public static void WorldOpened()
     {
+        Core.Log.Msg("World Opened");
+        PlayerTrackerPatch.AllowedZones.Clear();
+        AccessDoorPatch.LabDoor.CurrState = AccessDoor.State.CLOSED;
+        AccessDoorPatch.OvergrowthDoor.CurrState = AccessDoor.State.CLOSED;
+        AccessDoorPatch.GrottoDoor.CurrState = AccessDoor.State.CLOSED;
+
         ItemCache.Clear();
+
         foreach (var item in Items)
         {
             ProcessItem(item);
@@ -111,9 +119,104 @@ public static class ApSlimeClient
     public static void ProcessItem(ItemInfo item)
     {
         var name = item.ItemName;
-        switch (name)
+        if (name.Contains("Region Unlock: "))
         {
-            
+            RegionItem(name.Substring(15));
+        }
+        else
+        {
+            UpgradeItem(name);
+        }
+    }
+
+    public static void RegionItem(string region)
+    {
+        if (PlayerTrackerPatch.ZoneTypeToName.ContainsValue(region))
+        {
+            PlayerTrackerPatch.AllowedZones.Add(region);
+        }
+        else
+        {
+            switch (region)
+            {
+                case "The Lab":
+                    AccessDoorPatch.LabDoor.CurrState = AccessDoor.State.OPEN;
+                    break;
+                case "The Overgrowth":
+                    AccessDoorPatch.OvergrowthDoor.CurrState = AccessDoor.State.OPEN;
+                    break;
+                case "The Grotto":
+                    AccessDoorPatch.GrottoDoor.CurrState = AccessDoor.State.OPEN;
+                    break;
+            }
+        }
+    }
+
+    public static void UpgradeItem(string name)
+    {
+        if (name.StartsWith("Progressive"))
+        {
+            ItemCache.TryAdd(name, 0);
+        }
+
+        try
+        {
+            switch (name)
+            {
+                case "Air Burst":
+                    Model.hasAirBurst = true;
+                    return;
+                case "Liquid Slot":
+                    Model.ammoDict[PlayerState.AmmoMode.DEFAULT].IncreaseUsableSlots(5);
+                    return;
+                case "Golden Sure Shot":
+                    return;
+                case "Progressive Max Health":
+                    Model.maxHealth = 150 + 50 * ItemCache[name];
+                    if ((double)Model.currHealth >= Model.maxHealth)
+                        break;
+                    Model.healthBurstAfter =
+                        Math.Min(Model.healthBurstAfter, PlayerModelPatch.WorldModel.worldTime + 300.0);
+                    break;
+                case "Progressive Max Ammo":
+                    Model.maxAmmo = PlayerModel.DEFAULT_MAX_AMMO[ItemCache[name] + 1];
+                    break;
+                case "Progressive Run Efficiency":
+                    Model.runEfficiency = ItemCache[name] == 0 ? 0.667f : .5f;
+                    break;
+                case "Progressive Max Energy":
+                    Model.maxEnergy = 150 + 50 * ItemCache[name];
+                    if ((double)Model.currEnergy >= Model.maxEnergy)
+                        break;
+                    Model.energyRecoverAfter = Math.Min(Model.energyRecoverAfter,
+                        PlayerModelPatch.WorldModel.worldTime + 300.0);
+                    break;
+                case "Progressive Jetpack":
+                    switch (ItemCache[name])
+                    {
+                        case 0:
+                            JetpackPatch.EnableJetpack = true;
+                            Model.jetpackEfficiency = 1f;
+                            break;
+                        case 1:
+                            Model.jetpackEfficiency = .8f;
+                            break;
+                    }
+
+                    break;
+                case "Progressive Treasure Cracker":
+                    break;
+                default:
+                    return;
+            }
+
+            ItemCache[name]++;
+        }
+        catch (Exception e)
+        {
+            Core.Log.Msg(JsonConvert.SerializeObject(ItemCache, Formatting.Indented));
+            Core.Log.Msg($"Error with: {name}");
+            Core.Log.Error(e);
         }
     }
 }

@@ -1,5 +1,6 @@
 using HarmonyLib;
 using JetBrains.Annotations;
+using MonomiPark.SlimeRancher.DataModel;
 using Slimipelago.Patches.UiPatches;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,7 +15,7 @@ public static class PlayerStatePatch
     public static Rigidbody PlayerInWorldBody;
     public static Map PlayerMap;
     public static Button SaveAndQuitButton;
-    private static bool _FirstUpdate;
+    public static bool FirstUpdate { get; private set; }
 
     [CanBeNull] public static event Action OnFirstUpdate;
     
@@ -36,10 +37,11 @@ public static class PlayerStatePatch
             PlayerInWorldBody = null;
             PlayerMap = null;
             SaveAndQuitButton = null;
-            _FirstUpdate = false;
+            FirstUpdate = false;
         };
 
         OnFirstUpdate += () => Core.Log.Msg("First Update");
+        OnFirstUpdate += ApSlimeClient.WorldOpened;
         Core.Log.Msg("Player Awake");
         GameLoader.ResetData();
     }
@@ -47,9 +49,9 @@ public static class PlayerStatePatch
     [HarmonyPatch(typeof(PlayerState), "Update"), HarmonyPostfix]
     public static void Update()
     {
-        if (_FirstUpdate) return;
+        if (FirstUpdate) return;
         OnFirstUpdate?.Invoke();
-        _FirstUpdate = true;
+        FirstUpdate = true;
     }
 
     [HarmonyPatch(typeof(Map), "Start"), HarmonyPostfix]
@@ -65,4 +67,4 @@ public static class PlayerStatePatch
         pos.y += 5;
         PlayerInWorld.transform.position = pos;
     }
-}
+    }

@@ -11,11 +11,7 @@ public static class MapFragmentPatch
         __instance.InteractableInstanced("map");
         return false;
     }
-    
+
     [HarmonyPatch(typeof(MapDataEntry), "Activate"), HarmonyPrefix]
-    public static bool ActivateMapDataEntry(MapDataEntry __instance)
-    {
-        __instance.InteractableInteracted("Map");
-        return false;
-    }
+    public static void ActivateMapDataEntry(MapDataEntry __instance) => __instance.InteractableInteracted("Map");
 }

@@ -9,7 +9,12 @@ public static class PersonalUpgradePatch
     [HarmonyPatch(typeof(PlayerModel), "ApplyUpgrade"), HarmonyPrefix]
     public static bool ApplyUpgrade(PlayerState.Upgrade upgrade)
     {
-        Core.Log.Msg($"upgrade: [{upgrade}]");
+        // Core.Log.Msg($"upgrade: [{upgrade}]");
+        var location = ApWorldShenanigans.UpgradeLocations[upgrade];
+        if (!ApSlimeClient.Client.MissingLocations.Contains(location)) return false;
+        
+        PopupPatch.AddItemToQueue(new ApPopupData(GameLoader.Spritemap["normal"], "Upgrade Bought", location));
+        ApSlimeClient.Client.SendLocation(location);
         return false;
     }
     

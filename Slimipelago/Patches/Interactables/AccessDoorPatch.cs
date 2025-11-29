@@ -1,6 +1,6 @@
 using HarmonyLib;
 
-namespace Slimipelago.Patches.Expansions;
+namespace Slimipelago.Patches.Interactables;
 
 [PatchAll]
 public static class AccessDoorPatch
@@ -13,7 +13,7 @@ public static class AccessDoorPatch
     public static void Init(AccessDoor __instance)
     {
         var id = __instance.lockedRegionId;
-        __instance.gameObject.SetActive(false);
+        
         switch (id)
         {
             case PediaDirector.Id.LAB:
@@ -25,6 +25,13 @@ public static class AccessDoorPatch
             case PediaDirector.Id.OVERGROWTH:
                 OvergrowthDoor = __instance;
                 break;
+            default:
+                return;
+        }
+        
+        foreach (var child in __instance.gameObject.GetChildren().Where(obj => obj.name.ToLower() != "barrier"))
+        {
+            child.SetActive(false);
         }
     }
 }

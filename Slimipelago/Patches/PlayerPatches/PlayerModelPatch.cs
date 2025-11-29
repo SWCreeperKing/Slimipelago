@@ -8,26 +8,24 @@ namespace Slimipelago.Patches.PlayerPatches;
 public static class PlayerModelPatch
 {
     public static PlayerModel Model;
+    public static WorldModel WorldModel;
     public static bool EnableRecovery = true;
     
-    [HarmonyPatch(typeof(PlayerModel), "Init"), HarmonyPostfix]
-    public static void PlayerInit(PlayerModel __instance)
+    [HarmonyPatch(typeof(PlayerState), "SetModel"), HarmonyPostfix]
+    public static void SetModel(PlayerModel model)
     {
-        Model = __instance;
+        Model = model;
         MainMenuPatch.OnGamePotentialExit += () => Model = null;
-        
-        // if (Model.upgrades.Contains(PlayerState.Upgrade.JETPACK))
-        // {
-        //     Model.upgrades.Remove(PlayerState.Upgrade.JETPACK);
-        // }
-
-        // Model.hasJetpack = false;
-        
         Core.Log.Msg("PlayerInit");
-        ApSlimeClient.WorldOpened();
     }
-
+    
     [HarmonyPatch(typeof(PlayerModel), "Recover"), HarmonyPrefix]
     public static bool Regen(PlayerModel __instance) => EnableRecovery;
 
+    [HarmonyPatch(typeof(PlayerModel), "SetWorldModel"), HarmonyPrefix]
+    public static void SetWorldModel(PlayerModel __instance, WorldModel worldModel)
+    {
+        Model ??= __instance;
+        WorldModel = worldModel;
+    }
 }
