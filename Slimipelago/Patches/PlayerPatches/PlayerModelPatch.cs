@@ -24,6 +24,7 @@ public static class PlayerModelPatch
         // Model.hasJetpack = false;
         
         Core.Log.Msg("PlayerInit");
+        ApSlimeClient.WorldOpened();
     }
 
     [HarmonyPatch(typeof(PlayerModel), "Recover"), HarmonyPrefix]

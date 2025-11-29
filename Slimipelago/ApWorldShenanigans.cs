@@ -1,5 +1,3 @@
-using System.Text;
-
 namespace Slimipelago;
 
 public static class ApWorldShenanigans

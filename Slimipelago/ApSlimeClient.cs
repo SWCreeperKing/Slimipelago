@@ -1,4 +1,11 @@
+// using Archipelago.MultiClient.Net.Enums;
+// using CreepyUtil.Archipelago;
+// using CreepyUtil.Archipelago.ApClient;
+
+using System.Collections.Concurrent;
+using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
+using Archipelago.MultiClient.Net.Models;
 using CreepyUtil.Archipelago;
 using CreepyUtil.Archipelago.ApClient;
 using JetBrains.Annotations;
@@ -10,7 +17,9 @@ public static class ApSlimeClient
 {
     public static Dictionary<string, string> LocationDictionary = [];
     public static Dictionary<string, string> LocationInfoDictionary = [];
-    public static HashSet<string> LocationsFound = [];
+    public static List<ItemInfo> Items = [];
+    public static List<ItemInfo> ItemsWaiting = [];
+    public static Dictionary<string, int> ItemCache = [];
     public static ApClient Client = new();
 
     public static string AddressPort = "archipelago.gg:12345";
@@ -52,7 +61,6 @@ public static class ApSlimeClient
 
         Client.OnConnectionEvent += _ =>
         {
-            File.WriteAllText("ApConnection.txt", $"{AddressPort}\n{Password}\n{SlotName}");
             GameUUID = (string)Client.SlotData["uuid"];
         };
 
@@ -73,6 +81,39 @@ public static class ApSlimeClient
 
     public static void Update()
     {
-        Client?.UpdateConnection();
+        if (Client is null) return;
+        Client.UpdateConnection();
+        
+        if (!Client.IsConnected) return;
+        ItemsWaiting.AddRange(Client.GetOutstandingItems()!);
+        
+        if (PlayerModelPatch.Model is null) return;
+        foreach (var item in ItemsWaiting)
+        {
+            ProcessItem(item);
+        }
+
+        Items.AddRange(ItemsWaiting);
+        ItemsWaiting.Clear();
+    }
+
+    public static void SaveFile() => File.WriteAllText("ApConnection.txt", $"{AddressPort}\n{Password}\n{SlotName}");
+
+    public static void WorldOpened()
+    {
+        ItemCache.Clear();
+        foreach (var item in Items)
+        {
+            ProcessItem(item);
+        }
+    }
+
+    public static void ProcessItem(ItemInfo item)
+    {
+        var name = item.ItemName;
+        switch (name)
+        {
+            
+        }
     }
 }

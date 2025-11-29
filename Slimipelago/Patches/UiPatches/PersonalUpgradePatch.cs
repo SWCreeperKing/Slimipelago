@@ -6,15 +6,16 @@ namespace Slimipelago.Patches.UiPatches;
 [PatchAll]
 public static class PersonalUpgradePatch
 {
-    [HarmonyPatch(typeof(PlayerModel), "ApplyUpgrade")]
-    public static void ApplyUpgrade()
+    [HarmonyPatch(typeof(PlayerModel), "ApplyUpgrade"), HarmonyPrefix]
+    public static bool ApplyUpgrade(PlayerState.Upgrade upgrade)
     {
-        
+        Core.Log.Msg($"upgrade: [{upgrade}]");
+        return false;
     }
     
     // public static List<PurchaseUI.Purchasable> TestPurchasables = [];
 
-//     [HarmonyPatch(typeof(PersonalUpgradeUI), "CreatePurchaseUI"), HarmonyPrefix]
+     // [HarmonyPatch(typeof(PersonalUpgradeUI), "CreatePurchaseUI"), HarmonyPrefix]
 //     public static bool OverridePurchasables(PersonalUpgradeUI __instance, ref GameObject __result)
 //     {
 //         __result = SRSingleton<GameContext>.Instance.UITemplates.CreatePurchaseUI(__instance.titleIcon,

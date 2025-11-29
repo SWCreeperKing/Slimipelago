@@ -1,14 +1,7 @@
 ﻿using System.Reflection;
 using MelonLoader;
-using Slimipelago.Patches;
 using Slimipelago.Patches.UiPatches;
-using UnityEngine;
-using static Identifiable;
 using static Slimipelago.GameLoader;
-using static Slimipelago.Patches.PlayerPatches.JetpackPatch;
-using static Slimipelago.Patches.PlayerPatches.PlayerModelPatch;
-using static Slimipelago.Patches.PlayerPatches.PlayerStatePatch;
-using static Slimipelago.Patches.PlayerPatches.SprintStaminaPatch;
 
 [assembly: MelonInfo(typeof(Slimipelago.Core), "Slimipelago", "1.0.0", "SW_CreeperKing", null)]
 [assembly: MelonGame("Monomi Park", "Slime Rancher")]

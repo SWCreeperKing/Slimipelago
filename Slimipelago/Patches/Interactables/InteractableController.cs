@@ -9,9 +9,16 @@ public static class InteractableController
     extension<T>(T __instance) where T: MonoBehaviour
     {
         public void InteractableInstanced(string markerName)
-        {
+        { 
             var hash = __instance.transform.position.HashPos();
-            var found = ApSlimeClient.LocationsFound.Contains(hash);
+            if (!ApSlimeClient.LocationDictionary.TryGetValue(hash, out var itemName))
+            {
+                // Core.Log.Msg($"Location Hash not found: [{hash}] for [{__instance.gameObject.name}]");
+                __instance.gameObject.SetActive(false);
+                return;
+            }
+
+            var found = !ApSlimeClient.Client.MissingLocations.Contains(itemName);
             __instance.gameObject.SetActive(!found);
             if (found) return;
         
@@ -22,7 +29,6 @@ public static class InteractableController
         public void InteractableInteracted(string itemFound)
         {
             var hash = __instance.transform.position.HashPos();
-            if (!ApSlimeClient.LocationsFound.Add(hash)) return;
             GameLoader.ChangeMarkerColor(hash, color =>
             {
                 color.a = 0;
@@ -30,6 +36,15 @@ public static class InteractableController
             });
         
             __instance.gameObject.SetActive(false);
+
+            try
+            {
+                ApSlimeClient.Client.SendLocation(ApSlimeClient.LocationDictionary[hash]);
+            }
+            catch (Exception e)
+            {
+                Core.Log.Error(e);
+            }
 
             PopupPatch.AddItemToQueue(new ApPopupData(GameLoader.Spritemap["normal"], $"{itemFound} Found",
                 ApSlimeClient.LocationDictionary[hash]));

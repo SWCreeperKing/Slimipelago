@@ -1,6 +1,4 @@
 using HarmonyLib;
-using MonomiPark.SlimeRancher.Regions;
-using Slimipelago.Patches.UiPatches;
 
 namespace Slimipelago.Patches.Interactables;
 

@@ -25,7 +25,8 @@ public static class MainMenuPatch
         NewGameButton = container.GetChild(2);
 
         ContinueButton.AddComponent<Invisinator>();
-        NewGameButton.gameObject.SetActive(false);
+        NewGameButton.gameObject.SetActive(ApSlimeClient.Client.IsConnected);
+        LoadButton.gameObject.SetActive(ApSlimeClient.Client.IsConnected);
     }
 
     [HarmonyPatch(typeof(NewGameUI), "Start"), HarmonyPostfix]

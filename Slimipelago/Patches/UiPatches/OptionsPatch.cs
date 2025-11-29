@@ -59,6 +59,10 @@ public static class OptionsPatch
         connectButton.onClick.AddListener(() =>
         {
             Core.Log.Msg("Try Connect");
+
+            ApSlimeClient.ItemsWaiting.Clear();
+            ApSlimeClient.Items.Clear();
+            
             try
             {
                 if (!ApSlimeClient.Client.IsConnected)
@@ -69,6 +73,10 @@ public static class OptionsPatch
                     if (error is null)
                     {
                         buttonText.text = "Disconnect";
+                        ApSlimeClient.AddressPort = address.text;
+                        ApSlimeClient.Password = password.text;
+                        ApSlimeClient.SlotName = slot.text;
+                        ApSlimeClient.SaveFile();
                     }
                     else
                     {
@@ -85,6 +93,9 @@ public static class OptionsPatch
             {
                 Core.Log.Error(e);
             }
+            
+            MainMenuPatch.NewGameButton.gameObject.SetActive(ApSlimeClient.Client.IsConnected);
+            MainMenuPatch.LoadButton.gameObject.SetActive(ApSlimeClient.Client.IsConnected);
         });
         return false;
     }
