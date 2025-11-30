@@ -6,14 +6,14 @@ namespace Slimipelago.Patches.Interactables;
 
 public static class InteractableController
 {
-    extension<T>(T __instance) where T: MonoBehaviour
+    extension<T>(T __instance) where T : MonoBehaviour
     {
         public void InteractableInstanced(string markerName)
-        { 
+        {
             var hash = __instance.transform.position.HashPos();
             if (!ApSlimeClient.LocationDictionary.TryGetValue(hash, out var itemName))
             {
-                // Core.Log.Msg($"Location Hash not found: [{hash}] for [{__instance.gameObject.name}]");
+                Core.Log.Msg($"Location Hash not found: [{hash}] for [{__instance.gameObject.name}]");
                 __instance.gameObject.SetActive(false);
                 return;
             }
@@ -21,7 +21,7 @@ public static class InteractableController
             var found = !ApSlimeClient.Client.MissingLocations.Contains(itemName);
             __instance.gameObject.SetActive(!found);
             if (found) return;
-        
+
             var region = __instance.GetComponentInParent<Region>();
             GameLoader.MakeMarker(markerName, __instance.transform.position, null, region.setId);
         }
@@ -34,12 +34,18 @@ public static class InteractableController
                 color.a = 0;
                 return color;
             });
-        
+
             __instance.gameObject.SetActive(false);
 
             try
             {
                 ApSlimeClient.Client.SendLocation(ApSlimeClient.LocationDictionary[hash]);
+
+                if (itemFound == "Entry" &&
+                    !ApSlimeClient.Client.MissingLocations.Any(loc => loc.ToLower().Contains("note")))
+                {
+                    ApSlimeClient.Client.Goal();
+                }
             }
             catch (Exception e)
             {

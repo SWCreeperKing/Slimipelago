@@ -107,6 +107,7 @@ public static class ApSlimeClient
         AccessDoorPatch.LabDoor.CurrState = AccessDoor.State.CLOSED;
         AccessDoorPatch.OvergrowthDoor.CurrState = AccessDoor.State.CLOSED;
         AccessDoorPatch.GrottoDoor.CurrState = AccessDoor.State.CLOSED;
+        AccessDoorPatch.DocksDoor.CurrState = AccessDoor.State.OPEN;
 
         ItemCache.Clear();
 

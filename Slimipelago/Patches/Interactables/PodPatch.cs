@@ -23,7 +23,7 @@ public static class PodPatch
     }
 
     [HarmonyPatch(typeof(TreasurePod), "Activate"), HarmonyPrefix]
-    public static void OpenPod(TreasurePod __instance) { __instance.InteractableInteracted("Pod"); }
+    public static void OpenPod(TreasurePod __instance) => __instance.InteractableInteracted("Pod");
 
     [HarmonyPatch(typeof(TreasurePod), "HasKey"), HarmonyPrefix]
     public static bool HasKey(TreasurePod __instance, ref bool __result)

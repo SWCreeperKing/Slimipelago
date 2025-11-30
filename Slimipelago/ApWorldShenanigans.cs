@@ -6,39 +6,31 @@ public static class ApWorldShenanigans
 
     public static void RunShenanigans()
     {
-        var upgrades = NumberedText(i => $"Buy Personal Upgrade (Max Health lv.{i})", 4)
-                      .Concat(NumberedText(i => $"Buy Personal Upgrade (Max Ammo lv.{i})", 4))
-                      .Concat(NumberedText(i => $"Buy Personal Upgrade (Run Efficiency lv.{i})", 2))
-                      .Concat(NumberedText(i => $"Buy Personal Upgrade (Max Energy lv.{i})", 3))
-                      .Concat(NumberedText(i => $"Buy Personal Upgrade (Treasure Cracker lv.{i})", 3)) // require lab
-                      .Concat([
-                           "Buy Personal Upgrade (Jetpack)",
-                           "Buy Personal Upgrade (Jetpack Efficiency)",
-                           "Buy Personal Upgrade (Air Burst)",
-                           "Buy Personal Upgrade (Liquid Slot)",
-                           "Buy Personal Upgrade (Golden Sure Shot)"
-                       ])
-                      .ToArray();
-
-        PlayerState.Upgrade[] upgradeTypeMap =
-        [
-            PlayerState.Upgrade.HEALTH_1, PlayerState.Upgrade.HEALTH_2, PlayerState.Upgrade.HEALTH_3,
-            PlayerState.Upgrade.HEALTH_4,
-
-            PlayerState.Upgrade.AMMO_1, PlayerState.Upgrade.AMMO_2, PlayerState.Upgrade.AMMO_3,
-            PlayerState.Upgrade.AMMO_4,
-
-            PlayerState.Upgrade.RUN_EFFICIENCY, PlayerState.Upgrade.RUN_EFFICIENCY_2,
-            PlayerState.Upgrade.ENERGY_1, PlayerState.Upgrade.ENERGY_2, PlayerState.Upgrade.ENERGY_3,
-            PlayerState.Upgrade.TREASURE_CRACKER_1, PlayerState.Upgrade.TREASURE_CRACKER_2,
-            PlayerState.Upgrade.TREASURE_CRACKER_3,
-            PlayerState.Upgrade.JETPACK, PlayerState.Upgrade.JETPACK_EFFICIENCY,
-            PlayerState.Upgrade.AIR_BURST,
-            PlayerState.Upgrade.LIQUID_SLOT,
-            PlayerState.Upgrade.GOLDEN_SURESHOT
-        ];
-
-        UpgradeLocations = upgrades.Zip(upgradeTypeMap, (s, u) => (s, u)).ToDictionary(t => t.u, t => t.s);
+        Dictionary<string, PlayerState.Upgrade> upgradeTypeMap = new()
+        {
+            ["Buy Personal Upgrade (Max Health lv.1)"] = PlayerState.Upgrade.HEALTH_1,
+            ["Buy Personal Upgrade (Max Health lv.2)"] = PlayerState.Upgrade.HEALTH_2,
+            ["Buy Personal Upgrade (Max Health lv.3)"] = PlayerState.Upgrade.HEALTH_3,
+            ["Buy Personal Upgrade (Max Health lv.4)"] = PlayerState.Upgrade.HEALTH_4,
+            ["Buy Personal Upgrade (Max Ammo lv.1)"] = PlayerState.Upgrade.AMMO_1,
+            ["Buy Personal Upgrade (Max Ammo lv.2)"] = PlayerState.Upgrade.AMMO_2,
+            ["Buy Personal Upgrade (Max Ammo lv.3)"] = PlayerState.Upgrade.AMMO_3,
+            ["Buy Personal Upgrade (Max Ammo lv.4)"] = PlayerState.Upgrade.AMMO_4,
+            ["Buy Personal Upgrade (Run Efficiency lv.1)"] = PlayerState.Upgrade.RUN_EFFICIENCY,
+            ["Buy Personal Upgrade (Run Efficiency lv.2)"] = PlayerState.Upgrade.RUN_EFFICIENCY_2,
+            ["Buy Personal Upgrade (Max Energy lv.1)"] = PlayerState.Upgrade.ENERGY_1,
+            ["Buy Personal Upgrade (Max Energy lv.2)"] = PlayerState.Upgrade.ENERGY_2,
+            ["Buy Personal Upgrade (Max Energy lv.3)"] = PlayerState.Upgrade.ENERGY_3,
+            ["Buy Personal Upgrade (Treasure Cracker lv.1)"] = PlayerState.Upgrade.TREASURE_CRACKER_1,
+            ["Buy Personal Upgrade (Treasure Cracker lv.2)"] = PlayerState.Upgrade.TREASURE_CRACKER_2,
+            ["Buy Personal Upgrade (Treasure Cracker lv.3)"] = PlayerState.Upgrade.TREASURE_CRACKER_3,
+            ["Buy Personal Upgrade (Jetpack)"] = PlayerState.Upgrade.JETPACK,
+            ["Buy Personal Upgrade (Jetpack Efficiency)"] = PlayerState.Upgrade.JETPACK_EFFICIENCY,
+            ["Buy Personal Upgrade (Air Burst)"] = PlayerState.Upgrade.AIR_BURST,
+            ["Buy Personal Upgrade (Liquid Slot)"] = PlayerState.Upgrade.LIQUID_SLOT,
+        };
+        
+        UpgradeLocations = upgradeTypeMap.ToDictionary(kv => kv.Value, kv => kv.Key);
 
         // downloaded from spreadsheet:
         // https://docs.google.com/spreadsheets/d/15PdrnGmkYdocX9RU-D5U_9OgihRNN9axX71mm-jOPUQ
@@ -72,9 +64,27 @@ public static class ApWorldShenanigans
         var gates = csv.Where(arr => arr[8] != "").Select(arr => arr.Skip(8).Take(5).ToArray()).ToArray();
         var gordos = csv.Where(arr => arr[14] != "").Select(arr => arr.Skip(14).ToArray()).ToArray();
 
+        Dictionary<string, string> upgradeRules = new()
+        {
+            ["Buy Personal Upgrade (Max Health lv.2)"] = "Region Dry Reef",
+            ["Buy Personal Upgrade (Max Health lv.3)"] = "Region Dry Reef",
+            ["Buy Personal Upgrade (Max Health lv.4)"] = "7z",
+            ["Buy Personal Upgrade (Max Ammo lv.2)"] = "Region Dry Reef",
+            ["Buy Personal Upgrade (Max Ammo lv.3)"] = "Region Dry Reef",
+            ["Buy Personal Upgrade (Max Ammo lv.4)"] = "7z",
+            ["Buy Personal Upgrade (Run Efficiency lv.2)"] = "7z",
+            ["Buy Personal Upgrade (Max Energy lv.2)"] = "Region Dry Reef",
+            ["Buy Personal Upgrade (Max Energy lv.3)"] = "Region Dry Reef",
+            ["Buy Personal Upgrade (Treasure Cracker lv.1)"] = "Region The Lab",
+            ["Buy Personal Upgrade (Treasure Cracker lv.2)"] = "Region The Lab",
+            ["Buy Personal Upgrade (Treasure Cracker lv.3)"] = "Region The Lab",
+            ["Buy Personal Upgrade (Jetpack Efficiency)"] = "Region Dry Reef",
+        };
+        
         File.WriteAllText("Mods/SW_CreeperKing.Slimipelago/Data/Locations.txt",
             string.Join("\n",
                 interactables.Select(arr => $"{arr[0]},{arr[1]},{arr[6]}")
+                             .Concat(dlcInteractables.Select(arr => $"{arr[0]},{arr[1]},{arr[6]}"))
                              .Concat(gates.Select(arr => $"{arr[0]},{arr[1]}"))
                              .Concat(gordos.Select(arr => $"{arr[0]},{arr[1]},Favorite: {arr[7]}"))));
 
@@ -83,7 +93,7 @@ public static class ApWorldShenanigans
              # File is Auto-generated, see: https://github.com/SWCreeperKing/Slimipelago/blob/master/Slimipelago/ApWorldShenanigans.cs
 
              upgrades = [
-                 {string.Join(",\n\t", upgrades.Select(s => $"\"{s}\""))}
+                 {string.Join(",\n\t", upgradeTypeMap.Select(kv => $"\"{kv.Key}\""))}
              ]
 
              interactables = [
@@ -105,9 +115,10 @@ public static class ApWorldShenanigans
             $$"""
               # File is Auto-generated, see: https://github.com/SWCreeperKing/Slimipelago/blob/master/Slimipelago/ApWorldShenanigans.cs
 
-              def get_rule_map(player):
+              def get_rule_map(player, world):
                   return {
-                      {{string.Join(",\n\t\t", interactables.Concat(dlcInteractables).Select(arr => GenRule(arr[1], arr[3], arr[4], arr[5].Split(' ')[0])).Where(s => s != ""))}}
+                      {{string.Join(",\n\t\t", interactables.Concat(dlcInteractables).Select(arr => GenRule(arr[1], arr[3], arr[4], arr[5].Split(' ')[0])).Where(s => s != ""))}},
+                      {{string.Join(",\n\t\t", upgradeRules.Select(kv => GenItemRule(kv.Key, kv.Value)))}},
                   }
 
               def has_cracker(state, player, level) -> bool:
@@ -118,6 +129,12 @@ public static class ApWorldShenanigans
 
               def has_jetpack(state, player) -> bool:
                   return state.has("Progressive Jetpack", player)
+                  
+              def has_7z_checks(world) -> bool:
+                  return world.include_7z_upgrades
+                  
+              def has_region(state, player, region) -> bool:
+                  return state.has(f"Region Unlock: {region}", player) 
               """);
 
         if (File.Exists("output/Slimerancher - Sheet1.csv"))
@@ -134,7 +151,7 @@ public static class ApWorldShenanigans
 
             if (cracker.Contains("Treasure Cracker"))
             {
-                rules.Add($"has_cracker(state, player, {Math.Min(1, cracker.Count(c => c == 'I'))})");
+                rules.Add($"has_cracker(state, player, {Math.Max(1, cracker.Count(c => c == 'I'))})");
             }
 
             if (needsJetpack == "Yes")
@@ -150,8 +167,20 @@ public static class ApWorldShenanigans
 
             return rules.Count == 0 ? "" : $"\"{location}\": lambda state: {string.Join(" and ", rules)}";
         }
-    }
 
-    public static string[] NumberedText(Func<int, string> numAction, int toNum, int fromNum = 1)
-        => Enumerable.Range(fromNum, toNum - fromNum + 1).Select(numAction).ToArray();
+        string GenItemRule(string location, string rule)
+        {
+            if (rule.StartsWith("Region "))
+            {
+                return $"\"{location}\": lambda state: has_region(state, player, \"{rule.Substring(7)}\")";
+            } 
+            
+            if (rule == "7z")
+            {
+                return $"\"{location}\": lambda state: has_7z_checks(world)";
+            }
+
+            return "";
+        }
+    }
 }

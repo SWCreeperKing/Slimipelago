@@ -8,6 +8,7 @@ public static class AccessDoorPatch
     public static AccessDoor LabDoor;
     public static AccessDoor GrottoDoor;
     public static AccessDoor OvergrowthDoor;
+    public static AccessDoor DocksDoor;
 
     [HarmonyPatch(typeof(AccessDoor), "Awake"), HarmonyPostfix]
     public static void Init(AccessDoor __instance)
@@ -24,6 +25,9 @@ public static class AccessDoorPatch
                 break;
             case PediaDirector.Id.OVERGROWTH:
                 OvergrowthDoor = __instance;
+                break;
+            case PediaDirector.Id.DOCKS:
+                DocksDoor = __instance;
                 break;
             default:
                 return;
