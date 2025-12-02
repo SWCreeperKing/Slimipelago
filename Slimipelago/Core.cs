@@ -1,6 +1,8 @@
 ﻿using System.Reflection;
 using MelonLoader;
+using Slimipelago.Archipelago;
 using Slimipelago.Patches.UiPatches;
+using Slimipzelago.Archipelago;
 using static Slimipelago.GameLoader;
 
 [assembly: MelonInfo(typeof(Slimipelago.Core), "Slimipelago", "1.0.0", "SW_CreeperKing", null)]
@@ -15,7 +17,7 @@ public class Core : MelonMod
     public override void OnInitializeMelon()
     {
         Log = LoggerInstance;
-
+        
         ApWorldShenanigans.RunShenanigans();
         var locationFileData = File
                               .ReadAllText("Mods/SW_CreeperKing.Slimipelago/Data/Locations.txt")
@@ -39,7 +41,7 @@ public class Core : MelonMod
         
         ApSlimeClient.Init();
         
-        Log.Msg("Shenanigans finished");
+        Log.Msg("Shenanigans finished"); 
 
         LoadSprites();
 
@@ -55,8 +57,13 @@ public class Core : MelonMod
         foreach (var patch in classesToPatch)
         {
             HarmonyInstance.PatchAll(patch);
+            
             Log.Msg($"Loaded: [{patch.Name}]");
         }
+
+        Log.Msg("Loading Songs");
+        
+        MusicPatch.LoadSongs();
 
         Log.Msg("Initialized.");
     }

@@ -1,5 +1,7 @@
 using HarmonyLib;
 using MonomiPark.SlimeRancher.DataModel;
+using Slimipelago.Archipelago;
+using Slimipzelago.Archipelago;
 
 namespace Slimipelago.Patches.UiPatches;
 
@@ -12,9 +14,7 @@ public static class PersonalUpgradePatch
         // Core.Log.Msg($"upgrade: [{upgrade}]");
         var location = ApWorldShenanigans.UpgradeLocations[upgrade];
         if (!ApSlimeClient.Client.MissingLocations.Contains(location)) return false;
-        
-        PopupPatch.AddItemToQueue(new ApPopupData(GameLoader.Spritemap["normal"], "Upgrade Bought", location));
-        ApSlimeClient.Client.SendLocation(location);
+        ApSlimeClient.SendItem("Upgrade Bought", location);
         return false;
     }
     

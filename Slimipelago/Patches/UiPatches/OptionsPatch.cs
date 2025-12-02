@@ -1,8 +1,11 @@
+using CreepyUtil.Archipelago;
 using HarmonyLib;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using static Slimipelago.Helper;
+using static Slimipzelago.Archipelago.ApSlimeClient;
 
 namespace Slimipelago.Patches.UiPatches;
 
@@ -37,46 +40,77 @@ public static class OptionsPatch
         layout.spacing = new Vector2(20, 40);
         layout.constraintCount = 1;
 
-        var g1 = Helper.CreateHorizontalGroup(panel).gameObject;
-        Helper.CreateText("Address:Port", Color.black, g1);
-        var address = Helper.CreateInputField("Ap Address", g1);
-        address.text = ApSlimeClient.AddressPort;
+        var g1 = CreateHorizontalGroup(panel).gameObject;
+        CreateText("Address:Port", Color.black, g1);
+        var address = CreateInputField("Ap Address", g1);
+        address.text = AddressPort;
 
-        var g2 = Helper.CreateHorizontalGroup(panel).gameObject;
-        Helper.CreateText("Password    ", Color.black, g2);
-        var password = Helper.CreateInputField("Ap Password", g2);
+        var g2 = CreateHorizontalGroup(panel).gameObject;
+        CreateText("Password    ", Color.black, g2);
+        var password = CreateInputField("Ap Password", g2);
         password.contentType = InputField.ContentType.Password;
-        password.text = ApSlimeClient.Password;
+        password.text = Password;
 
-        var g3 = Helper.CreateHorizontalGroup(panel).gameObject;
-        Helper.CreateText("Slot name    ", Color.black, g3);
-        var slot = Helper.CreateInputField("Ap Slot", g3);
-        slot.text = ApSlimeClient.SlotName;
+        var g3 = CreateHorizontalGroup(panel).gameObject;
+        CreateText("Slot name    ", Color.black, g3);
+        var slot = CreateInputField("Ap Slot", g3);
+        slot.text = SlotName;
 
-        var connectButton = Helper.CreateButton(ApSlimeClient.Client.IsConnected ? "Disconnect" : "Connect", panel,
+        var g4 = CreateHorizontalGroup(panel).gameObject;
+        CreateCheckbox(__instance.modTogglePrefab, g4, DeathLink, "DeathLink\n ", b =>
+            {
+                DeathLink = b;
+                if (!Client.IsConnected) return;
+                if (Client.Tags[ArchipelagoTag.DeathLink]) _ = Client.Tags - ArchipelagoTag.DeathLink;
+                else _ = Client.Tags + ArchipelagoTag.DeathLink;
+            })
+           .interactable = false;
+        CreateCheckbox(__instance.modTogglePrefab, g4, DeathLinkTeleport, "Teleport to Ranch\ninstead of dying",
+                b => DeathLinkTeleport = b)
+           .interactable = false;
+
+        var g42 = CreateHorizontalGroup(panel).gameObject;
+        CreateCheckbox(__instance.modTogglePrefab, g42, TrapLink, "TrapLink\n ", b =>
+            {
+                DeathLink = b;
+                if (!Client.IsConnected) return;
+                if (Client.Tags[ArchipelagoTag.DeathLink]) _ = Client.Tags - ArchipelagoTag.DeathLink;
+                else _ = Client.Tags + ArchipelagoTag.DeathLink;
+            })
+           .interactable = false;
+        CreateCheckbox(__instance.modTogglePrefab, g42, TrapLinkRandom, "Give random traps\nfor unknown traps", b => TrapLinkRandom = b)
+           .interactable = false;
+
+        var g5 = CreateHorizontalGroup(panel).gameObject;
+        CreateCheckbox(__instance.modTogglePrefab, g5, MusicRando, "Music Rando\n ", b => MusicRando = b);
+        CreateCheckbox(__instance.modTogglePrefab, g5, MusicRandoRandomizeOnce, "Music Rando:\nRandomize Once",
+            b => MusicRandoRandomizeOnce = b);
+
+        var connectButton = CreateButton(Client.IsConnected ? "Disconnect" : "Connect", panel,
             null, out var buttonText);
-        var errorText = Helper.CreateText("", Color.red, panel);
+        var errorText = CreateText("", Color.red, panel);
+
         connectButton.onClick.AddListener(() =>
         {
             Core.Log.Msg("Try Connect");
 
-            ApSlimeClient.ItemsWaiting.Clear();
-            ApSlimeClient.Items.Clear();
-            
+            ItemsWaiting.Clear();
+            Items.Clear();
+
             try
             {
-                if (!ApSlimeClient.Client.IsConnected)
+                if (!Client.IsConnected)
                 {
                     errorText.text = "";
-                    var error = ApSlimeClient.TryConnect(address.text, password.text, slot.text);
+                    var error = TryConnect(address.text, password.text, slot.text);
 
                     if (error is null)
                     {
                         buttonText.text = "Disconnect";
-                        ApSlimeClient.AddressPort = address.text;
-                        ApSlimeClient.Password = password.text;
-                        ApSlimeClient.SlotName = slot.text;
-                        ApSlimeClient.SaveFile();
+                        AddressPort = address.text;
+                        Password = password.text;
+                        SlotName = slot.text;
+                        SaveFile();
                     }
                     else
                     {
@@ -85,7 +119,7 @@ public static class OptionsPatch
                 }
                 else
                 {
-                    ApSlimeClient.Client.TryDisconnect();
+                    Client.TryDisconnect();
                     buttonText.text = "Connect";
                 }
             }
@@ -93,9 +127,9 @@ public static class OptionsPatch
             {
                 Core.Log.Error(e);
             }
-            
-            MainMenuPatch.NewGameButton.gameObject.SetActive(ApSlimeClient.Client.IsConnected);
-            MainMenuPatch.LoadButton.gameObject.SetActive(ApSlimeClient.Client.IsConnected);
+
+            MainMenuPatch.NewGameButton.gameObject.SetActive(Client.IsConnected);
+            MainMenuPatch.LoadButton.gameObject.SetActive(Client.IsConnected);
         });
         return false;
     }

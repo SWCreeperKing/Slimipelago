@@ -65,7 +65,14 @@ public static class Helper
             methodInfo.Invoke(obj, param);
         }
     }
-
+    
+    public static HorizontalLayoutGroup CreateHorizontalGroup(GameObject parent)
+    {
+        var hGroup = new GameObject("HorizontalLayoutGroup (custom)").AddComponent<HorizontalLayoutGroup>();
+        hGroup.transform.parent = parent.transform;
+        return hGroup;
+    }
+    
     public static TextMeshProUGUI CreateText(string text, Color color, GameObject parent, int fontSize = 24)
     {
         var textObj = new GameObject("TextMeshProUGUI (custom)").AddComponent<TextMeshProUGUI>();
@@ -74,13 +81,6 @@ public static class Helper
         textObj.fontSize = fontSize;
         textObj.gameObject.transform.parent = parent.gameObject.transform;
         return textObj;
-    }
-
-    public static HorizontalLayoutGroup CreateHorizontalGroup(GameObject parent)
-    {
-        var hGroup = new GameObject("HorizontalLayoutGroup (custom)").AddComponent<HorizontalLayoutGroup>();
-        hGroup.transform.parent = parent.transform;
-        return hGroup;
     }
 
     public static SRInputField CreateInputField(string desc, GameObject parent)
@@ -144,6 +144,17 @@ public static class Helper
         return button;
     }
 
+    public static Toggle CreateCheckbox(GameObject prefab, GameObject parent, bool setting, string name,
+        UnityAction<bool> valueChanged)
+    {
+        var gameObject = UnityEngine.Object.Instantiate(prefab, parent.transform, false);
+        var component = gameObject.GetComponent<Toggle>();
+        component.isOn = setting;
+        component.onValueChanged.AddListener(valueChanged);
+        gameObject.transform.Find("Label").GetComponent<TMP_Text>().text = name;
+        return component;
+    }
+    
     public static string HashPos(this Vector3 pos)
         => $"[x:{Math.Floor(pos.x)}|y:{Math.Floor(pos.y)}|z:{Math.Floor(pos.z)}]";
 }

@@ -1,4 +1,6 @@
-namespace Slimipelago;
+using Slimipzelago.Archipelago;
+
+namespace Slimipelago.Archipelago;
 
 public static class ApWorldShenanigans
 {
@@ -29,7 +31,7 @@ public static class ApWorldShenanigans
             ["Buy Personal Upgrade (Air Burst)"] = PlayerState.Upgrade.AIR_BURST,
             ["Buy Personal Upgrade (Liquid Slot)"] = PlayerState.Upgrade.LIQUID_SLOT,
         };
-        
+
         UpgradeLocations = upgradeTypeMap.ToDictionary(kv => kv.Value, kv => kv.Key);
 
         // downloaded from spreadsheet:
@@ -64,23 +66,23 @@ public static class ApWorldShenanigans
         var gates = csv.Where(arr => arr[8] != "").Select(arr => arr.Skip(8).Take(5).ToArray()).ToArray();
         var gordos = csv.Where(arr => arr[14] != "").Select(arr => arr.Skip(14).ToArray()).ToArray();
 
-        Dictionary<string, string> upgradeRules = new()
+        Dictionary<string, string[]> upgradeRules = new()
         {
-            ["Buy Personal Upgrade (Max Health lv.2)"] = "Region Dry Reef",
-            ["Buy Personal Upgrade (Max Health lv.3)"] = "Region Dry Reef",
-            ["Buy Personal Upgrade (Max Health lv.4)"] = "7z",
-            ["Buy Personal Upgrade (Max Ammo lv.2)"] = "Region Dry Reef",
-            ["Buy Personal Upgrade (Max Ammo lv.3)"] = "Region Dry Reef",
-            ["Buy Personal Upgrade (Max Ammo lv.4)"] = "7z",
-            ["Buy Personal Upgrade (Run Efficiency lv.2)"] = "7z",
-            ["Buy Personal Upgrade (Max Energy lv.2)"] = "Region Dry Reef",
-            ["Buy Personal Upgrade (Max Energy lv.3)"] = "Region Dry Reef",
-            ["Buy Personal Upgrade (Treasure Cracker lv.1)"] = "Region The Lab",
-            ["Buy Personal Upgrade (Treasure Cracker lv.2)"] = "Region The Lab",
-            ["Buy Personal Upgrade (Treasure Cracker lv.3)"] = "Region The Lab",
-            ["Buy Personal Upgrade (Jetpack Efficiency)"] = "Region Dry Reef",
+            ["Buy Personal Upgrade (Max Health lv.2)"] = ["Region Dry Reef"],
+            ["Buy Personal Upgrade (Max Health lv.3)"] = ["Region Dry Reef"],
+            ["Buy Personal Upgrade (Max Health lv.4)"] = ["7z"],
+            ["Buy Personal Upgrade (Max Ammo lv.2)"] = ["Region Dry Reef"],
+            ["Buy Personal Upgrade (Max Ammo lv.3)"] = ["Region Dry Reef"],
+            ["Buy Personal Upgrade (Max Ammo lv.4)"] = ["7z"],
+            ["Buy Personal Upgrade (Run Efficiency lv.2)"] = ["7z"],
+            ["Buy Personal Upgrade (Max Energy lv.2)"] = ["Region Dry Reef"],
+            ["Buy Personal Upgrade (Max Energy lv.3)"] = ["Region Dry Reef"],
+            ["Buy Personal Upgrade (Treasure Cracker lv.1)"] = ["Region The Lab", "Region Indigo Quarry"],
+            ["Buy Personal Upgrade (Treasure Cracker lv.2)"] = ["Region The Lab", "Region Indigo Quarry"],
+            ["Buy Personal Upgrade (Treasure Cracker lv.3)"] = ["Region The Lab", "Region Indigo Quarry"],
+            ["Buy Personal Upgrade (Jetpack Efficiency)"] = ["Region Dry Reef"],
         };
-        
+
         File.WriteAllText("Mods/SW_CreeperKing.Slimipelago/Data/Locations.txt",
             string.Join("\n",
                 interactables.Select(arr => $"{arr[0]},{arr[1]},{arr[6]}")
@@ -94,6 +96,10 @@ public static class ApWorldShenanigans
 
              upgrades = [
                  {string.Join(",\n\t", upgradeTypeMap.Select(kv => $"\"{kv.Key}\""))}
+             ]
+
+             upgrades_7z = [
+                 {string.Join(",\n\t", upgradeRules.Where(kv => kv.Value.Contains("7z")).Select(kv => $"\"{kv.Key}\""))}
              ]
 
              interactables = [
@@ -118,7 +124,8 @@ public static class ApWorldShenanigans
               def get_rule_map(player, world):
                   return {
                       {{string.Join(",\n\t\t", interactables.Concat(dlcInteractables).Select(arr => GenRule(arr[1], arr[3], arr[4], arr[5].Split(' ')[0])).Where(s => s != ""))}},
-                      {{string.Join(",\n\t\t", upgradeRules.Select(kv => GenItemRule(kv.Key, kv.Value)))}},
+                      {{string.Join(",\n\t\t", upgradeRules.Where(kv => !kv.Value.Contains("7z")).Select(kv => $"\"{kv.Key}\": lambda state: {string.Join(" and ", kv.Value.Select(GenItemRule))}"))}},
+                      {{string.Join(",\n\t\t", upgradeRules.Where(kv => kv.Value.Contains("7z")).Select(kv => $"\"{kv.Key}\": lambda state: has_region(state, player, \"Indigo Quarry\")"))}},
                   }
 
               def has_cracker(state, player, level) -> bool:
@@ -129,9 +136,6 @@ public static class ApWorldShenanigans
 
               def has_jetpack(state, player) -> bool:
                   return state.has("Progressive Jetpack", player)
-                  
-              def has_7z_checks(world) -> bool:
-                  return world.include_7z_upgrades
                   
               def has_region(state, player, region) -> bool:
                   return state.has(f"Region Unlock: {region}", player) 
@@ -168,16 +172,11 @@ public static class ApWorldShenanigans
             return rules.Count == 0 ? "" : $"\"{location}\": lambda state: {string.Join(" and ", rules)}";
         }
 
-        string GenItemRule(string location, string rule)
+        string GenItemRule(string rule)
         {
             if (rule.StartsWith("Region "))
             {
-                return $"\"{location}\": lambda state: has_region(state, player, \"{rule.Substring(7)}\")";
-            } 
-            
-            if (rule == "7z")
-            {
-                return $"\"{location}\": lambda state: has_7z_checks(world)";
+                return $"has_region(state, player, \"{rule.Substring(7)}\")";
             }
 
             return "";

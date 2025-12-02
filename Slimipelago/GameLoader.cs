@@ -1,5 +1,8 @@
+using Archipelago.MultiClient.Net.Enums;
 using MonomiPark.SlimeRancher.Regions;
 using Slimipelago.Added;
+using Slimipelago.Patches.UiPatches;
+using Slimipzelago.Archipelago;
 using UnityEngine;
 using UnityEngine.Events;
 using static Slimipelago.Patches.PlayerPatches.PlayerStatePatch;
@@ -55,6 +58,14 @@ public static class GameLoader
             new Vector2(0.5f, 0.5f));
     }
 
+    public static string GetSpriteFromItemFlag(ItemFlags itemFlags)
+    {
+        if (itemFlags.HasFlag(ItemFlags.Advancement)) return "progressive";
+        if (itemFlags.HasFlag(ItemFlags.NeverExclude)) return "useful";
+        if (itemFlags.HasFlag(ItemFlags.Trap)) return "trap";
+        return "normal";
+    }
+
     public static ItemDisplayOnMap MakeMarker(string id, Vector3 position, UnityAction onPressed = null,
         RegionRegistry.RegionSetId region = RegionRegistry.RegionSetId.HOME)
     {
@@ -82,7 +93,16 @@ public static class GameLoader
 
         if (ReplaceNullOnClickWithId && onPressed is null)
         {
-            onPressed = () => Core.Log.Msg($"Marker id: \"{posHash}\"");
+            onPressed = () =>
+            {
+                if (ApSlimeClient.LocationDictionary.TryGetValue(posHash, out var itemName))
+                {
+                    PopupPatch.AddItemToQueue(new ApPopupData(Spritemap["got_trap"], "Marker Name", itemName,
+                        timer: 0.1f));
+                }
+
+                Core.Log.Msg($"Marker id: \"{posHash}\"");
+            };
         }
 
         GameObject gobj = new($"Archipelago Marker Display ({id})")
@@ -111,9 +131,10 @@ public static class GameLoader
     {
         if (!MarkerDictionary.TryGetValue(hash, out var marker))
         {
-            Core.Log.Msg($"Marker for [{hash}] not found");
+            // Core.Log.Msg($"Marker for [{hash}] not found");
             return;
         }
+
         marker.Image.color = modify(marker.Image.color);
     }
 

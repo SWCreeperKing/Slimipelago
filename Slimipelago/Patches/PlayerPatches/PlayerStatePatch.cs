@@ -1,7 +1,7 @@
 using HarmonyLib;
 using JetBrains.Annotations;
-using MonomiPark.SlimeRancher.DataModel;
 using Slimipelago.Patches.UiPatches;
+using Slimipzelago.Archipelago;
 using UnityEngine;
 using UnityEngine.UI;
 

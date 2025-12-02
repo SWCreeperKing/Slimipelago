@@ -16,18 +16,17 @@ public static class PlayerTrackerPatch
         [ZoneDirector.Zone.QUARRY] = "Indigo Quarry", 
         [ZoneDirector.Zone.MOSS] = "Moss Blanket", 
         [ZoneDirector.Zone.DESERT] = "Glass Desert", 
-        // [ZoneDirector.Zone.SEA] = "Slime Sea", 
         [ZoneDirector.Zone.RUINS] = "Ruins", 
-        [ZoneDirector.Zone.RUINS_TRANSITION] = "Ruins Transition", 
+        [ZoneDirector.Zone.RUINS_TRANSITION] = "Ruins Transition",
     };
     
     [HarmonyPatch(typeof(PlayerZoneTracker), "OnEntered"), HarmonyPrefix]
     public static void AreaEntered(PlayerZoneTracker __instance, ZoneDirector.Zone zone)
     {
-        // Core.Log.Msg($"Zone entered: [{zone}]");
         if (!PlayerStatePatch.FirstUpdate) return;
-        if (zone is ZoneDirector.Zone.NONE or ZoneDirector.Zone.RANCH) return;
+        if (zone is ZoneDirector.Zone.NONE or ZoneDirector.Zone.RANCH or ZoneDirector.Zone.SEA) return;
         if (ZoneTypeToName.ContainsKey(zone) && AllowedZones.Contains(ZoneTypeToName[zone])) return;
+        Core.Log.Msg($"Player Entered Restricted Area: [{zone}]");
         Playground.BanishPlayer();
     }
 }

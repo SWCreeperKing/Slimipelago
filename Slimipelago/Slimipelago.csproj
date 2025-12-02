@@ -266,8 +266,9 @@
 		<Compile Include="Added\ItemDisplayOnMap.cs" />
 		<Compile Include="Added\ItemMapMarker.cs" />
 		<Compile Include="Added\Playground.cs" />
-		<Compile Include="ApSlimeClient.cs" />
-		<Compile Include="ApWorldShenanigans.cs" />
+		<Compile Include="Archipelago\ApSlimeClient.cs" />
+		<Compile Include="Archipelago\ApWorldShenanigans.cs" />
+		<Compile Include="Archipelago\ItemHandler.cs" />
 		<Compile Include="Core.cs" />
 		<Compile Include="GameLoader.cs" />
 		<Compile Include="Helper.cs" />
@@ -285,6 +286,7 @@
 		<Compile Include="Patches\PlayerPatches\SprintStaminaPatch.cs" />
 		<Compile Include="Patches\UiPatches\KillTutorialPatch.cs" />
 		<Compile Include="Patches\UiPatches\MainMenuPatch.cs" />
+		<Compile Include="Patches\UiPatches\MusicPatch.cs" />
 		<Compile Include="Patches\UiPatches\OptionsPatch.cs" />
 		<Compile Include="Patches\UiPatches\PersonalUpgradePatch.cs" />
 		<Compile Include="Patches\UiPatches\PopupPatch.cs" />

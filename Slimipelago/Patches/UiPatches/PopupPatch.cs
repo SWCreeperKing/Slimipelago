@@ -44,24 +44,25 @@ public static class PopupPatch
             if (!PopupDatas.Any()) return;
             var newData = PopupDatas.Dequeue();
             CurrentPopup = CreateItemPopup(newData.Sprite, newData.ItemDialogue, newData.Item, newData.OtherPlayer, newData.OnPopup);
-            DeadTime = 0;
+            DeadTime = newData.Timer;
         }
         
         if (CurrentPopup is null) return;
-        DeadTime += Time.deltaTime;
+        DeadTime -= Time.deltaTime;
         
-        if (DeadTime <= 3) return;
+        if (DeadTime >= 0) return;
         Destroy(CurrentPopup);
         CurrentPopup = null;
         DeadTime = 0;
     }
 }
 
-public readonly struct ApPopupData(Sprite sprite, string itemDialogue, string item, string otherPlayer = "", Action onPopup = null)
+public readonly struct ApPopupData(Sprite sprite, string itemDialogue, string item, string otherPlayer = "", Action onPopup = null, double timer = 3)
 {
     public readonly Sprite Sprite = sprite;
     public readonly string ItemDialogue = itemDialogue;
     public readonly string Item = item;
     public readonly string OtherPlayer = otherPlayer;
     public readonly Action OnPopup = onPopup;
+    public readonly double Timer = timer;
 }
