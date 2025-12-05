@@ -4,36 +4,8 @@ namespace Slimipelago.Archipelago;
 
 public static class ApWorldShenanigans
 {
-    public static Dictionary<PlayerState.Upgrade, string> UpgradeLocations;
-
     public static void RunShenanigans()
     {
-        Dictionary<string, PlayerState.Upgrade> upgradeTypeMap = new()
-        {
-            ["Buy Personal Upgrade (Max Health lv.1)"] = PlayerState.Upgrade.HEALTH_1,
-            ["Buy Personal Upgrade (Max Health lv.2)"] = PlayerState.Upgrade.HEALTH_2,
-            ["Buy Personal Upgrade (Max Health lv.3)"] = PlayerState.Upgrade.HEALTH_3,
-            ["Buy Personal Upgrade (Max Health lv.4)"] = PlayerState.Upgrade.HEALTH_4,
-            ["Buy Personal Upgrade (Max Ammo lv.1)"] = PlayerState.Upgrade.AMMO_1,
-            ["Buy Personal Upgrade (Max Ammo lv.2)"] = PlayerState.Upgrade.AMMO_2,
-            ["Buy Personal Upgrade (Max Ammo lv.3)"] = PlayerState.Upgrade.AMMO_3,
-            ["Buy Personal Upgrade (Max Ammo lv.4)"] = PlayerState.Upgrade.AMMO_4,
-            ["Buy Personal Upgrade (Run Efficiency lv.1)"] = PlayerState.Upgrade.RUN_EFFICIENCY,
-            ["Buy Personal Upgrade (Run Efficiency lv.2)"] = PlayerState.Upgrade.RUN_EFFICIENCY_2,
-            ["Buy Personal Upgrade (Max Energy lv.1)"] = PlayerState.Upgrade.ENERGY_1,
-            ["Buy Personal Upgrade (Max Energy lv.2)"] = PlayerState.Upgrade.ENERGY_2,
-            ["Buy Personal Upgrade (Max Energy lv.3)"] = PlayerState.Upgrade.ENERGY_3,
-            ["Buy Personal Upgrade (Treasure Cracker lv.1)"] = PlayerState.Upgrade.TREASURE_CRACKER_1,
-            ["Buy Personal Upgrade (Treasure Cracker lv.2)"] = PlayerState.Upgrade.TREASURE_CRACKER_2,
-            ["Buy Personal Upgrade (Treasure Cracker lv.3)"] = PlayerState.Upgrade.TREASURE_CRACKER_3,
-            ["Buy Personal Upgrade (Jetpack)"] = PlayerState.Upgrade.JETPACK,
-            ["Buy Personal Upgrade (Jetpack Efficiency)"] = PlayerState.Upgrade.JETPACK_EFFICIENCY,
-            ["Buy Personal Upgrade (Air Burst)"] = PlayerState.Upgrade.AIR_BURST,
-            ["Buy Personal Upgrade (Liquid Slot)"] = PlayerState.Upgrade.LIQUID_SLOT,
-        };
-
-        UpgradeLocations = upgradeTypeMap.ToDictionary(kv => kv.Value, kv => kv.Key);
-
         // downloaded from spreadsheet:
         // https://docs.google.com/spreadsheets/d/15PdrnGmkYdocX9RU-D5U_9OgihRNN9axX71mm-jOPUQ
         if (!File.Exists("Slimerancher - Sheet1.csv")) return;
@@ -58,22 +30,9 @@ public static class ApWorldShenanigans
         var gates = csv.Where(line => line.HasGate).ToArray();
         var gordos = csv.Where(line => line.HasGordo).ToArray();
 
-        Dictionary<string, string[]> upgradeRules = new()
-        {
-            ["Buy Personal Upgrade (Max Health lv.2)"] = ["Region Dry Reef"],
-            ["Buy Personal Upgrade (Max Health lv.3)"] = ["Region Dry Reef"],
-            ["Buy Personal Upgrade (Max Health lv.4)"] = ["7z"],
-            ["Buy Personal Upgrade (Max Ammo lv.2)"] = ["Region Dry Reef"],
-            ["Buy Personal Upgrade (Max Ammo lv.3)"] = ["Region Dry Reef"],
-            ["Buy Personal Upgrade (Max Ammo lv.4)"] = ["7z"],
-            ["Buy Personal Upgrade (Run Efficiency lv.2)"] = ["7z"],
-            ["Buy Personal Upgrade (Max Energy lv.2)"] = ["Region Dry Reef"],
-            ["Buy Personal Upgrade (Max Energy lv.3)"] = ["Region Dry Reef"],
-            ["Buy Personal Upgrade (Treasure Cracker lv.1)"] = ["Region The Lab", "Region Indigo Quarry"],
-            ["Buy Personal Upgrade (Treasure Cracker lv.2)"] = ["Region The Lab", "Region Indigo Quarry"],
-            ["Buy Personal Upgrade (Treasure Cracker lv.3)"] = ["Region The Lab", "Region Indigo Quarry"],
-            ["Buy Personal Upgrade (Jetpack Efficiency)"] = ["Region Dry Reef"],
-        };
+        var upgrades = csv.Where(line => line.HasUpgrade).ToArray();
+        var upgradeRules = upgrades.Where(line => line.UpgradeRules.Length > 0)
+                                   .ToDictionary(line => line.UpgradeName, line => line.UpgradeRules);
 
         File.WriteAllText("Mods/SW_CreeperKing.Slimipelago/Data/Locations.txt",
             string.Join("\n",
@@ -82,12 +41,15 @@ public static class ApWorldShenanigans
                              .Concat(gates.Select(line => line.GetGateText))
                              .Concat(gordos.Select(line => line.GetGordoText))));
 
+        File.WriteAllText("Mods/SW_CreeperKing.Slimipelago/Data/Upgrades.txt",
+            string.Join("\n", upgrades.Select(line => $"{line.UpgradeName},{line.UpgradeId}")));
+
         File.WriteAllText("output/Locations.py",
             $"""
              # File is Auto-generated, see: https://github.com/SWCreeperKing/Slimipelago/blob/master/Slimipelago/ApWorldShenanigans.cs
 
              upgrades = [
-                 {string.Join(",\n\t", upgradeTypeMap.Select(kv => $"\"{kv.Key}\""))}
+                 {string.Join(",\n\t", upgrades.Select(line => $"\"{line.UpgradeName}\""))}
              ]
 
              upgrades_7z = [
@@ -196,9 +158,14 @@ public readonly struct CsvLine(string[] line)
     public readonly string GordoNormalFoodRequirement = line[20];
     public readonly string GordoFavoriteFood = line[21];
 
+    public readonly string UpgradeName = line[23];
+    public readonly string UpgradeId = line[24];
+    public readonly string[] UpgradeRules = line[25].Split(['&'], StringSplitOptions.RemoveEmptyEntries).Select(rule => rule.Trim()).ToArray();
+
     public bool HasInteractable => InteractableId != "";
     public bool HasGate => GateId != "";
     public bool HasGordo => GordoId != "";
+    public bool HasUpgrade => UpgradeName != "";
 
     public bool IsValidZone => ApSlimeClient.Zones.Contains(InteractableArea);
     public bool IsSecretStyle => InteractableCrackerLevel != "Secret Style";

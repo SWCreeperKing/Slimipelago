@@ -20,6 +20,7 @@ public static class ApSlimeClient
     public static Dictionary<string, int> RandoSeeds = [];
     public static Dictionary<string, string> LocationDictionary = [];
     public static Dictionary<string, string> LocationInfoDictionary = [];
+    public static Dictionary<PlayerState.Upgrade, string> UpgradeLocations;
     public static List<ItemInfo> Items = [];
     public static List<ItemInfo> ItemsWaiting = [];
     public static ConcurrentDictionary<string, int> ItemCache = [];

@@ -16,7 +16,7 @@ public static class PersonalUpgradePatch
     public static bool ApplyUpgrade(PlayerState.Upgrade upgrade)
     {
         // Core.Log.Msg($"upgrade: [{upgrade}]");
-        var location = ApWorldShenanigans.UpgradeLocations[upgrade];
+        var location = ApSlimeClient.UpgradeLocations[upgrade];
         if (!ApSlimeClient.Client.MissingLocations.Contains(location)) return false;
         ApSlimeClient.SendItem("Upgrade Bought", location);
         return false;
@@ -42,7 +42,7 @@ public static class PersonalUpgradePatch
     [HarmonyPatch(typeof(PersonalUpgradeUI), "CreateUpgradePurchasable"), HarmonyPostfix]
     public static void CreateUpgradePurchasable(PlayerState.Upgrade upgrade, ref PurchaseUI.Purchasable __result)
     {
-        if (!ApWorldShenanigans.UpgradeLocations.TryGetValue(upgrade, out var location)) return;
+        if (!ApSlimeClient.UpgradeLocations.TryGetValue(upgrade, out var location)) return;
         PurchaseNameKeyToLocation[__result.nameKey] = location;
     }
 }

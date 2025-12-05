@@ -2,6 +2,7 @@
 using KaitoKid.ArchipelagoUtilities.AssetDownloader.ItemSprites;
 using MelonLoader;
 using MonomiPark.SlimeRancher.DataModel;
+using MultiplayerWithBindingsExample;
 using Slimipelago.Archipelago;
 using Slimipelago.Patches.PlayerPatches;
 using Slimipelago.Patches.UiPatches;
@@ -18,7 +19,7 @@ namespace Slimipelago;
 public class Core : MelonMod
 {
     public static MelonLogger.Instance Log;
-    
+
     private static Logger Logger;
     public static ArchipelagoItemSprites ItemSpritesManager;
 
@@ -27,7 +28,7 @@ public class Core : MelonMod
         Log = LoggerInstance;
         Logger = new Logger();
         // ItemSpritesManager = new ArchipelagoItemSprites(Logger);
-        
+
         ApWorldShenanigans.RunShenanigans();
         var locationFileData = File
                               .ReadAllText("Mods/SW_CreeperKing.Slimipelago/Data/Locations.txt")
@@ -35,7 +36,7 @@ public class Core : MelonMod
                               .Split('\n')
                               .Select(s => s.Split(','))
                               .ToArray();
-        
+
         foreach (var data in locationFileData)
         {
             if (ApSlimeClient.LocationDictionary.ContainsKey(data[0]))
@@ -43,15 +44,23 @@ public class Core : MelonMod
                 Log.Msg($"Duplicate Key: {data[0]}");
                 continue;
             }
-        
+
             ApSlimeClient.LocationDictionary[data[0]] = data[1];
             if (data.Length < 3) continue;
             ApSlimeClient.LocationInfoDictionary[data[0]] = data[2];
         }
-        
+
+        ApSlimeClient.UpgradeLocations = File
+                                        .ReadAllText("Mods/SW_CreeperKing.Slimipelago/Data/Upgrades.txt")
+                                        .Replace("\r", "")
+                                        .Split('\n')
+                                        .Select(s => s.Split(','))
+                                        .ToDictionary(sArr => (PlayerState.Upgrade)int.Parse(sArr[1]), sArr => sArr[0]);
+
+
         ApSlimeClient.Init();
-        
-        Log.Msg("Shenanigans finished"); 
+
+        Log.Msg("Shenanigans finished");
 
         LoadSprites();
 
@@ -67,12 +76,12 @@ public class Core : MelonMod
         foreach (var patch in classesToPatch)
         {
             HarmonyInstance.PatchAll(patch);
-            
+
             Log.Msg($"Loaded: [{patch.Name}]");
         }
 
         Log.Msg("Loading Songs (in background)");
-        
+
         Task.Run(MusicPatch.LoadSongs);
 
         Log.Msg("Initialized.");
