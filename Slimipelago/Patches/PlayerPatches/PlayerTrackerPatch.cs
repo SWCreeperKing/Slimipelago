@@ -16,8 +16,8 @@ public static class PlayerTrackerPatch
         [ZoneDirector.Zone.QUARRY] = "Indigo Quarry", 
         [ZoneDirector.Zone.MOSS] = "Moss Blanket", 
         [ZoneDirector.Zone.DESERT] = "Glass Desert", 
-        [ZoneDirector.Zone.RUINS] = "Ruins", 
-        [ZoneDirector.Zone.RUINS_TRANSITION] = "Ruins Transition",
+        [ZoneDirector.Zone.RUINS] = "Ancient Ruins", 
+        [ZoneDirector.Zone.RUINS_TRANSITION] = "Ancient Ruins Transition",
     };
     
     [HarmonyPatch(typeof(PlayerZoneTracker), "OnEntered"), HarmonyPrefix]

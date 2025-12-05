@@ -1,5 +1,7 @@
 using HarmonyLib;
 using JetBrains.Annotations;
+using MonomiPark.SlimeRancher.Regions;
+using Slimipelago.Patches.Interactables;
 using Slimipelago.Patches.UiPatches;
 using Slimipzelago.Archipelago;
 using UnityEngine;
@@ -11,6 +13,7 @@ namespace Slimipelago.Patches.PlayerPatches;
 public static class PlayerStatePatch
 {
     public static PlayerState PlayerState;
+    public static FirestormActivator FirestormActivator;
     public static GameObject PlayerInWorld = null;
     public static Rigidbody PlayerInWorldBody;
     public static Map PlayerMap;
@@ -18,9 +21,9 @@ public static class PlayerStatePatch
     public static bool FirstUpdate { get; private set; }
 
     [CanBeNull] public static event Action OnFirstUpdate;
-    
+
     public static Vector3 PlayerPos => PlayerInWorld.transform.position;
-    
+
     [HarmonyPatch(typeof(PlayerState), "Awake"), HarmonyPostfix]
     public static void PlayerAwake(PlayerState __instance)
     {
@@ -28,6 +31,7 @@ public static class PlayerStatePatch
         PlayerInWorld = GameObject.Find("SimplePlayer");
         PlayerInWorldBody = PlayerInWorld.GetComponent<Rigidbody>();
         SaveAndQuitButton = GameObject.Find("HUD Root/PauseMenu/PauseUI/Buttons/QuitButton").GetComponent<Button>();
+        FirestormActivator = PlayerInWorld.GetComponent<FirestormActivator>();
 
         MainMenuPatch.OnGamePotentialExit += () =>
         {
@@ -42,6 +46,7 @@ public static class PlayerStatePatch
 
         OnFirstUpdate += () => Core.Log.Msg("First Update");
         OnFirstUpdate += ApSlimeClient.WorldOpened;
+
         Core.Log.Msg("Player Awake");
         GameLoader.ResetData();
     }
@@ -49,9 +54,21 @@ public static class PlayerStatePatch
     [HarmonyPatch(typeof(PlayerState), "Update"), HarmonyPostfix]
     public static void Update()
     {
-        if (FirstUpdate) return;
-        OnFirstUpdate?.Invoke();
-        FirstUpdate = true;
+        try
+        {
+            if (FirstUpdate) return;
+            OnFirstUpdate?.Invoke();
+            foreach (var accessDoor in Resources.FindObjectsOfTypeAll<AccessDoor>())
+            {
+                AccessDoorPatch.RunDoorCheck(accessDoor);
+            }
+
+            FirstUpdate = true;
+        }
+        catch (Exception e)
+        {
+            Core.Log.Error(e);
+        }
     }
 
     [HarmonyPatch(typeof(Map), "Start"), HarmonyPostfix]
@@ -62,9 +79,10 @@ public static class PlayerStatePatch
         Core.Log.Msg("Map Alive");
     }
 
-    public static void TeleportPlayer(Vector3 pos)
+    public static void TeleportPlayer(Vector3 pos, RegionRegistry.RegionSetId region)
     {
         pos.y += 5;
+        PlayerModelPatch.Model.SetCurrRegionSet(region);
         PlayerInWorld.transform.position = pos;
     }
-    }
+}

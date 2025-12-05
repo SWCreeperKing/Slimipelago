@@ -8,6 +8,8 @@ namespace Slimipelago;
 
 public static class Helper
 {
+    public static Dictionary<Vector3, string> PosHashCache = [];
+    
     extension(GameObject gobj)
     {
         public GameObject[] GetChildren()
@@ -156,7 +158,10 @@ public static class Helper
     }
     
     public static string HashPos(this Vector3 pos)
-        => $"[x:{Math.Floor(pos.x)}|y:{Math.Floor(pos.y)}|z:{Math.Floor(pos.z)}]";
+    {
+        if (PosHashCache.TryGetValue(pos, out var hashPos)) return hashPos;
+        return PosHashCache[pos] = $"[x:{Math.Floor(pos.x)}|y:{Math.Floor(pos.y)}|z:{Math.Floor(pos.z)}]";
+    }
 }
 
 [AttributeUsage(AttributeTargets.Class)]

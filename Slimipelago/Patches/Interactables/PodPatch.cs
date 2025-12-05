@@ -12,6 +12,11 @@ public static class PodPatch
     public static void MarkPod(TreasurePod __instance)
     {
         __instance.InteractableInstanced(PodType[GetType(__instance)]);
+        
+        if (!ApSlimeClient.LocationDictionary.TryGetValue(__instance.transform.position.HashPos(), out var itemName))
+            return;
+        if (!ApSlimeClient.Client.MissingLocations.Contains(itemName) || __instance.CurrState is TreasurePod.State.LOCKED) return;
+        __instance.CurrState = TreasurePod.State.LOCKED;
     }
 
     public static int GetType(TreasurePod pod)

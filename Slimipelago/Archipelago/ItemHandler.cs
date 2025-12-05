@@ -1,20 +1,29 @@
 using Archipelago.MultiClient.Net.Models;
+using CreepyUtil.Archipelago.ApClient;
+using KaitoKid.ArchipelagoUtilities.AssetDownloader.ItemSprites;
 using MonomiPark.SlimeRancher.DataModel;
 using Newtonsoft.Json;
 using Slimipelago.Patches.Interactables;
 using Slimipelago.Patches.PlayerPatches;
 using Slimipelago.Patches.UiPatches;
+using Slimipzelago.Archipelago;
+using UnityEngine;
 using static Slimipelago.Patches.PlayerPatches.PlayerModelPatch;
 using static Slimipzelago.Archipelago.ApSlimeClient;
+using ILogger = KaitoKid.Utilities.Interfaces.ILogger;
 
 namespace Slimipelago.Archipelago;
 
 public static class ItemHandler
 {
+    public static Dictionary<string, Sprite> ItemSprites = [];
     public static long ItemNumberTracker;
 
     public static void ProcessItem(ItemInfo item)
     {
+        ItemNumberTracker++;
+        var firstTime = ItemNumberTracker > CurrentItemIndex;
+
         var name = item.ItemName;
         if (name.Contains("Region Unlock: "))
         {
@@ -22,19 +31,20 @@ public static class ItemHandler
         }
         else
         {
-            UpgradeItem(name);
+            UpgradeItem(name, firstTime);
         }
 
-        ItemNumberTracker++;
-        if (ItemNumberTracker <= CurrentItemIndex) return;
+        if (!firstTime) return;
+
         var sprite = GameLoader.GetSpriteFromItemFlag(item.Flags);
         if (sprite is "trap") sprite = "got_trap";
-        
-        PopupPatch.AddItemToQueue(new ApPopupData(GameLoader.Spritemap[sprite], "Item Recieved", item.ItemName, $"from: {item.Player.Name}", () =>
-        {
-            if (ItemNumberTracker <= CurrentItemIndex) return;
-            Client.SendToStorage("new_item_index", ItemNumberTracker);
-        }));
+
+        PopupPatch.AddItemToQueue(new ApPopupData(GameLoader.Spritemap[sprite], "Item Recieved", item.ItemName,
+            $"from: {item.Player.Name}", () =>
+            {
+                if (ItemNumberTracker <= CurrentItemIndex) return;
+                Client.SendToStorage("new_item_index", ItemNumberTracker);
+            }));
     }
 
     public static void RegionItem(string region)
@@ -42,6 +52,8 @@ public static class ItemHandler
         if (PlayerTrackerPatch.ZoneTypeToName.ContainsValue(region))
         {
             PlayerTrackerPatch.AllowedZones.Add(region);
+            if (region != "Dry Reef") return;
+            GameLoader.MakeTeleporterMarker(GameLoader.Reef);
         }
         else
         {
@@ -49,9 +61,11 @@ public static class ItemHandler
             {
                 case "The Lab":
                     AccessDoorPatch.LabDoor.CurrState = AccessDoor.State.OPEN;
+                    GameLoader.MakeTeleporterMarker(GameLoader.Lab);
                     break;
                 case "The Overgrowth":
                     AccessDoorPatch.OvergrowthDoor.CurrState = AccessDoor.State.OPEN;
+                    GameLoader.MakeTeleporterMarker(GameLoader.Overgrowth);
                     break;
                 case "The Grotto":
                     AccessDoorPatch.GrottoDoor.CurrState = AccessDoor.State.OPEN;
@@ -60,7 +74,7 @@ public static class ItemHandler
         }
     }
 
-    public static void UpgradeItem(string name)
+    public static void UpgradeItem(string name, bool firstReceive)
     {
         if (name.StartsWith("Progressive"))
         {
@@ -82,23 +96,35 @@ public static class ItemHandler
                 case "Progressive Max Health":
                     Model.maxHealth = 150 + 50 * ItemCache[name];
                     if ((double)Model.currHealth >= Model.maxHealth)
-                        break;
+                    {
+                        ItemCache[name]++;
+                        return;
+                    }
+
                     Model.healthBurstAfter =
                         Math.Min(Model.healthBurstAfter, PlayerModelPatch.WorldModel.worldTime + 300.0);
-                    break;
+                    ItemCache[name]++;
+                    return;
                 case "Progressive Max Ammo":
                     Model.maxAmmo = PlayerModel.DEFAULT_MAX_AMMO[ItemCache[name] + 1];
-                    break;
+                    ItemCache[name]++;
+                    return;
                 case "Progressive Run Efficiency":
                     Model.runEfficiency = ItemCache[name] == 0 ? 0.667f : .5f;
-                    break;
+                    ItemCache[name]++;
+                    return;
                 case "Progressive Max Energy":
                     Model.maxEnergy = 150 + 50 * ItemCache[name];
                     if ((double)Model.currEnergy >= Model.maxEnergy)
-                        break;
+                    {
+                        ItemCache[name]++;
+                        return;
+                    }
+
                     Model.energyRecoverAfter = Math.Min(Model.energyRecoverAfter,
                         PlayerModelPatch.WorldModel.worldTime + 300.0);
-                    break;
+                    ItemCache[name]++;
+                    return;
                 case "Progressive Jetpack":
                     switch (ItemCache[name])
                     {
@@ -111,14 +137,18 @@ public static class ItemHandler
                             break;
                     }
 
-                    break;
-                case "Progressive Treasure Cracker":
-                    break;
-                default:
+                    ItemCache[name]++;
                     return;
+                case "Progressive Treasure Cracker":
+                    ItemCache[name]++;
+                    break;
             }
 
-            ItemCache[name]++;
+            if (firstReceive && name.EndsWith("x Newbucks"))
+            {
+                int.TryParse(name.Substring(0, name.IndexOf('x')), out var amount);
+                PlayerStatePatch.PlayerState.AddCurrency(amount);
+            }
         }
         catch (Exception e)
         {
@@ -127,4 +157,53 @@ public static class ItemHandler
             Core.Log.Error(e);
         }
     }
+
+    public static Sprite ItemImage(AssetItem location)
+    {
+        // Core.Log.Msg($"Loading sprite: [{location.ItemName}], [{location.GameName}], [{location.ItemFlags}]");
+        var fallback = GameLoader.Spritemap[GameLoader.GetSpriteFromItemFlag(location.ItemFlags)];
+        if (!UseCustomAssets) return fallback;
+
+        var res = Core.ItemSpritesManager.TryGetCustomAsset(location, "Slime Rancher",
+            true, false, out var spriteData);
+
+        Core.Log.Msg(
+            $"Res: [{res}], [{spriteData is null}], [{spriteData?.FilePath}] | [{Core.ItemSpritesManager.HasSpritesForGame(location.GameName)}]");
+        if (spriteData is null) return fallback;
+        var file = spriteData.FilePath;
+
+        if (!ItemSprites.TryGetValue(file, out var sprite))
+        {
+            ItemSprites[file] = sprite = GameLoader.CreateSprite(file);
+        }
+
+        return sprite;
+    }
+}
+
+public class Logger : ILogger
+{
+    public void LogError(string message) => Core.Log?.Error(message);
+    public void LogError(string message, Exception e) => Core.Log?.Error(message, e);
+    public void LogWarning(string message) => Core.Log?.Warning(message);
+    public void LogInfo(string message) => Core.Log?.Msg(message);
+    public void LogMessage(string message) => Core.Log?.Msg(message);
+    public void LogDebug(string message) => Core.Log?.Msg(message);
+
+    public void LogDebugPatchIsRunning(string patchedType, string patchedMethod, string patchType, string patchMethod,
+        params object[] arguments)
+        => Core.Log?.Msg($"Debug Patch: [{patchedMethod}] -> [{patchMethod}]");
+
+    public void LogDebug(string message, params object[] arguments) => Core.Log?.Msg(message);
+    public void LogErrorException(string prefixMessage, Exception ex, params object[] arguments) => Core.Log?.Error(ex);
+
+    public void LogWarningException(string prefixMessage, Exception ex, params object[] arguments)
+        => Core.Log?.Error(ex);
+
+    public void LogErrorException(Exception ex, params object[] arguments) => Core.Log?.Error(ex);
+    public void LogWarningException(Exception ex, params object[] arguments) => Core.Log?.Error(ex);
+    public void LogErrorMessage(string message, params object[] arguments) => Core.Log?.Error(message);
+
+    public void LogErrorException(string patchType, string patchMethod, Exception ex, params object[] arguments)
+        => Core.Log?.Error(ex);
 }

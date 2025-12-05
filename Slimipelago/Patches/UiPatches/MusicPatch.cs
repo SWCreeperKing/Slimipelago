@@ -139,9 +139,7 @@ public static class MusicPatch
                  {
                      clips.Add(new SECTR_AudioCue.ClipData(await LoadClip(file)));
                      Core.Log.Msg($"Song Loaded: [{rawFile}]");
-                 })
-                .GetAwaiter()
-                .GetResult();
+                 }).GetAwaiter().GetResult();
         }
     }
 

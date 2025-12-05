@@ -1,18 +1,30 @@
 using Archipelago.MultiClient.Net.Enums;
-using MonomiPark.SlimeRancher.Regions;
+using MonomiPark.SlimeRancher.DataModel;
 using Slimipelago.Added;
+using Slimipelago.Patches.PlayerPatches;
 using Slimipelago.Patches.UiPatches;
 using Slimipzelago.Archipelago;
 using UnityEngine;
 using UnityEngine.Events;
+using static MonomiPark.SlimeRancher.Regions.RegionRegistry;
 using static Slimipelago.Patches.PlayerPatches.PlayerStatePatch;
 
 namespace Slimipelago;
 
 public static class GameLoader
 {
+    public static readonly Vector3 Home = new(91, 14.9f, -141);
+    public static readonly Vector3 Overgrowth = new(-44.8f, 17.1f, -158.3f);
+    public static readonly Vector3 Lab = new(194.7f, 14.8f, -273.1f);
+    public static readonly Vector3 Reef = new(-108.7f, .6f, 138.9f);
+    public static readonly Vector3 ReefBeach = new(-236.7f, 0.9f, -120.6f);
+    public static readonly Vector3 Quarry = new(258.7f, 4.5f, 189.1f);
+    public static readonly Vector3 Moss = new(-307.9f, .4f, 401.5f);
+    public static readonly Vector3 RuinsTransition = new(38.9f, 4.8f, 498.8f);
+    public static readonly Vector3 Ruins = new(91.9f, 22.8f, 715.8f);
+    public static readonly Vector3 Glass = new(-28.4f, 1033.4f, 437.1f);
+
     public static readonly Dictionary<string, ItemDisplayOnMap> MarkerDictionary = [];
-    public static readonly Vector3 Home = new(90.9811f, 14.7f, -140.8849f);
     public static Dictionary<string, Sprite> Spritemap = [];
 
     private static readonly Queue<MapMarkerData> MarkerQueue = [];
@@ -39,7 +51,7 @@ public static class GameLoader
 
     public static void LoadMapMarkers()
     {
-        MakeMarker("fast_travel", Home, () => TeleportPlayer(Home));
+        MakeTeleporterMarker(Home);
 
         while (MarkerQueue.Any())
         {
@@ -58,6 +70,15 @@ public static class GameLoader
             new Vector2(0.5f, 0.5f));
     }
 
+    public static Sprite CreateSprite(string file)
+    {
+        Texture2D texture = new(2, 2);
+        if (!texture.LoadImage(File.ReadAllBytes(file)))
+            throw new ArgumentException($"Error sprite not created: [{file}]");
+        return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height),
+            new Vector2(0.5f, 0.5f));
+    }
+
     public static string GetSpriteFromItemFlag(ItemFlags itemFlags)
     {
         if (itemFlags.HasFlag(ItemFlags.Advancement)) return "progressive";
@@ -66,10 +87,16 @@ public static class GameLoader
         return "normal";
     }
 
-    public static ItemDisplayOnMap MakeMarker(string id, Vector3 position, UnityAction onPressed = null,
-        RegionRegistry.RegionSetId region = RegionRegistry.RegionSetId.HOME)
+    public static ItemDisplayOnMap MakeTeleporterMarker(Vector3 pos)
     {
-        if (region is not (RegionRegistry.RegionSetId.HOME or RegionRegistry.RegionSetId.DESERT)) return null;
+        var region = pos.y > 500 ? RegionSetId.DESERT : RegionSetId.HOME;
+        return MakeMarker("fast_travel", pos, () => TeleportPlayer(pos, region), region: region);
+    }
+
+    public static ItemDisplayOnMap MakeMarker(string id, Vector3 position, UnityAction onPressed = null,
+        RegionSetId region = RegionSetId.HOME)
+    {
+        if (region is not (RegionSetId.HOME or RegionSetId.DESERT)) return null;
         if (PlayerMap is null)
         {
             MarkerQueue.Enqueue(new MapMarkerData(id, position, onPressed, region));
@@ -77,7 +104,7 @@ public static class GameLoader
         }
 
         var map = PlayerMap.mapUI;
-        var isRegionDesert = region == RegionRegistry.RegionSetId.DESERT;
+        var isRegionDesert = region == RegionSetId.DESERT;
 
         var cof = map.GetPrivateField<Vector4>($"{(isRegionDesert ? "desert" : "main")}Coefficients");
         var markerPosMin =
@@ -145,10 +172,10 @@ public readonly struct MapMarkerData(
     string text,
     Vector3 coords,
     UnityAction onClick,
-    RegionRegistry.RegionSetId region)
+    RegionSetId region)
 {
     public readonly string Text = text;
     public readonly Vector3 Coords = coords;
     public readonly UnityAction OnClick = onClick;
-    public readonly RegionRegistry.RegionSetId Region = region;
+    public readonly RegionSetId Region = region;
 }

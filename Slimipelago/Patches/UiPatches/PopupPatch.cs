@@ -15,9 +15,23 @@ public static class PopupPatch
     [CanBeNull] private static GameObject CurrentPopup;
 
     [HarmonyPatch(typeof(PopupDirector), "QueueForPopup"), HarmonyPrefix]
-    public static bool StopPopups() => false;
-    
-    private static GameObject CreateItemPopup(Sprite sprite, string itemDialogue, string item, string otherPlayer, Action onPopup)
+    public static bool StopPopups(PopupDirector.PopupCreator creator)
+    {
+        try
+        {
+            var director = creator.GetPrivateField<PediaDirector>("pediaDir");
+            director.Unlock(creator.GetPrivateField<PediaDirector.Id>("id"));
+        }
+        catch
+        {
+            // ignored
+        }
+
+        return false;
+    }
+
+    private static GameObject CreateItemPopup(Sprite sprite, string itemDialogue, string item, string otherPlayer,
+        Action onPopup)
     {
         var popup = Instantiate(SRSingleton<SceneContext>.Instance.GadgetDirector.gadgetPopupPrefab);
         Destroy(popup.GetComponent<BlueprintPopupUI>());
@@ -32,10 +46,7 @@ public static class PopupPatch
         return popup;
     }
 
-    public static void AddItemToQueue(ApPopupData itemData)
-    {
-        PopupDatas.Enqueue(itemData);
-    }
+    public static void AddItemToQueue(ApPopupData itemData) { PopupDatas.Enqueue(itemData); }
 
     public static void UpdateQueue()
     {
@@ -43,13 +54,14 @@ public static class PopupPatch
         {
             if (!PopupDatas.Any()) return;
             var newData = PopupDatas.Dequeue();
-            CurrentPopup = CreateItemPopup(newData.Sprite, newData.ItemDialogue, newData.Item, newData.OtherPlayer, newData.OnPopup);
+            CurrentPopup = CreateItemPopup(newData.Sprite, newData.ItemDialogue, newData.Item, newData.OtherPlayer,
+                newData.OnPopup);
             DeadTime = newData.Timer;
         }
-        
+
         if (CurrentPopup is null) return;
         DeadTime -= Time.deltaTime;
-        
+
         if (DeadTime >= 0) return;
         Destroy(CurrentPopup);
         CurrentPopup = null;
@@ -57,7 +69,13 @@ public static class PopupPatch
     }
 }
 
-public readonly struct ApPopupData(Sprite sprite, string itemDialogue, string item, string otherPlayer = "", Action onPopup = null, double timer = 3)
+public readonly struct ApPopupData(
+    Sprite sprite,
+    string itemDialogue,
+    string item,
+    string otherPlayer = "",
+    Action onPopup = null,
+    double timer = 3)
 {
     public readonly Sprite Sprite = sprite;
     public readonly string ItemDialogue = itemDialogue;

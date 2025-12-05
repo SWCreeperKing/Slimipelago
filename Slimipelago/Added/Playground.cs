@@ -1,3 +1,4 @@
+using MonomiPark.SlimeRancher.Regions;
 using Slimipelago.Patches.PlayerPatches;
 
 namespace Slimipelago.Added;
@@ -35,5 +36,5 @@ public static class Playground
         }
     }
 
-    public static void BanishPlayer() => PlayerStatePatch.TeleportPlayer(GameLoader.Home);
+    public static void BanishPlayer() => PlayerStatePatch.TeleportPlayer(GameLoader.Home, RegionRegistry.RegionSetId.HOME);
 }

@@ -47,24 +47,16 @@ public static class ApWorldShenanigans
                  .Replace("\r", "")
                  .Split('\n')
                  .Skip(1)
-                 .Select(s => s.Split(',').Skip(1).ToArray())
                  .Where(arr => arr.Length > 0)
+                 .Select(s => new CsvLine(s.Split(',').Skip(1).ToArray()))
                  .ToArray();
 
-        var rawInteractables = csv.Where(arr => arr[0] != "" && ApSlimeClient.Zones.Contains(arr[2]));
+        var rawInteractables = csv.Where(line => line.HasInteractable && line.IsValidZone).ToArray();
+        var interactables = rawInteractables.Where(line => !line.IsSecretStyle).ToArray();
+        var dlcInteractables = rawInteractables.Where(line => line.IsSecretStyle).ToArray();
 
-        var interactables = rawInteractables
-                           .Where(arr => arr[3] != "Secret Style")
-                           .Select(arr => arr.Take(7).ToArray())
-                           .ToArray();
-
-        var dlcInteractables = rawInteractables
-                              .Where(arr => arr[3] == "Secret Style")
-                              .Select(arr => arr.Take(7).ToArray())
-                              .ToArray();
-
-        var gates = csv.Where(arr => arr[8] != "").Select(arr => arr.Skip(8).Take(5).ToArray()).ToArray();
-        var gordos = csv.Where(arr => arr[14] != "").Select(arr => arr.Skip(14).ToArray()).ToArray();
+        var gates = csv.Where(line => line.HasGate).ToArray();
+        var gordos = csv.Where(line => line.HasGordo).ToArray();
 
         Dictionary<string, string[]> upgradeRules = new()
         {
@@ -85,10 +77,10 @@ public static class ApWorldShenanigans
 
         File.WriteAllText("Mods/SW_CreeperKing.Slimipelago/Data/Locations.txt",
             string.Join("\n",
-                interactables.Select(arr => $"{arr[0]},{arr[1]},{arr[6]}")
-                             .Concat(dlcInteractables.Select(arr => $"{arr[0]},{arr[1]},{arr[6]}"))
-                             .Concat(gates.Select(arr => $"{arr[0]},{arr[1]}"))
-                             .Concat(gordos.Select(arr => $"{arr[0]},{arr[1]},Favorite: {arr[7]}"))));
+                interactables.Select(line => line.GetInteractableText)
+                             .Concat(dlcInteractables.Select(line => line.GetInteractableText))
+                             .Concat(gates.Select(line => line.GetGateText))
+                             .Concat(gordos.Select(line => line.GetGordoText))));
 
         File.WriteAllText("output/Locations.py",
             $"""
@@ -103,11 +95,11 @@ public static class ApWorldShenanigans
              ]
 
              interactables = [
-                 {string.Join(",\n\t", interactables.Select(arr => $"[\"{arr[1]}\", \"{arr[2]}\"]"))}
+                 {string.Join(",\n\t", interactables.Select(line => $"[\"{line.InteractableName}\", \"{line.InteractableArea}\"]"))}
              ]
 
              dlc_interactables = [
-                 {string.Join(",\n\t", dlcInteractables.Select(arr => $"[\"{arr[1]}\", \"{arr[2]}\"]"))}
+                 {string.Join(",\n\t", dlcInteractables.Select(line => $"[\"{line.InteractableName}\", \"{line.InteractableArea}\"]"))}
              ]
 
              location_dict = [
@@ -123,7 +115,7 @@ public static class ApWorldShenanigans
 
               def get_rule_map(player, world):
                   return {
-                      {{string.Join(",\n\t\t", interactables.Concat(dlcInteractables).Select(arr => GenRule(arr[1], arr[3], arr[4], arr[5].Split(' ')[0])).Where(s => s != ""))}},
+                      {{string.Join(",\n\t\t", interactables.Concat(dlcInteractables).Select(line => GenRule(line.InteractableName, line.InteractableCrackerLevel, line.InteractableJetpackRequirement, line.InteractableMinJetpackEnergy.Split(' ')[0])).Where(s => s != ""))}},
                       {{string.Join(",\n\t\t", upgradeRules.Where(kv => !kv.Value.Contains("7z")).Select(kv => $"\"{kv.Key}\": lambda state: {string.Join(" and ", kv.Value.Select(GenItemRule))}"))}},
                       {{string.Join(",\n\t\t", upgradeRules.Where(kv => kv.Value.Contains("7z")).Select(kv => $"\"{kv.Key}\": lambda state: has_region(state, player, \"Indigo Quarry\")"))}},
                   }
@@ -174,12 +166,44 @@ public static class ApWorldShenanigans
 
         string GenItemRule(string rule)
         {
-            if (rule.StartsWith("Region "))
-            {
-                return $"has_region(state, player, \"{rule.Substring(7)}\")";
-            }
-
-            return "";
+            return rule.StartsWith("Region ") ? $"has_region(state, player, \"{rule.Substring(7)}\")" : "";
         }
     }
+}
+
+public readonly struct CsvLine(string[] line)
+{
+    public readonly string InteractableId = line[0];
+    public readonly string InteractableName = line[1];
+    public readonly string InteractableArea = line[2];
+    public readonly string InteractableCrackerLevel = line[3];
+    public readonly string InteractableJetpackRequirement = line[4];
+    public readonly string InteractableMinJetpackEnergy = line[5];
+    public readonly string InteractableSummary = line[6];
+
+    public readonly string GateId = line[8];
+    public readonly string GateName = line[9];
+    public readonly string GateFromArea = line[10];
+    public readonly string GateToArea = line[11];
+    public readonly string GateSkippableWithJetpack = line[12];
+
+    public readonly string GordoId = line[14];
+    public readonly string GordoName = line[15];
+    public readonly string GordoArea = line[16];
+    public readonly string GordoContents = line[17];
+    public readonly string GordoTeleporterLocation = line[18];
+    public readonly string GordoJetpackRequirement = line[19];
+    public readonly string GordoNormalFoodRequirement = line[20];
+    public readonly string GordoFavoriteFood = line[21];
+
+    public bool HasInteractable => InteractableId != "";
+    public bool HasGate => GateId != "";
+    public bool HasGordo => GordoId != "";
+
+    public bool IsValidZone => ApSlimeClient.Zones.Contains(InteractableArea);
+    public bool IsSecretStyle => InteractableCrackerLevel != "Secret Style";
+
+    public string GetInteractableText => $"{InteractableId},{InteractableName},{InteractableSummary}";
+    public string GetGateText => $"{GateId},{GateName}";
+    public string GetGordoText => $"{GordoId},{GordoName},Favorite: {GordoFavoriteFood}";
 }

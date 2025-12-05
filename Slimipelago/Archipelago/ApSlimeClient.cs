@@ -6,6 +6,7 @@ using Archipelago.MultiClient.Net.Models;
 using CreepyUtil.Archipelago;
 using CreepyUtil.Archipelago.ApClient;
 using JetBrains.Annotations;
+using KaitoKid.ArchipelagoUtilities.AssetDownloader.ItemSprites;
 using Slimipelago;
 using Slimipelago.Archipelago;
 using Slimipelago.Patches.Interactables;
@@ -33,6 +34,7 @@ public static class ApSlimeClient
     public static bool TrapLinkRandom = false;
     public static bool MusicRando = false;
     public static bool MusicRandoRandomizeOnce = false;
+    public static bool UseCustomAssets = true;
 
     public static long CurrentItemIndex;
 
@@ -71,6 +73,7 @@ public static class ApSlimeClient
                 TrapLinkRandom = StrBool(boolArr[3]);
                 MusicRando = StrBool(boolArr[4]);
                 MusicRandoRandomizeOnce = StrBool(boolArr[5]);
+                if (boolArr.Length > 6) UseCustomAssets = StrBool(boolArr[6]);
             }
         }
 
@@ -92,7 +95,7 @@ public static class ApSlimeClient
                 return;
             }
 
-            using var sha = SHA1.Create(); 
+            using var sha = SHA1.Create();
             RandoSeeds[seed!] = BitConverter.ToInt32(sha.ComputeHash(Encoding.UTF8.GetBytes(seed)), 0);
         };
 
@@ -131,26 +134,34 @@ public static class ApSlimeClient
 
     public static void SaveFile()
         => File.WriteAllText("ApConnection.txt",
-            $"{AddressPort}\n{Password}\n{SlotName}\n{BoolStr(DeathLink)}{BoolStr(DeathLinkTeleport)}{BoolStr(TrapLink)}{BoolStr(TrapLinkRandom)}{BoolStr(MusicRando)}{BoolStr(MusicRandoRandomizeOnce)}");
+            $"{AddressPort}\n{Password}\n{SlotName}\n{BoolStr(DeathLink)}{BoolStr(DeathLinkTeleport)}{BoolStr(TrapLink)}{BoolStr(TrapLinkRandom)}{BoolStr(MusicRando)}{BoolStr(MusicRandoRandomizeOnce)}{BoolStr(UseCustomAssets)}");
 
     private static char BoolStr(bool b) => b ? '1' : '0';
     private static bool StrBool(char c) => c == '1';
 
     public static void WorldOpened()
     {
-        Core.Log.Msg("World Opened");
-        ItemHandler.ItemNumberTracker = 0;
-        PlayerTrackerPatch.AllowedZones.Clear();
-        AccessDoorPatch.LabDoor.CurrState = AccessDoor.State.CLOSED;
-        AccessDoorPatch.OvergrowthDoor.CurrState = AccessDoor.State.CLOSED;
-        AccessDoorPatch.GrottoDoor.CurrState = AccessDoor.State.CLOSED;
-        AccessDoorPatch.DocksDoor.CurrState = AccessDoor.State.OPEN;
-
-        ItemCache.Clear();
-
-        foreach (var item in Items)
+        try
         {
-            ItemHandler.ProcessItem(item);
+            PersonalUpgradePatch.ScoutedUpgrades = [];
+            Core.Log.Msg("World Opened");
+            ItemHandler.ItemNumberTracker = 0;
+            PlayerTrackerPatch.AllowedZones.Clear();
+            AccessDoorPatch.LabDoor.CurrState = AccessDoor.State.CLOSED;
+            AccessDoorPatch.OvergrowthDoor.CurrState = AccessDoor.State.CLOSED;
+            AccessDoorPatch.GrottoDoor.CurrState = AccessDoor.State.CLOSED;
+            AccessDoorPatch.DocksDoor.CurrState = AccessDoor.State.OPEN;
+
+            ItemCache.Clear();
+
+            foreach (var item in Items)
+            {
+                ItemHandler.ProcessItem(item);
+            }
+        }
+        catch (Exception e)
+        {
+            Core.Log.Error(e);
         }
     }
 
@@ -166,8 +177,8 @@ public static class ApSlimeClient
             }
             else
             {
-                PopupPatch.AddItemToQueue(new ApPopupData(
-                    GameLoader.Spritemap[GameLoader.GetSpriteFromItemFlag(item.Flags)], locationType,
+                var loc = new AssetItem(item.ItemGame, item.ItemName, item.Flags);
+                PopupPatch.AddItemToQueue(new ApPopupData(ItemHandler.ItemImage(loc), locationType,
                     $"sent: [{item.ItemName}]", $"to: {item.Player.Name}"));
             }
         }
@@ -177,4 +188,12 @@ public static class ApSlimeClient
         if (Client.MissingLocations.Any(loc => loc.ToLower().Contains("note"))) return;
         Client.Goal();
     }
+}
+
+public class AssetItem(string game, string item, ItemFlags flags) : IAssetLocation
+{
+    public int GetSeed() => 0;
+    public string GameName { get; } = game;
+    public string ItemName { get; } = item;
+    public ItemFlags ItemFlags { get; } = flags;
 }

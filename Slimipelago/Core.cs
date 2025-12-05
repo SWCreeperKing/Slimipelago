@@ -1,9 +1,14 @@
 ﻿using System.Reflection;
+using KaitoKid.ArchipelagoUtilities.AssetDownloader.ItemSprites;
 using MelonLoader;
+using MonomiPark.SlimeRancher.DataModel;
 using Slimipelago.Archipelago;
+using Slimipelago.Patches.PlayerPatches;
 using Slimipelago.Patches.UiPatches;
 using Slimipzelago.Archipelago;
+using UnityEngine;
 using static Slimipelago.GameLoader;
+using Logger = Slimipelago.Archipelago.Logger;
 
 [assembly: MelonInfo(typeof(Slimipelago.Core), "Slimipelago", "1.0.0", "SW_CreeperKing", null)]
 [assembly: MelonGame("Monomi Park", "Slime Rancher")]
@@ -13,10 +18,15 @@ namespace Slimipelago;
 public class Core : MelonMod
 {
     public static MelonLogger.Instance Log;
+    
+    private static Logger Logger;
+    public static ArchipelagoItemSprites ItemSpritesManager;
 
     public override void OnInitializeMelon()
     {
         Log = LoggerInstance;
+        Logger = new Logger();
+        // ItemSpritesManager = new ArchipelagoItemSprites(Logger);
         
         ApWorldShenanigans.RunShenanigans();
         var locationFileData = File
@@ -61,9 +71,9 @@ public class Core : MelonMod
             Log.Msg($"Loaded: [{patch.Name}]");
         }
 
-        Log.Msg("Loading Songs");
+        Log.Msg("Loading Songs (in background)");
         
-        MusicPatch.LoadSongs();
+        Task.Run(MusicPatch.LoadSongs);
 
         Log.Msg("Initialized.");
     }
