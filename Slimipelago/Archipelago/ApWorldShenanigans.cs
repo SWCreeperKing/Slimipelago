@@ -1,5 +1,3 @@
-using Slimipzelago.Archipelago;
-
 namespace Slimipelago.Archipelago;
 
 public static class ApWorldShenanigans
@@ -168,7 +166,7 @@ public readonly struct CsvLine(string[] line)
     public bool HasUpgrade => UpgradeName != "";
 
     public bool IsValidZone => ApSlimeClient.Zones.Contains(InteractableArea);
-    public bool IsSecretStyle => InteractableCrackerLevel != "Secret Style";
+    public bool IsSecretStyle => InteractableCrackerLevel == "Secret Style";
 
     public string GetInteractableText => $"{InteractableId},{InteractableName},{InteractableSummary}";
     public string GetGateText => $"{GateId},{GateName}";

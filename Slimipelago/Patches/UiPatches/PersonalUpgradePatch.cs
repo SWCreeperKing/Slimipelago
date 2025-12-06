@@ -2,7 +2,6 @@ using Archipelago.MultiClient.Net.Models;
 using HarmonyLib;
 using MonomiPark.SlimeRancher.DataModel;
 using Slimipelago.Archipelago;
-using Slimipzelago.Archipelago;
 
 namespace Slimipelago.Patches.UiPatches;
 
@@ -10,7 +9,7 @@ namespace Slimipelago.Patches.UiPatches;
 public static class PersonalUpgradePatch
 {
     public static Dictionary<string, string> PurchaseNameKeyToLocation = [];
-    public static Dictionary<string, ScoutedItemInfo> ScoutedUpgrades;
+    public static Dictionary<string, ScoutedItemInfo> ScoutedUpgrades = [];
 
     [HarmonyPatch(typeof(PlayerModel), "ApplyUpgrade"), HarmonyPrefix]
     public static bool ApplyUpgrade(PlayerState.Upgrade upgrade)

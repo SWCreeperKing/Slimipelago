@@ -1,9 +1,9 @@
 using Archipelago.MultiClient.Net.Enums;
 using MonomiPark.SlimeRancher.DataModel;
 using Slimipelago.Added;
+using Slimipelago.Archipelago;
 using Slimipelago.Patches.PlayerPatches;
 using Slimipelago.Patches.UiPatches;
-using Slimipzelago.Archipelago;
 using UnityEngine;
 using UnityEngine.Events;
 using static MonomiPark.SlimeRancher.Regions.RegionRegistry;

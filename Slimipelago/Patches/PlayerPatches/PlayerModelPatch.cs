@@ -27,5 +27,10 @@ public static class PlayerModelPatch
     {
         Model ??= __instance;
         WorldModel = worldModel;
+        MainMenuPatch.OnGamePotentialExit += () =>
+        {
+            WorldModel = null;
+            Model = null;
+        };
     }
 }

@@ -67,6 +67,14 @@ public static class PopupPatch
         CurrentPopup = null;
         DeadTime = 0;
     }
+
+    public static void Reset()
+    {
+        PopupDatas.Clear();
+        Destroy(CurrentPopup);
+        CurrentPopup = null;
+        DeadTime = 0;
+    }
 }
 
 public readonly struct ApPopupData(

@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using static Slimipelago.Helper;
-using static Slimipzelago.Archipelago.ApSlimeClient;
+using static Slimipelago.Archipelago.ApSlimeClient;
 
 namespace Slimipelago.Patches.UiPatches;
 
@@ -78,16 +78,21 @@ public static class OptionsPatch
                 else _ = Client.Tags + ArchipelagoTag.DeathLink;
             })
            .interactable = false;
-        CreateCheckbox(__instance.modTogglePrefab, g42, TrapLinkRandom, "Give random traps\nfor unknown traps", b => TrapLinkRandom = b)
+        CreateCheckbox(__instance.modTogglePrefab, g42, TrapLinkRandom, "Give random traps\nfor unknown traps",
+                b => TrapLinkRandom = b)
            .interactable = false;
 
         var g5 = CreateHorizontalGroup(panel).gameObject;
         CreateCheckbox(__instance.modTogglePrefab, g5, MusicRando, "Music Rando\n ", b => MusicRando = b);
         CreateCheckbox(__instance.modTogglePrefab, g5, MusicRandoRandomizeOnce, "Music Rando:\nRandomize Once",
             b => MusicRandoRandomizeOnce = b);
-        
+
+        // UseCustomAssets = false;
         var g6 = CreateHorizontalGroup(panel).gameObject;
-        CreateCheckbox(__instance.modTogglePrefab, g6, UseCustomAssets, "Use Archipelago Utilities\n Custom Assets", b => UseCustomAssets = b);
+        CreateCheckbox(__instance.modTogglePrefab, g6, UseCustomAssets, "Use Archipelago Utilities\n Custom Assets",
+                b => UseCustomAssets = b)
+           // .interactable = false
+            ;
 
         var connectButton = CreateButton(Client.IsConnected ? "Disconnect" : "Connect", g6,
             null, out var buttonText);

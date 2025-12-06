@@ -1,5 +1,5 @@
 using HarmonyLib;
-using Slimipzelago.Archipelago;
+using Slimipelago.Archipelago;
 
 namespace Slimipelago.Patches.Interactables;
 

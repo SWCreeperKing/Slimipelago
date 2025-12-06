@@ -1,6 +1,6 @@
 using HarmonyLib;
 using MonomiPark.SlimeRancher.Regions;
-using Slimipzelago.Archipelago;
+using Slimipelago.Archipelago;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;

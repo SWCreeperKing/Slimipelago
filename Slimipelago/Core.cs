@@ -3,10 +3,10 @@ using KaitoKid.ArchipelagoUtilities.AssetDownloader.ItemSprites;
 using MelonLoader;
 using MonomiPark.SlimeRancher.DataModel;
 using MultiplayerWithBindingsExample;
+using Newtonsoft.Json;
 using Slimipelago.Archipelago;
 using Slimipelago.Patches.PlayerPatches;
 using Slimipelago.Patches.UiPatches;
-using Slimipzelago.Archipelago;
 using UnityEngine;
 using static Slimipelago.GameLoader;
 using Logger = Slimipelago.Archipelago.Logger;
@@ -27,7 +27,7 @@ public class Core : MelonMod
     {
         Log = LoggerInstance;
         Logger = new Logger();
-        // ItemSpritesManager = new ArchipelagoItemSprites(Logger);
+        ItemSpritesManager = new ArchipelagoItemSprites(Logger, JsonConvert.DeserializeObject<ItemSpriteAliases>);
 
         ApWorldShenanigans.RunShenanigans();
         var locationFileData = File

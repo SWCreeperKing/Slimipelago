@@ -1,5 +1,5 @@
 using MonomiPark.SlimeRancher.Regions;
-using Slimipzelago.Archipelago;
+using Slimipelago.Archipelago;
 using UnityEngine;
 
 namespace Slimipelago.Patches.Interactables;

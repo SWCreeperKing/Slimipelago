@@ -32,6 +32,12 @@
         <Reference Include="InControl.Examples">
             <HintPath>D:\Programs\steam\steamapps\common\Slime Rancher\SlimeRancher_Data\Managed\InControl.Examples.dll</HintPath>
         </Reference>
+        <Reference Include="KaitoKid.ArchipelagoUtilities.AssetDownloader">
+          <HintPath>Lib\KaitoKid.ArchipelagoUtilities.AssetDownloader.dll</HintPath>
+        </Reference>
+        <Reference Include="KaitoKid.Utilities.Interfaces">
+          <HintPath>Lib\KaitoKid.Utilities.Interfaces.dll</HintPath>
+        </Reference>
         <Reference Include="Logger">
             <HintPath>D:\Programs\steam\steamapps\common\Slime Rancher\SlimeRancher_Data\Managed\Logger.dll</HintPath>
         </Reference>
@@ -297,10 +303,6 @@
 
     <ItemGroup>
         <Folder Include="Lib\"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <PackageReference Include="KaitoKid.ArchipelagoUtilities.AssetDownloader" Version="3.1.2"/>
     </ItemGroup>
 
     <Target Name="CopyCustomContent" AfterTargets="AfterBuild">

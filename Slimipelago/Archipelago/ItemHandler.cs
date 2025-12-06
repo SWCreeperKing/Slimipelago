@@ -6,10 +6,9 @@ using Newtonsoft.Json;
 using Slimipelago.Patches.Interactables;
 using Slimipelago.Patches.PlayerPatches;
 using Slimipelago.Patches.UiPatches;
-using Slimipzelago.Archipelago;
 using UnityEngine;
 using static Slimipelago.Patches.PlayerPatches.PlayerModelPatch;
-using static Slimipzelago.Archipelago.ApSlimeClient;
+using static Slimipelago.Archipelago.ApSlimeClient;
 using ILogger = KaitoKid.Utilities.Interfaces.ILogger;
 
 namespace Slimipelago.Archipelago;
@@ -25,6 +24,7 @@ public static class ItemHandler
         var firstTime = ItemNumberTracker > CurrentItemIndex;
 
         var name = item.ItemName;
+        // Core.Log.Msg($"Handling Item: [{item.ItemName}]");
         if (name.Contains("Region Unlock: "))
         {
             RegionItem(name.Substring(15));
@@ -160,24 +160,28 @@ public static class ItemHandler
 
     public static Sprite ItemImage(AssetItem location)
     {
-        // Core.Log.Msg($"Loading sprite: [{location.ItemName}], [{location.GameName}], [{location.ItemFlags}]");
         var fallback = GameLoader.Spritemap[GameLoader.GetSpriteFromItemFlag(location.ItemFlags)];
-        if (!UseCustomAssets) return fallback;
-
-        var res = Core.ItemSpritesManager.TryGetCustomAsset(location, "Slime Rancher",
-            true, false, out var spriteData);
-
-        Core.Log.Msg(
-            $"Res: [{res}], [{spriteData is null}], [{spriteData?.FilePath}] | [{Core.ItemSpritesManager.HasSpritesForGame(location.GameName)}]");
-        if (spriteData is null) return fallback;
-        var file = spriteData.FilePath;
-
-        if (!ItemSprites.TryGetValue(file, out var sprite))
+        try
         {
+            if (!UseCustomAssets) return fallback;
+
+            var res = Core.ItemSpritesManager.TryGetCustomAsset(location, "Slime Rancher", true, true, out var spriteData);
+
+            if (!res || spriteData is null) return fallback;
+            var file = spriteData.FilePath;
+
+            if (ItemSprites.TryGetValue(file, out var sprite)) return sprite;
+            
             ItemSprites[file] = sprite = GameLoader.CreateSprite(file);
+            sprite.texture.filterMode = FilterMode.Point;
+            return sprite;
+        }
+        catch (Exception e)
+        {
+            Core.Log.Error(e);
         }
 
-        return sprite;
+        return fallback;
     }
 }
 

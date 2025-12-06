@@ -7,13 +7,11 @@ using CreepyUtil.Archipelago;
 using CreepyUtil.Archipelago.ApClient;
 using JetBrains.Annotations;
 using KaitoKid.ArchipelagoUtilities.AssetDownloader.ItemSprites;
-using Slimipelago;
-using Slimipelago.Archipelago;
 using Slimipelago.Patches.Interactables;
 using Slimipelago.Patches.PlayerPatches;
 using Slimipelago.Patches.UiPatches;
 
-namespace Slimipzelago.Archipelago;
+namespace Slimipelago.Archipelago;
 
 public static class ApSlimeClient
 {
@@ -117,20 +115,27 @@ public static class ApSlimeClient
 
     public static void Update()
     {
-        if (Client is null) return;
-        Client.UpdateConnection();
-
-        if (!Client.IsConnected) return;
-        ItemsWaiting.AddRange(Client.GetOutstandingItems()!);
-
-        if (!PlayerStatePatch.FirstUpdate) return;
-        foreach (var item in ItemsWaiting)
+        try
         {
-            ItemHandler.ProcessItem(item);
-        }
+            if (Client is null) return;
+            Client.UpdateConnection();
 
-        Items.AddRange(ItemsWaiting);
-        ItemsWaiting.Clear();
+            if (!Client.IsConnected) return;
+            ItemsWaiting.AddRange(Client.GetOutstandingItems()!);
+
+            if (!PlayerStatePatch.FirstUpdate) return;
+            foreach (var item in ItemsWaiting)
+            {
+                ItemHandler.ProcessItem(item);
+            }
+
+            Items.AddRange(ItemsWaiting);
+            ItemsWaiting.Clear();
+        }
+        catch (Exception e)
+        {
+            Core.Log.Error(e);
+        }
     }
 
     public static void SaveFile()
@@ -144,8 +149,8 @@ public static class ApSlimeClient
     {
         try
         {
-            PersonalUpgradePatch.ScoutedUpgrades = [];
             Core.Log.Msg("World Opened");
+            PersonalUpgradePatch.ScoutedUpgrades.Clear();
             ItemHandler.ItemNumberTracker = 0;
             PlayerTrackerPatch.AllowedZones.Clear();
             AccessDoorPatch.LabDoor.CurrState = AccessDoor.State.CLOSED;
@@ -153,8 +158,9 @@ public static class ApSlimeClient
             AccessDoorPatch.GrottoDoor.CurrState = AccessDoor.State.CLOSED;
             AccessDoorPatch.DocksDoor.CurrState = AccessDoor.State.OPEN;
 
+            Items.Clear();
             ItemCache.Clear();
-
+            
             foreach (var item in Items)
             {
                 ItemHandler.ProcessItem(item);
@@ -188,6 +194,26 @@ public static class ApSlimeClient
 
         if (Client.MissingLocations.Any(loc => loc.ToLower().Contains("note"))) return;
         Client.Goal();
+    }
+
+    public static void DisconnectAndReset()
+    {
+        try
+        {
+            if (Client.IsConnected) Client.TryDisconnect();
+            GameUUID = null;
+            CurrentItemIndex = 0;
+            JetpackPatch.EnableJetpack = false;
+            
+            ItemsWaiting.Clear();
+            AccessDoorPatch.TeleportMarkers.Clear();
+            PersonalUpgradePatch.PurchaseNameKeyToLocation.Clear();
+            PopupPatch.Reset();
+        }
+        catch (Exception e)
+        {
+            Core.Log.Error(e);
+        }
     }
 }
 

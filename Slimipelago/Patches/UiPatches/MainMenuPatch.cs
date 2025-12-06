@@ -1,6 +1,6 @@
 using HarmonyLib;
 using JetBrains.Annotations;
-using Slimipzelago.Archipelago;
+using Slimipelago.Archipelago;
 using TMPro;
 using UnityEngine;
 
@@ -12,7 +12,7 @@ public static class MainMenuPatch
     public static GameObject ContinueButton;
     public static GameObject LoadButton;
     public static GameObject NewGameButton;
-    [CanBeNull] public static event Action OnGamePotentialExit; 
+    [CanBeNull] public static event Action OnGamePotentialExit;
 
     [HarmonyPatch(typeof(MainMenuUI), "Start"), HarmonyPostfix]
     public static void MenuPatch(MainMenuUI __instance)
@@ -20,6 +20,15 @@ public static class MainMenuPatch
         OnGamePotentialExit?.Invoke();
         OnGamePotentialExit = null;
         
+        try
+        {
+            ApSlimeClient.DisconnectAndReset();
+        }
+        catch (Exception e)
+        {
+            Core.Log.Error(e);
+        }
+
         var container = __instance.GetChild(1);
         ContinueButton = container.GetChild(0);
         LoadButton = container.GetChild(1);

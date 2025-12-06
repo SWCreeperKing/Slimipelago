@@ -1,9 +1,9 @@
 using HarmonyLib;
 using JetBrains.Annotations;
 using MonomiPark.SlimeRancher.Regions;
+using Slimipelago.Archipelago;
 using Slimipelago.Patches.Interactables;
 using Slimipelago.Patches.UiPatches;
-using Slimipzelago.Archipelago;
 using UnityEngine;
 using UnityEngine.UI;
 
