@@ -16,7 +16,6 @@ public static class PodPatch
         if (!ApSlimeClient.LocationDictionary.TryGetValue(__instance.transform.position.HashPos(), out var itemName))
             return;
         if (!ApSlimeClient.Client.MissingLocations.Contains(itemName) || __instance.CurrState is TreasurePod.State.LOCKED) return;
-        __instance.CurrState = TreasurePod.State.LOCKED;
     }
 
     public static int GetType(TreasurePod pod)
@@ -29,7 +28,11 @@ public static class PodPatch
     }
 
     [HarmonyPatch(typeof(TreasurePod), "Activate"), HarmonyPrefix]
-    public static void OpenPod(TreasurePod __instance) => __instance.InteractableInteracted("Pod");
+    public static void OpenPod(TreasurePod __instance)
+    {
+        Core.Log.Msg($"{__instance.transform.position.HashPos()}: {__instance.blueprint}");
+        __instance.InteractableInteracted("Pod");
+    }
 
     [HarmonyPatch(typeof(TreasurePod), "HasKey"), HarmonyPrefix]
     public static bool HasKey(TreasurePod __instance, ref bool __result)

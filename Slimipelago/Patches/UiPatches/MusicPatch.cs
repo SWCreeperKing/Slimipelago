@@ -1,9 +1,10 @@
+using System.Reflection;
 using HarmonyLib;
 using MonomiPark.SlimeRancher.Regions;
-using Slimipelago.Archipelago;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
+using static Slimipelago.Archipelago.ApSlimeClient;
 using Random = System.Random;
 
 namespace Slimipelago.Patches.UiPatches;
@@ -28,20 +29,10 @@ public static class MusicPatch
         [ZoneDirector.Zone.RUINS_TRANSITION] = "Ruins Transition",
     };
 
-    [HarmonyPatch(typeof(MusicDirector), "GetRegionMusic"), HarmonyPostfix]
-    private static void GetRegionMusic(MusicDirector __instance, RegionMember member, ref MusicDirector.Music __result)
-    {
-        if (!ApSlimeClient.MusicRando) return;
-        if (ApSlimeClient.MusicRandoRandomizeOnce) return;
-        var source = ZoneDirector.Zones(member);
-        if (__result is not MusicDirector.Music.Zone.Default zoneSong || !source.Any()) return;
-        SetDayAndNight(zoneSong, SongZones[source.Max()]);
-    }
-
     [HarmonyPatch(typeof(MusicDirector), "OnSceneLoaded"), HarmonyPostfix]
     private static void OnSceneLoaded(MusicDirector __instance, Scene scene, LoadSceneMode mode)
     {
-        if (!ApSlimeClient.MusicRando) return;
+        if (!MusicRando) return;
         VanillaSongs = new Dictionary<string, SECTR_AudioCue.ClipData[]>
         {
             ["Ranch"] =
@@ -70,11 +61,16 @@ public static class MusicPatch
                 __instance.ruinsTransMusic.background.AudioClips[0],
                 __instance.ruinsTransMusic.nightBackground.AudioClips[0]
             ],
+            ["Tarr"] =
+            [
+                __instance.tarrMusic.AudioClips[0]
+            ]
         };
 
-        if (!ApSlimeClient.MusicRandoRandomizeOnce) return;
-        var seed = ApSlimeClient.Client.Seed;
-        Random = seed is null ? new Random() : new Random(ApSlimeClient.RandoSeeds[seed]);
+        if (!MusicRandoRandomizeOnce) return;
+        var seed = Client.Seed;
+        Random = seed is null ? new Random() : new Random(RandoSeeds[seed]);
+        SetDayAndNight(__instance.ranchMusic, "Ranch");
         SetDayAndNight(__instance.reefMusic, "Reef");
         SetDayAndNight(__instance.quarryMusic, "Quarry");
         SetDayAndNight(__instance.mossMusic, "Moss");
@@ -82,6 +78,49 @@ public static class MusicPatch
         SetDayAndNight(__instance.seaMusic, "Sea");
         SetDayAndNight(__instance.ruinsMusic, "Ruins");
         SetDayAndNight(__instance.ruinsTransMusic, "Ruins Transition");
+        __instance.tarrMusic.AudioClips = GetRandomSong(Songs["Tarr"][0]);
+    }
+
+    [HarmonyPatch(typeof(MusicDirector), "GetRegionMusic"), HarmonyPostfix]
+    private static void GetRegionMusic(MusicDirector __instance, RegionMember member, ref MusicDirector.Music __result)
+    {
+        try
+        {
+            if (!MusicRando) return;
+            if (MusicRandoRandomizeOnce) return;
+            var source = ZoneDirector.Zones(member);
+            if (__result is not MusicDirector.Music.Zone.Default zoneSong || !source.Any()) return;
+            SetDayAndNight(zoneSong, SongZones[source.Max()]);
+        }
+        catch (Exception e)
+        {
+            Core.Log.Error(e);
+        }
+    }
+
+    [HarmonyPatch(typeof(MusicDirector), "SetTarrMode"), HarmonyPrefix]
+    public static bool SetTarrMode(MusicDirector __instance, bool enabled)
+    {
+        if (MusicRandoRandomizeOnce) return true;
+        try
+        {
+            __instance.tarrMusic.AudioClips = GetRandomSong(Songs["Tarr"][0].Concat(VanillaSongs["Tarr"]));
+            var method = __instance.GetType()
+                                   .GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
+                                   .FirstOrDefault(mi =>
+                                    {
+                                        var param = mi.GetParameters();
+                                        return mi.Name == "Enqueue" && param.Length == 3 &&
+                                               param[2].ParameterType == typeof(bool);
+                                    });
+            method!.Invoke(__instance, [__instance.tarrMusic, MusicDirector.Priority.TARR, enabled]);
+        }
+        catch (Exception e)
+        {
+            Core.Log.Error(e);
+        }
+
+        return false;
     }
 
     public static void SetDayAndNight(MusicDirector.Music.Zone.Default music, string area)
@@ -92,13 +131,21 @@ public static class MusicPatch
 
     public static List<SECTR_AudioCue.ClipData> GetRandomSong(string region, bool isDay)
     {
-        var possibleSongs = Songs[region][isDay ? 0 : 1]
+        var time = isDay ? 0 : 1;
+        var possibleSongs = Songs[region][time]
                            .Concat(Songs[region][2])
-                           .Concat(Songs["Any"][isDay ? 0 : 1])
+                           .Concat(Songs["Any"][time])
                            .Concat(Songs["Any"][2])
-                           .Concat(VanillaSongs.Select(songs => songs.Value[isDay ? 0 : 1]))
+                           .Concat(VanillaSongs.Where(songs => songs.Key != "Tarr")
+                                               .Select(songs => songs.Value[time]))
                            .ToArray();
-        return [possibleSongs[Random.Next(possibleSongs.Length)]];
+        return GetRandomSong(possibleSongs);
+    }
+
+    public static List<SECTR_AudioCue.ClipData> GetRandomSong(IEnumerable<SECTR_AudioCue.ClipData> list)
+    {
+        var clipDatas = list as SECTR_AudioCue.ClipData[] ?? list.ToArray();
+        return [clipDatas[Random.Next(clipDatas.Length)]];
     }
 
     public static void LoadSongs()
@@ -113,16 +160,30 @@ public static class MusicPatch
             CheckDirectory($"MusicRando/{folder}/Both");
         }
 
+        CheckDirectory("MusicRando/Tarr");
+
         foreach (var folder in folders)
         {
-            List<SECTR_AudioCue.ClipData> day = [];
-            List<SECTR_AudioCue.ClipData> night = [];
-            List<SECTR_AudioCue.ClipData> both = [];
-            LoadSongsInDirectory(day, $"MusicRando/{folder}/Day");
-            LoadSongsInDirectory(night, $"MusicRando/{folder}/Night");
-            LoadSongsInDirectory(both, $"MusicRando/{folder}/Both");
-            Songs[folder] = [day, night, both];
+            try
+            {
+                List<SECTR_AudioCue.ClipData> day = [];
+                List<SECTR_AudioCue.ClipData> night = [];
+                List<SECTR_AudioCue.ClipData> both = [];
+                LoadSongsInDirectory(day, $"MusicRando/{folder}/Day");
+                LoadSongsInDirectory(night, $"MusicRando/{folder}/Night");
+                LoadSongsInDirectory(both, $"MusicRando/{folder}/Both");
+                Songs[folder] = [day, night, both];
+            }
+            catch (Exception e)
+            {
+                Core.Log.Error($"Failed Loading: [{folder}]");
+                Core.Log.Error(e);
+            }
         }
+
+        List<SECTR_AudioCue.ClipData> tarr = [];
+        LoadSongsInDirectory(tarr, "MusicRando/Tarr");
+        Songs["Tarr"] = [tarr];
     }
 
     public static void CheckDirectory(string dir)
@@ -134,16 +195,23 @@ public static class MusicPatch
     {
         foreach (var rawFile in Directory.GetFiles(dir))
         {
-            var file = $"{CurrentDirectory}/{rawFile}";
-            Task.Run(async () =>
-                 {
-                     clips.Add(new SECTR_AudioCue.ClipData(await LoadClip(file)));
-                     Core.Log.Msg($"Song Loaded: [{rawFile}]");
-                 }).GetAwaiter().GetResult();
+            try
+            {
+                var file = $"{CurrentDirectory}/{rawFile}";
+                var clip = LoadClip(file);
+                if (clip is null) return;
+                clips.Add(new SECTR_AudioCue.ClipData(clip));
+                Core.Log.Msg($"Song Loaded: [{rawFile}]");
+            }
+            catch (Exception e)
+            {
+                Core.Log.Error($"Failed Loading: [{rawFile}]");
+                Core.Log.Error(e);
+            }
         }
     }
 
-    public static async Task<AudioClip> LoadClip(string path)
+    public static AudioClip LoadClip(string path)
     {
         AudioClip clip = null;
 
@@ -158,18 +226,10 @@ public static class MusicPatch
         using var uwr = UnityWebRequestMultimedia.GetAudioClip(path, type);
         uwr.SendWebRequest();
 
-        // wrap tasks in try/catch, otherwise it'll fail silently
-        try
-        {
-            while (!uwr.isDone) await Task.Delay(5);
+        while (!uwr.isDone) Task.Delay(5).GetAwaiter().GetResult();
 
-            if (uwr.isNetworkError || uwr.isHttpError) Core.Log.Error($"{uwr.error}");
-            else clip = DownloadHandlerAudioClip.GetContent(uwr);
-        }
-        catch (Exception e)
-        {
-            Core.Log.Error(e);
-        }
+        if (uwr.isNetworkError || uwr.isHttpError) Core.Log.Error($"{uwr.error}");
+        else clip = DownloadHandlerAudioClip.GetContent(uwr);
 
         return clip;
     }

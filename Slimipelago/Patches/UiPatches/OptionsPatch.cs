@@ -87,12 +87,9 @@ public static class OptionsPatch
         CreateCheckbox(__instance.modTogglePrefab, g5, MusicRandoRandomizeOnce, "Music Rando:\nRandomize Once",
             b => MusicRandoRandomizeOnce = b);
 
-        // UseCustomAssets = false;
         var g6 = CreateHorizontalGroup(panel).gameObject;
         CreateCheckbox(__instance.modTogglePrefab, g6, UseCustomAssets, "Use Archipelago Utilities\n Custom Assets",
-                b => UseCustomAssets = b)
-           // .interactable = false
-            ;
+                b => UseCustomAssets = b);
 
         var connectButton = CreateButton(Client.IsConnected ? "Disconnect" : "Connect", g6,
             null, out var buttonText);

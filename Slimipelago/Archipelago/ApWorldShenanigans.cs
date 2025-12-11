@@ -1,5 +1,11 @@
 namespace Slimipelago.Archipelago;
 
+// 1-2: nothing
+// 3-10: dry reef
+// 11-15: moss or indigo
+// 16-19: moss AND indigo
+// 20-23: ancient ruins
+// 24-28: glass
 public static class ApWorldShenanigans
 {
     public static void RunShenanigans()
@@ -75,7 +81,7 @@ public static class ApWorldShenanigans
 
               def get_rule_map(player, world):
                   return {
-                      {{string.Join(",\n\t\t", interactables.Concat(dlcInteractables).Select(line => GenRule(line.InteractableName, line.InteractableCrackerLevel, line.InteractableJetpackRequirement, line.InteractableMinJetpackEnergy.Split(' ')[0])).Where(s => s != ""))}},
+                      {{string.Join(",\n\t\t", interactables.Concat(dlcInteractables).Select(line => GenRule(line.InteractableName, line.InteractableCrackerLevel, line.InteractableJetpackRequirement, line.InteractableMinJetpackEnergy.Split(' ')[0], true)).Where(s => s != ""))}},
                       {{string.Join(",\n\t\t", upgradeRules.Where(kv => !kv.Value.Contains("7z")).Select(kv => $"\"{kv.Key}\": lambda state: {string.Join(" and ", kv.Value.Select(GenItemRule))}"))}},
                       {{string.Join(",\n\t\t", upgradeRules.Where(kv => kv.Value.Contains("7z")).Select(kv => $"\"{kv.Key}\": lambda state: has_region(state, player, \"Indigo Quarry\")"))}},
                   }
@@ -93,6 +99,13 @@ public static class ApWorldShenanigans
                   return state.has(f"Region Unlock: {region}", player) 
               """);
 
+        File.WriteAllText("Mods/SW_CreeperKing.Slimipelago/Data/Logic.txt",
+            string.Join("\n",
+                interactables.Concat(dlcInteractables)
+                             .Select(line
+                                  => $"{line.InteractableName}:{GenRule(line.InteractableName, line.InteractableCrackerLevel, line.InteractableJetpackRequirement, line.InteractableMinJetpackEnergy.Split(' ')[0], false)}:{line.InteractableArea}")
+                             .Where(s => s != "")));
+
         if (File.Exists("output/Slimerancher - Sheet1.csv"))
         {
             File.Delete("output/Slimerancher - Sheet1.csv");
@@ -101,33 +114,37 @@ public static class ApWorldShenanigans
         File.Move("Slimerancher - Sheet1.csv", "output/Slimerancher - Sheet1.csv");
         return;
 
-        string GenRule(string location, string cracker, string needsJetpack, string energyNeeded)
+        string GenRule(string location, string cracker, string needsJetpack, string energyNeeded, bool isPython)
         {
             List<string> rules = [];
 
             if (cracker.Contains("Treasure Cracker"))
             {
-                rules.Add($"has_cracker(state, player, {Math.Max(1, cracker.Count(c => c == 'I'))})");
+                var level = Math.Max(1, cracker.Count(c => c == 'I'));
+                rules.Add(isPython
+                    ? $"has_cracker(state, player, {level})"
+                    : string.Join("", Enumerable.Repeat('c', level)));
             }
 
             if (needsJetpack == "Yes")
             {
-                rules.Add("has_jetpack(state, player)");
+                rules.Add(isPython ? "has_jetpack(state, player)" : "j");
             }
 
             if (energyNeeded is not ("0" or "50" or "100"))
             {
-                rules.Add(
-                    $"has_energy(state, player, {(energyNeeded[0] == '1' ? 0 : 2) + (energyNeeded[1] == '0' ? 0 : 1)})");
+                var energyLevel = (energyNeeded[0] == '1' ? 0 : 2) + (energyNeeded[1] == '0' ? 0 : 1);
+                rules.Add(isPython
+                    ? $"has_energy(state, player, {energyLevel})"
+                    : string.Join("", Enumerable.Repeat('e', energyLevel)));
             }
 
-            return rules.Count == 0 ? "" : $"\"{location}\": lambda state: {string.Join(" and ", rules)}";
+            return rules.Count == 0 ? "" :
+                isPython ? $"\"{location}\": lambda state: {string.Join(" and ", rules)}" : string.Join("", rules);
         }
 
         string GenItemRule(string rule)
-        {
-            return rule.StartsWith("Region ") ? $"has_region(state, player, \"{rule.Substring(7)}\")" : "";
-        }
+            => rule.StartsWith("Region ") ? $"has_region(state, player, \"{rule.Substring(7)}\")" : "";
     }
 }
 
@@ -158,7 +175,9 @@ public readonly struct CsvLine(string[] line)
 
     public readonly string UpgradeName = line[23];
     public readonly string UpgradeId = line[24];
-    public readonly string[] UpgradeRules = line[25].Split(['&'], StringSplitOptions.RemoveEmptyEntries).Select(rule => rule.Trim()).ToArray();
+
+    public readonly string[] UpgradeRules =
+        line[25].Split(['&'], StringSplitOptions.RemoveEmptyEntries).Select(rule => rule.Trim()).ToArray();
 
     public bool HasInteractable => InteractableId != "";
     public bool HasGate => GateId != "";

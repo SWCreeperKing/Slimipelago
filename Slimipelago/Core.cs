@@ -1,8 +1,6 @@
 ﻿using System.Reflection;
 using KaitoKid.ArchipelagoUtilities.AssetDownloader.ItemSprites;
 using MelonLoader;
-using MonomiPark.SlimeRancher.DataModel;
-using MultiplayerWithBindingsExample;
 using Newtonsoft.Json;
 using Slimipelago.Archipelago;
 using Slimipelago.Patches.PlayerPatches;
@@ -57,6 +55,10 @@ public class Core : MelonMod
                                         .Select(s => s.Split(','))
                                         .ToDictionary(sArr => (PlayerState.Upgrade)int.Parse(sArr[1]), sArr => sArr[0]);
 
+        foreach (var line in File.ReadAllText("Mods/SW_CreeperKing.Slimipelago/Data/Logic.txt").Split('\n'))
+        {
+            LogicHandler.AddLogic(line);
+        }
 
         ApSlimeClient.Init();
 
@@ -80,11 +82,15 @@ public class Core : MelonMod
             Log.Msg($"Loaded: [{patch.Name}]");
         }
 
-        Log.Msg("Loading Songs (in background)");
+        Log.Msg("Loading Songs");
 
-        Task.Run(MusicPatch.LoadSongs);
+        MusicPatch.LoadSongs();
 
         Log.Msg("Initialized.");
+
+        // IntroUI
+        // KeyRegistry.AddKey(KeyCode.P, () => Log.Msg(PlayerStatePatch.PlayerInWorld.transform.position));
+        // KeyRegistry.AddKey(KeyCode.Backspace, () => SRSingleton<SceneContext>.Instance.GadgetDirector?.AddGadget(Gadget.Id.DRONE_ADVANCED));
     }
 
     public override void OnUpdate()

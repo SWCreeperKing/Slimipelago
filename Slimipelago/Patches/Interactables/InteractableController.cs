@@ -14,8 +14,8 @@ public static class InteractableController
             if (!ApSlimeClient.LocationDictionary.TryGetValue(hash, out var itemName))
             {
                 // Core.Log.Msg($"Location Hash not found: [{hash}] for [{__instance.gameObject.name}]");
-                __instance.gameObject.SetActive(false);
-                return;
+                // __instance.gameObject.SetActive(false);
+                // return;
             }
 
             var found = !ApSlimeClient.Client.MissingLocations.Contains(itemName);
@@ -24,20 +24,16 @@ public static class InteractableController
 
             var region = __instance.GetComponentInParent<Region>();
             GameLoader.MakeMarker(markerName, __instance.transform.position, null, region.setId);
+            ApSlimeClient.QueueReLogic = true;
         }
 
         public void InteractableInteracted(string itemFound)
         {
             var hash = __instance.transform.position.HashPos();
+            ApSlimeClient.SendItem($"{itemFound} Found", ApSlimeClient.LocationDictionary[hash]);
             if (!ApSlimeClient.Client.MissingLocations.Contains(ApSlimeClient.LocationDictionary[hash])) return;
-            GameLoader.ChangeMarkerColor(hash, color =>
-            {
-                color.a = 0;
-                return color;
-            });
 
             // __instance.gameObject.SetActive(false);
-            ApSlimeClient.SendItem($"{itemFound} Found", ApSlimeClient.LocationDictionary[hash]);
         }
     }
 }

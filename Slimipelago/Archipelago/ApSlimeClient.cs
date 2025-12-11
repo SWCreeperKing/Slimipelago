@@ -22,6 +22,7 @@ public static class ApSlimeClient
     public static List<ItemInfo> Items = [];
     public static List<ItemInfo> ItemsWaiting = [];
     public static ConcurrentDictionary<string, int> ItemCache = [];
+    public static string[] HintedItems = [];
     public static ApClient Client = new();
 
     public static string AddressPort = "archipelago.gg:12345";
@@ -34,6 +35,8 @@ public static class ApSlimeClient
     public static bool MusicRando = false;
     public static bool MusicRandoRandomizeOnce = false;
     public static bool UseCustomAssets = true;
+    public static bool HackTheMarket = true;
+    public static bool QueueReLogic;
 
     public static long CurrentItemIndex;
 
@@ -84,8 +87,11 @@ public static class ApSlimeClient
 
         Client.OnConnectionEvent += _ =>
         {
+            HintedItems = [];
             GameUUID = (string)Client.SlotData["uuid"];
             CurrentItemIndex = Client.GetFromStorage("new_item_index", def: 0L);
+
+            if (Client.SlotData.TryGetValue("fix_market_rates", out var value)) HackTheMarket = (bool)value;
 
             var seed = Client.Seed;
             if (seed is null)
@@ -123,7 +129,23 @@ public static class ApSlimeClient
             if (!Client.IsConnected) return;
             ItemsWaiting.AddRange(Client.GetOutstandingItems()!);
 
-            if (!PlayerStatePatch.FirstUpdate) return;
+            if (QueueReLogic)
+            {
+                QueueReLogic = false;
+                LogicHandler.LogicCheck();
+            }
+            
+            if (Client.PushUpdatedVariables(false, out var hints))
+            {
+                var player = Client.PlayerSlot;
+                HintedItems = hints.Where(hint => hint.Status is HintStatus.Priority && hint.FindingPlayer == player)
+                                   .Select(hint => Client.LocationIdToLocationName(hint.LocationId, player))
+                                   .ToArray();
+                LogicHandler.LogicCheck();
+                QueueReLogic = true;
+            }
+
+            if (!PlayerStatePatch.FirstUpdate || !ItemsWaiting.Any()) return;
             foreach (var item in ItemsWaiting)
             {
                 ItemHandler.ProcessItem(item);
@@ -131,6 +153,7 @@ public static class ApSlimeClient
 
             Items.AddRange(ItemsWaiting);
             ItemsWaiting.Clear();
+            QueueReLogic = true;
         }
         catch (Exception e)
         {
@@ -153,6 +176,7 @@ public static class ApSlimeClient
             PersonalUpgradePatch.ScoutedUpgrades.Clear();
             ItemHandler.ItemNumberTracker = 0;
             PlayerTrackerPatch.AllowedZones.Clear();
+
             AccessDoorPatch.LabDoor.CurrState = AccessDoor.State.CLOSED;
             AccessDoorPatch.OvergrowthDoor.CurrState = AccessDoor.State.CLOSED;
             AccessDoorPatch.GrottoDoor.CurrState = AccessDoor.State.CLOSED;
@@ -160,7 +184,7 @@ public static class ApSlimeClient
 
             Items.Clear();
             ItemCache.Clear();
-            
+
             foreach (var item in Items)
             {
                 ItemHandler.ProcessItem(item);
@@ -204,7 +228,7 @@ public static class ApSlimeClient
             GameUUID = null;
             CurrentItemIndex = 0;
             JetpackPatch.EnableJetpack = false;
-            
+
             ItemsWaiting.Clear();
             AccessDoorPatch.TeleportMarkers.Clear();
             PersonalUpgradePatch.PurchaseNameKeyToLocation.Clear();

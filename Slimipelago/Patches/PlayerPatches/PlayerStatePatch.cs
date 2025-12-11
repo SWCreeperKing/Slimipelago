@@ -45,7 +45,6 @@ public static class PlayerStatePatch
         };
 
         OnFirstUpdate += () => Core.Log.Msg("First Update");
-        OnFirstUpdate += ApSlimeClient.WorldOpened;
 
         Core.Log.Msg("Player Awake");
         GameLoader.ResetData();
@@ -57,11 +56,13 @@ public static class PlayerStatePatch
         try
         {
             if (FirstUpdate) return;
-            OnFirstUpdate?.Invoke();
             foreach (var accessDoor in Resources.FindObjectsOfTypeAll<AccessDoor>())
             {
                 AccessDoorPatch.RunDoorCheck(accessDoor);
             }
+
+            ApSlimeClient.WorldOpened();
+            OnFirstUpdate?.Invoke();
 
             FirstUpdate = true;
         }

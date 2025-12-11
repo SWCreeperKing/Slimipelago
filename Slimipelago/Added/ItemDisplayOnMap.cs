@@ -13,14 +13,12 @@ public class ItemDisplayOnMap : DisplayOnMap
     public Vector3 Pos;
     public UnityAction OnPress;
     public RegionRegistry.RegionSetId Region = RegionRegistry.RegionSetId.HOME;
+    public string LocationName = "";
 
     public override void Awake()
     {
-        // Core.Log.Msg("Marker Wakeup");
         try
         {
-            // mainMap.OpenMap(ZoneDirector.Zone.NONE);
-            
             SRSingleton<Map>.Instance.RegisterMarker(this);
 
             var gobj = new GameObject("archipelago marker");
@@ -41,20 +39,6 @@ public class ItemDisplayOnMap : DisplayOnMap
 
             var marker = GameObject.Find("HUD Root/Map/MapUI/UIContainer/Panel/Scroll View/Viewport/Content/Markers");
             gobj.transform.parent = marker.transform;
-
-            // var map = mainMap.mapUI;
-            // var isRegionDesert = Region == RegionRegistry.RegionSetId.DESERT;
-            //
-            // var cof = map.GetPrivateField<Vector4>($"{(isRegionDesert ? "desert" : "main")}Coefficients");
-            // var markerPosMin =
-            //     map.GetPrivateField<Vector2>($"{(isRegionDesert ? "desert" : "world")}MarkerPositionMin");
-            // var markerPosMax =
-            //     map.GetPrivateField<Vector2>($"{(isRegionDesert ? "desert" : "world")}MarkerPositionMax");
-            //
-            // Pos = gobj.transform.localPosition = map.CallPrivateMethod<Vector2>("GetMapPos", Pos, cof);
-            //
-            // Pos = gobj.transform.localPosition = map.CallPrivateMethod<Vector2>("GetMapPosClamped",
-            //     Pos, cof, markerPosMin, markerPosMax);
         }
         catch (Exception e)
         {

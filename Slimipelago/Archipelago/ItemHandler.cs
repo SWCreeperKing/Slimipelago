@@ -1,6 +1,4 @@
 using Archipelago.MultiClient.Net.Models;
-using CreepyUtil.Archipelago.ApClient;
-using KaitoKid.ArchipelagoUtilities.AssetDownloader.ItemSprites;
 using MonomiPark.SlimeRancher.DataModel;
 using Newtonsoft.Json;
 using Slimipelago.Patches.Interactables;
@@ -39,7 +37,7 @@ public static class ItemHandler
         var sprite = GameLoader.GetSpriteFromItemFlag(item.Flags);
         if (sprite is "trap") sprite = "got_trap";
 
-        PopupPatch.AddItemToQueue(new ApPopupData(GameLoader.Spritemap[sprite], "Item Recieved", item.ItemName,
+        PopupPatch.AddItemToQueue(new ApPopupData(GameLoader.Spritemap[sprite], "Item Received", item.ItemName,
             $"from: {item.Player.Name}", () =>
             {
                 if (ItemNumberTracker <= CurrentItemIndex) return;
@@ -61,14 +59,18 @@ public static class ItemHandler
             {
                 case "The Lab":
                     AccessDoorPatch.LabDoor.CurrState = AccessDoor.State.OPEN;
+                    PlayerTrackerPatch.AllowedZones.Add(region);
                     GameLoader.MakeTeleporterMarker(GameLoader.Lab);
                     break;
                 case "The Overgrowth":
                     AccessDoorPatch.OvergrowthDoor.CurrState = AccessDoor.State.OPEN;
+                    PlayerTrackerPatch.AllowedZones.Add(region);
                     GameLoader.MakeTeleporterMarker(GameLoader.Overgrowth);
                     break;
                 case "The Grotto":
                     AccessDoorPatch.GrottoDoor.CurrState = AccessDoor.State.OPEN;
+                    PlayerTrackerPatch.AllowedZones.Add(region);
+                    GameLoader.MakeTeleporterMarker(GameLoader.Grotto);
                     break;
             }
         }
@@ -139,15 +141,20 @@ public static class ItemHandler
 
                     ItemCache[name]++;
                     return;
-                case "Progressive Treasure Cracker":
+                case "Progressive Treasure Cracker" or "Progressive Market Stonks":
                     ItemCache[name]++;
                     break;
             }
 
-            if (firstReceive && name.EndsWith("x Newbucks"))
+            if (!firstReceive) return;
+            if (name.EndsWith("x Newbucks"))
             {
                 int.TryParse(name.Substring(0, name.IndexOf('x')), out var amount);
                 PlayerStatePatch.PlayerState.AddCurrency(amount);
+            }
+            else if (name == "Drone")
+            {
+                SRSingleton<SceneContext>.Instance.GadgetDirector?.AddGadget(Gadget.Id.DRONE);
             }
         }
         catch (Exception e)
@@ -165,13 +172,14 @@ public static class ItemHandler
         {
             if (!UseCustomAssets) return fallback;
 
-            var res = Core.ItemSpritesManager.TryGetCustomAsset(location, "Slime Rancher", true, true, out var spriteData);
+            var res = Core.ItemSpritesManager.TryGetCustomAsset(location, "Slime Rancher", false, true,
+                out var spriteData);
 
             if (!res || spriteData is null) return fallback;
             var file = spriteData.FilePath;
 
             if (ItemSprites.TryGetValue(file, out var sprite)) return sprite;
-            
+
             ItemSprites[file] = sprite = GameLoader.CreateSprite(file);
             sprite.texture.filterMode = FilterMode.Point;
             return sprite;

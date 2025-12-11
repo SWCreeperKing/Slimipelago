@@ -1,8 +1,6 @@
 using Archipelago.MultiClient.Net.Enums;
-using MonomiPark.SlimeRancher.DataModel;
 using Slimipelago.Added;
 using Slimipelago.Archipelago;
-using Slimipelago.Patches.PlayerPatches;
 using Slimipelago.Patches.UiPatches;
 using UnityEngine;
 using UnityEngine.Events;
@@ -15,6 +13,7 @@ public static class GameLoader
 {
     public static readonly Vector3 Home = new(91, 14.9f, -141);
     public static readonly Vector3 Overgrowth = new(-44.8f, 17.1f, -158.3f);
+    public static readonly Vector3 Grotto = new(248.3f, 7.3f, -131.1f);
     public static readonly Vector3 Lab = new(194.7f, 14.8f, -273.1f);
     public static readonly Vector3 Reef = new(-108.7f, .6f, 138.9f);
     public static readonly Vector3 ReefBeach = new(-236.7f, 0.9f, -120.6f);
@@ -148,6 +147,7 @@ public static class GameLoader
         // obj.SetPrivateField("regionSetId", region);
         obj.Region = region;
         gobj.SetActive(true);
+        if (ApSlimeClient.LocationDictionary.TryGetValue(posHash, out var locName)) obj.LocationName = locName;
         obj.Image.overrideSprite = Spritemap[id];
 
         MarkerDictionary[posHash] = obj;
