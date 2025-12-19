@@ -54,6 +54,18 @@ Treasure Cracker Upgrades require the `Region Unlock: The Lab`
   - lv.2 requires 20 gadgets crafted
   - lv.3 requires 50 gadgets crafted
 
+
+### Music Rando
+
+Inorder to refresh the music options the game must be restarted
+the music rando folders only appear after the first launch with the mod
+
+the folders for music rando is first made into areas then time of day (`day`/`night`/`both`)
+
+music in the `Any` region folder can appear in any region
+
+Tarr music is special as it doesn't take from the `Any` region, nor does any region take from the Tarr folder
+
 ---
 
 ## Special Thanks
