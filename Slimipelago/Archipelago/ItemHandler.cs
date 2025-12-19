@@ -152,9 +152,14 @@ public static class ItemHandler
                 int.TryParse(name.Substring(0, name.IndexOf('x')), out var amount);
                 PlayerStatePatch.PlayerState.AddCurrency(amount);
             }
-            else if (name == "Drone")
+            else switch (name)
             {
-                SRSingleton<SceneContext>.Instance.GadgetDirector?.AddGadget(Gadget.Id.DRONE);
+                case "Drone":
+                    SRSingleton<SceneContext>.Instance.GadgetDirector?.AddGadget(Gadget.Id.DRONE);
+                    break;
+                case "Advanced Drone":
+                    SRSingleton<SceneContext>.Instance.GadgetDirector?.AddGadget(Gadget.Id.DRONE_ADVANCED);
+                    break;
             }
         }
         catch (Exception e)

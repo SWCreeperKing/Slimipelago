@@ -18,7 +18,7 @@ public static class PersonalUpgradePatch
     public static bool ApplyUpgrade(PlayerState.Upgrade upgrade)
     {
         // Core.Log.Msg($"upgrade: [{upgrade}]");
-        var location = ApSlimeClient.UpgradeLocations[upgrade];
+        if (!ApSlimeClient.UpgradeLocations.TryGetValue(upgrade, out var location)) return true;
         if (!ApSlimeClient.Client.MissingLocations.Contains(location)) return false;
         ApSlimeClient.SendItem("Upgrade Bought", location);
         return false;

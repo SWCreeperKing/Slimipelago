@@ -1,5 +1,6 @@
 using System.Reflection;
 using HarmonyLib;
+using JetBrains.Annotations;
 using MonomiPark.SlimeRancher.Regions;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -12,6 +13,7 @@ namespace Slimipelago.Patches.UiPatches;
 [PatchAll]
 public static class MusicPatch
 {
+    [CanBeNull] public static MethodInfo TarrMusicMethod;
     public static Random Random = new();
     public static readonly string CurrentDirectory = Directory.GetCurrentDirectory();
     public static readonly Dictionary<string, List<SECTR_AudioCue.ClipData>[]> Songs = [];
@@ -32,53 +34,80 @@ public static class MusicPatch
     [HarmonyPatch(typeof(MusicDirector), "OnSceneLoaded"), HarmonyPostfix]
     private static void OnSceneLoaded(MusicDirector __instance, Scene scene, LoadSceneMode mode)
     {
-        if (!MusicRando) return;
-        VanillaSongs = new Dictionary<string, SECTR_AudioCue.ClipData[]>
+        var trying = "WTF???";
+        try
         {
-            ["Ranch"] =
-            [
-                __instance.ranchMusic.background.AudioClips[0], __instance.ranchMusic.nightBackground.AudioClips[0]
-            ],
-            ["Reef"] =
-            [
-                __instance.reefMusic.background.AudioClips[0], __instance.reefMusic.nightBackground.AudioClips[0]
-            ],
-            ["Quarry"] =
-                [__instance.quarryMusic.background.AudioClips[0], __instance.quarryMusic.nightBackground.AudioClips[0]],
-            ["Moss"] =
-            [
-                __instance.mossMusic.background.AudioClips[0], __instance.mossMusic.nightBackground.AudioClips[0]
-            ],
-            ["Desert"] =
-                [__instance.desertMusic.background.AudioClips[0], __instance.desertMusic.nightBackground.AudioClips[0]],
-            ["Sea"] = [__instance.seaMusic.background.AudioClips[0], __instance.seaMusic.nightBackground.AudioClips[0]],
-            ["Ruins"] =
-            [
-                __instance.ruinsMusic.background.AudioClips[0], __instance.ruinsMusic.nightBackground.AudioClips[0]
-            ],
-            ["Ruins Transition"] =
-            [
-                __instance.ruinsTransMusic.background.AudioClips[0],
-                __instance.ruinsTransMusic.nightBackground.AudioClips[0]
-            ],
-            ["Tarr"] =
-            [
-                __instance.tarrMusic.AudioClips[0]
-            ]
-        };
+            if (!MusicRando) return;
+            VanillaSongs = new Dictionary<string, SECTR_AudioCue.ClipData[]>
+            {
+                ["Ranch"] =
+                [
+                    __instance.ranchMusic.background.AudioClips[0], __instance.ranchMusic.nightBackground.AudioClips[0]
+                ],
+                ["Reef"] =
+                [
+                    __instance.reefMusic.background.AudioClips[0], __instance.reefMusic.nightBackground.AudioClips[0]
+                ],
+                ["Quarry"] =
+                [
+                    __instance.quarryMusic.background.AudioClips[0],
+                    __instance.quarryMusic.nightBackground.AudioClips[0]
+                ],
+                ["Moss"] =
+                [
+                    __instance.mossMusic.background.AudioClips[0], __instance.mossMusic.nightBackground.AudioClips[0]
+                ],
+                ["Desert"] =
+                [
+                    __instance.desertMusic.background.AudioClips[0],
+                    __instance.desertMusic.nightBackground.AudioClips[0]
+                ],
+                ["Sea"] =
+                [
+                    __instance.seaMusic.background.AudioClips[0], __instance.seaMusic.nightBackground.AudioClips[0]
+                ],
+                ["Ruins"] =
+                [
+                    __instance.ruinsMusic.background.AudioClips[0], __instance.ruinsMusic.nightBackground.AudioClips[0]
+                ],
+                ["Ruins Transition"] =
+                [
+                    __instance.ruinsTransMusic.background.AudioClips[0],
+                    __instance.ruinsTransMusic.nightBackground.AudioClips[0]
+                ],
+                ["Tarr"] =
+                [
+                    __instance.tarrMusic.AudioClips[0]
+                ]
+            };
 
-        if (!MusicRandoRandomizeOnce) return;
-        var seed = Client.Seed;
-        Random = seed is null ? new Random() : new Random(RandoSeeds[seed]);
-        SetDayAndNight(__instance.ranchMusic, "Ranch");
-        SetDayAndNight(__instance.reefMusic, "Reef");
-        SetDayAndNight(__instance.quarryMusic, "Quarry");
-        SetDayAndNight(__instance.mossMusic, "Moss");
-        SetDayAndNight(__instance.desertMusic, "Desert");
-        SetDayAndNight(__instance.seaMusic, "Sea");
-        SetDayAndNight(__instance.ruinsMusic, "Ruins");
-        SetDayAndNight(__instance.ruinsTransMusic, "Ruins Transition");
-        __instance.tarrMusic.AudioClips = GetRandomSong(Songs["Tarr"][0]);
+            if (!MusicRandoRandomizeOnce) return;
+            var seed = Client.Seed;
+            Random = seed is null ? new Random() : new Random(RandoSeeds[seed]);
+            trying = "Ranch";
+            SetDayAndNight(__instance.ranchMusic, "Ranch");
+            trying = "Reef";
+            SetDayAndNight(__instance.reefMusic, "Reef");
+            trying = "Quarry";
+            SetDayAndNight(__instance.quarryMusic, "Quarry");
+            trying = "Moss";
+            SetDayAndNight(__instance.mossMusic, "Moss");
+            trying = "Glass Desert";
+            SetDayAndNight(__instance.desertMusic, "Desert");
+            trying = "Sea";
+            SetDayAndNight(__instance.seaMusic, "Sea");
+            trying = "Ruins";
+            SetDayAndNight(__instance.ruinsMusic, "Ruins");
+            trying = "Ruins Transition";
+            SetDayAndNight(__instance.ruinsTransMusic, "Ruins Transition");
+            trying = "Tarr";
+            __instance.tarrMusic.AudioClips = GetRandomSong(Songs["Tarr"][0].Concat(VanillaSongs["Tarr"]));
+        }
+        catch (Exception e)
+        {
+            Core.Log.Error($"There was an error trying to load Music Rando on [{trying}]");
+            Core.Log.Error(e);
+        }
     }
 
     [HarmonyPatch(typeof(MusicDirector), "GetRegionMusic"), HarmonyPostfix]
@@ -101,19 +130,25 @@ public static class MusicPatch
     [HarmonyPatch(typeof(MusicDirector), "SetTarrMode"), HarmonyPrefix]
     public static bool SetTarrMode(MusicDirector __instance, bool enabled)
     {
-        if (MusicRandoRandomizeOnce) return true;
+        if (!MusicRando || MusicRandoRandomizeOnce) return true;
         try
         {
             __instance.tarrMusic.AudioClips = GetRandomSong(Songs["Tarr"][0].Concat(VanillaSongs["Tarr"]));
-            var method = __instance.GetType()
-                                   .GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
-                                   .FirstOrDefault(mi =>
-                                    {
-                                        var param = mi.GetParameters();
-                                        return mi.Name == "Enqueue" && param.Length == 3 &&
-                                               param[2].ParameterType == typeof(bool);
-                                    });
-            method!.Invoke(__instance, [__instance.tarrMusic, MusicDirector.Priority.TARR, enabled]);
+
+            if (TarrMusicMethod is null)
+            {
+                TarrMusicMethod = __instance.GetType()
+                                            .GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
+                                            .FirstOrDefault(mi =>
+                                             {
+                                                 var param = mi.GetParameters();
+                                                 return mi.Name == "Enqueue" && param.Length == 3 &&
+                                                        param[2].ParameterType == typeof(bool);
+                                             });
+                MainMenuPatch.OnGamePotentialExit += () => TarrMusicMethod = null;
+            }
+            
+            TarrMusicMethod!.Invoke(__instance, [__instance.tarrMusic, MusicDirector.Priority.TARR, enabled]);
         }
         catch (Exception e)
         {
@@ -145,6 +180,13 @@ public static class MusicPatch
     public static List<SECTR_AudioCue.ClipData> GetRandomSong(IEnumerable<SECTR_AudioCue.ClipData> list)
     {
         var clipDatas = list as SECTR_AudioCue.ClipData[] ?? list.ToArray();
+        if (clipDatas.Length == 0)
+        {
+            Core.Log.Error("NO SONGS IN LIST");
+            return [];
+        }
+        
+        if (clipDatas.Length == 1) return [clipDatas[0]];
         return [clipDatas[Random.Next(clipDatas.Length)]];
     }
 

@@ -6,10 +6,9 @@ namespace Slimipelago.Patches.Interactables;
 public static class MapFragmentPatch
 {
     [HarmonyPatch(typeof(MapDataEntry), "Start"), HarmonyPrefix]
-    public static bool MapMarker(MapDataEntry __instance)
+    public static void MapMarker(MapDataEntry __instance)
     {
         __instance.InteractableInstanced("map");
-        return false;
     }
 
     [HarmonyPatch(typeof(MapDataEntry), "Activate"), HarmonyPrefix]

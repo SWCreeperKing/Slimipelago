@@ -71,7 +71,7 @@ public static class Helper
     public static HorizontalLayoutGroup CreateHorizontalGroup(GameObject parent)
     {
         var hGroup = new GameObject("HorizontalLayoutGroup (custom)").AddComponent<HorizontalLayoutGroup>();
-        hGroup.transform.parent = parent.transform;
+        hGroup.transform.SetParent(parent.transform);
         return hGroup;
     }
     
@@ -81,14 +81,14 @@ public static class Helper
         textObj.text = text;
         textObj.color = color;
         textObj.fontSize = fontSize;
-        textObj.gameObject.transform.parent = parent.gameObject.transform;
+        textObj.transform.SetParent(parent.transform);
         return textObj;
     }
 
     public static SRInputField CreateInputField(string desc, GameObject parent)
     {
         var gobj = new GameObject("SRInputField (custom)");
-        gobj.transform.parent = parent.transform;
+        gobj.transform.SetParent(parent.transform);
         var image = gobj.AddComponent<Image>();
         image.type = Image.Type.Sliced;
         gobj.SetActive(false);
@@ -101,7 +101,7 @@ public static class Helper
         field.descKey = $"archi_{desc}";
 
         var textGobj = new GameObject("SRInputField Text (custom)");
-        textGobj.transform.parent = gobj.transform;
+        textGobj.transform.SetParent(gobj.transform);
 
         var text = field.textComponent = textGobj.AddComponent<Text>();
         var rect = field.textComponent.GetComponent<RectTransform>();
@@ -122,7 +122,7 @@ public static class Helper
     public static Button CreateButton(string text, GameObject parent, UnityAction onPressed, out TextMeshProUGUI label)
     {
         var bGobj = new GameObject("Button (custom)");
-        bGobj.transform.parent = parent.transform;
+        bGobj.transform.SetParent(parent.transform);
         bGobj.AddComponent<CanvasRenderer>();
         var img = bGobj.AddComponent<Image>();
         img.type = Image.Type.Sliced;
@@ -140,7 +140,7 @@ public static class Helper
         var textObj = label = child.AddComponent<TextMeshProUGUI>();
         textObj.text = text;
         textObj.autoSizeTextContainer = true;
-        child.transform.parent = bGobj.transform;
+        child.transform.SetParent(bGobj.transform);
 
         bGobj.AddComponent<MeshButtonStyler>();
         return button;

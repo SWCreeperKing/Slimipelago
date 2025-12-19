@@ -16,6 +16,7 @@ namespace Slimipelago;
 
 public class Core : MelonMod
 {
+    public static int DebugLevel;
     public static MelonLogger.Instance Log;
 
     private static Logger Logger;
@@ -23,6 +24,11 @@ public class Core : MelonMod
 
     public override void OnInitializeMelon()
     {
+        if (File.Exists("debug.txt"))
+        {
+            DebugLevel = int.TryParse(File.ReadAllText("debug.txt"), out var debugLvl) ? debugLvl : 0;
+        }
+
         Log = LoggerInstance;
         Logger = new Logger();
         ItemSpritesManager = new ArchipelagoItemSprites(Logger, JsonConvert.DeserializeObject<ItemSpriteAliases>);
@@ -54,6 +60,19 @@ public class Core : MelonMod
                                         .Split('\n')
                                         .Select(s => s.Split(','))
                                         .ToDictionary(sArr => (PlayerState.Upgrade)int.Parse(sArr[1]), sArr => sArr[0]);
+
+        ApSlimeClient.CorporateLocations = File
+                                          .ReadAllText("Mods/SW_CreeperKing.Slimipelago/Data/7Zee.txt")
+                                          .Replace("\r", "")
+                                          .Split('\n')
+                                          .Where(line => line.Trim() != "")
+                                          .Select(s =>
+                                           {
+                                               var split = s.Split(',');
+                                               return (int.Parse(split[1]), split[0]);
+                                           })
+                                          .GroupBy(t => t.Item1)
+                                          .ToDictionary(g => g.Key, g => g.Select(t => t.Item2).ToArray());
 
         foreach (var line in File.ReadAllText("Mods/SW_CreeperKing.Slimipelago/Data/Logic.txt").Split('\n'))
         {
@@ -89,8 +108,10 @@ public class Core : MelonMod
         Log.Msg("Initialized.");
 
         // IntroUI
-        // KeyRegistry.AddKey(KeyCode.P, () => Log.Msg(PlayerStatePatch.PlayerInWorld.transform.position));
-        // KeyRegistry.AddKey(KeyCode.Backspace, () => SRSingleton<SceneContext>.Instance.GadgetDirector?.AddGadget(Gadget.Id.DRONE_ADVANCED));
+        // ExchangeFullUI
+        KeyRegistry.AddKey(KeyCode.P, () => Log.Msg(PlayerStatePatch.PlayerInWorld.transform.position));
+        KeyRegistry.AddKey(KeyCode.Backspace,
+            () => SRSingleton<SceneContext>.Instance.GadgetDirector?.AddGadget(Gadget.Id.DRONE_ADVANCED));
     }
 
     public override void OnUpdate()

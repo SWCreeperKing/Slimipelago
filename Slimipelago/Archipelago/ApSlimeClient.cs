@@ -19,6 +19,7 @@ public static class ApSlimeClient
     public static Dictionary<string, string> LocationDictionary = [];
     public static Dictionary<string, string> LocationInfoDictionary = [];
     public static Dictionary<PlayerState.Upgrade, string> UpgradeLocations;
+    public static Dictionary<int, string[]> CorporateLocations;
     public static List<ItemInfo> Items = [];
     public static List<ItemInfo> ItemsWaiting = [];
     public static ConcurrentDictionary<string, int> ItemCache = [];
@@ -37,6 +38,7 @@ public static class ApSlimeClient
     public static bool UseCustomAssets = true;
     public static bool HackTheMarket = true;
     public static bool QueueReLogic;
+    public static long GoalType;
 
     public static long CurrentItemIndex;
 
@@ -91,7 +93,8 @@ public static class ApSlimeClient
             GameUUID = (string)Client.SlotData["uuid"];
             CurrentItemIndex = Client.GetFromStorage("new_item_index", def: 0L);
 
-            if (Client.SlotData.TryGetValue("fix_market_rates", out var value)) HackTheMarket = (bool)value;
+            HackTheMarket = !Client.SlotData.TryGetValue("fix_market_rates", out var value) || (bool)value;
+            GoalType = Client.SlotData.TryGetValue("goal_type", out var value1) ? (long)value1 : 0;
 
             var seed = Client.Seed;
             if (seed is null)
@@ -196,7 +199,25 @@ public static class ApSlimeClient
         }
     }
 
+    public static void SendItems(string locationType, string[] locations)
+    {
+        foreach (var location in locations)
+        {
+            QueueItemPopup(locationType, location);
+        }
+        
+        Client.SendLocations(locations);
+        UpdateGoal();
+    }
+    
     public static void SendItem(string locationType, string location)
+    {
+        QueueItemPopup(locationType, location);
+        Client.SendLocation(location);
+        UpdateGoal();
+    }
+
+    public static void QueueItemPopup(string locationType, string location)
     {
         var item = Client.ScoutLocation(location);
         if (item?.Player.Slot != Client.PlayerSlot)
@@ -213,10 +234,18 @@ public static class ApSlimeClient
                     $"sent: [{item.ItemName}]", $"to: {item.Player.Name}"));
             }
         }
+    }
 
-        Client.SendLocation(location);
+    public static void UpdateGoal()
+    {
+        QueueReLogic = true;
 
-        if (Client.MissingLocations.Any(loc => loc.ToLower().Contains("note"))) return;
+        if (Client.MissingLocations.Any(loc => GoalType switch
+            {
+                0 => loc.ToLower().Contains("note"),
+                1 => loc.ToLower().Contains("7zee lv."),
+                _ => true
+            })) return;
         Client.Goal();
     }
 

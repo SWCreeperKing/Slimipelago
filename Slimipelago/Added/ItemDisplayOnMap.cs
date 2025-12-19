@@ -38,7 +38,7 @@ public class ItemDisplayOnMap : DisplayOnMap
             }
 
             var marker = GameObject.Find("HUD Root/Map/MapUI/UIContainer/Panel/Scroll View/Viewport/Content/Markers");
-            gobj.transform.parent = marker.transform;
+            gobj.transform.SetParent(marker.transform);
         }
         catch (Exception e)
         {

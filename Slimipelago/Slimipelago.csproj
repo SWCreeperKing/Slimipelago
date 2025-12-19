@@ -270,6 +270,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="Added\InteractableController.cs" />
         <Compile Include="Added\ItemDisplayOnMap.cs"/>
         <Compile Include="Added\ItemMapMarker.cs"/>
         <Compile Include="Added\Playground.cs"/>
@@ -286,7 +287,6 @@
         <Compile Include="Patches\GadgetPatches\ExtractorPatch.cs" />
         <Compile Include="Patches\Interactables\AccessDoorPatch.cs"/>
         <Compile Include="Patches\Interactables\LandLotPatch.cs" />
-        <Compile Include="Patches\Interactables\InteractableController.cs"/>
         <Compile Include="Patches\Interactables\JournalPatch.cs"/>
         <Compile Include="Patches\Interactables\MapFragmentPatch.cs"/>
         <Compile Include="Patches\Interactables\MarketPatch.cs" />
@@ -296,7 +296,6 @@
         <Compile Include="Patches\PlayerPatches\PlayerModelPatch.cs"/>
         <Compile Include="Patches\PlayerPatches\PlayerStatePatch.cs"/>
         <Compile Include="Patches\PlayerPatches\PlayerTrackerPatch.cs"/>
-        <Compile Include="Patches\PlayerPatches\SprintStaminaPatch.cs"/>
         <Compile Include="Patches\UiPatches\CorporatePatch.cs" />
         <Compile Include="Patches\UiPatches\KillTutorialPatch.cs"/>
         <Compile Include="Patches\UiPatches\MainMenuPatch.cs"/>
@@ -316,25 +315,5 @@
                 SourceFiles="bin/Debug/net472/Slimipelago.dll"
                 DestinationFolder="../../../Mods/SW_CreeperKing.Slimipelago"
         />
-<!--        <Copy-->
-<!--                SourceFiles="bin/Debug/net472/KaitoKid.ArchipelagoUtilities.AssetDownloader.dll"-->
-<!--                DestinationFolder="../../../Mods/SW_CreeperKing.Slimipelago/Lib"-->
-<!--        />-->
-<!--        <Copy-->
-<!--                SourceFiles="bin/Debug/net472/KaitoKid.Utilities.Interfaces.dll"-->
-<!--                DestinationFolder="../../../Mods/SW_CreeperKing.Slimipelago/Lib"-->
-<!--        />-->
-<!--        <Copy-->
-<!--                SourceFiles="bin/Debug/net472/System.Text.Json.dll"-->
-<!--                DestinationFolder="../../../Mods/SW_CreeperKing.Slimipelago/Lib"-->
-<!--        />-->
-<!--        <Copy-->
-<!--                SourceFiles="bin/Debug/net472/System.Text.Encodings.Web.dll"-->
-<!--                DestinationFolder="../../../Mods/SW_CreeperKing.Slimipelago/Lib"-->
-<!--        />-->
-<!--        <Copy-->
-<!--                SourceFiles="bin/Debug/net472/System.Memory.dll"-->
-<!--                DestinationFolder="../../../Mods/SW_CreeperKing.Slimipelago/Lib"-->
-<!--        />-->
     </Target>
 </Project>

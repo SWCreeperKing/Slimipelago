@@ -11,11 +11,26 @@ public static class PodPatch
     [HarmonyPatch(typeof(TreasurePod), "Awake"), HarmonyPostfix]
     public static void MarkPod(TreasurePod __instance)
     {
-        __instance.InteractableInstanced(PodType[GetType(__instance)]);
-        
-        if (!ApSlimeClient.LocationDictionary.TryGetValue(__instance.transform.position.HashPos(), out var itemName))
-            return;
-        if (!ApSlimeClient.Client.MissingLocations.Contains(itemName) || __instance.CurrState is TreasurePod.State.LOCKED) return;
+        // var trying = "WTF?";
+        try
+        {
+            // trying = "Interactable";
+            __instance.InteractableInstanced(PodType[GetType(__instance)]);
+
+            // trying = "location dict";
+            // if (!ApSlimeClient.LocationDictionary.TryGetValue(__instance.transform.position.HashPos(),
+            //         out var itemName))
+            //     return;
+
+            // trying = "missing";
+            // if (!ApSlimeClient.Client.MissingLocations.Contains(itemName) ||
+            //     __instance.CurrState is TreasurePod.State.LOCKED) return;
+        }
+        catch (Exception e)
+        {
+            // Core.Log.Error($"Failing at [{trying}] | [{__instance is null}] | [{__}]");
+            Core.Log.Error(e);
+        } 
     }
 
     public static int GetType(TreasurePod pod)
@@ -30,7 +45,10 @@ public static class PodPatch
     [HarmonyPatch(typeof(TreasurePod), "Activate"), HarmonyPrefix]
     public static void OpenPod(TreasurePod __instance)
     {
-        Core.Log.Msg($"{__instance.transform.position.HashPos()}: {__instance.blueprint}");
+        if (Core.DebugLevel > 0)
+        {
+            Core.Log.Msg($"{__instance.transform.position.HashPos()}: {__instance.blueprint}");
+        }
         __instance.InteractableInteracted("Pod");
     }
 

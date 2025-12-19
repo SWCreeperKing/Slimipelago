@@ -14,9 +14,16 @@ public static class PlayerModelPatch
     [HarmonyPatch(typeof(PlayerState), "SetModel"), HarmonyPostfix]
     public static void SetModel(PlayerModel model)
     {
-        Model = model;
-        MainMenuPatch.OnGamePotentialExit += () => Model = null;
-        Core.Log.Msg("PlayerInit");
+        try
+        {
+            Model = model;
+            MainMenuPatch.OnGamePotentialExit += () => Model = null;
+            Core.Log.Msg("PlayerInit");
+        }
+        catch (Exception e)
+        {
+            Core.Log.Error(e);
+        }
     }
     
     [HarmonyPatch(typeof(PlayerModel), "Recover"), HarmonyPrefix]

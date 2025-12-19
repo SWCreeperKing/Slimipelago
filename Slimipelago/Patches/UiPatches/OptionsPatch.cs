@@ -30,7 +30,7 @@ public static class OptionsPatch
         if (SceneManager.GetActiveScene().name is not "MainMenu") return true;
         var modPanel = __instance.modsPanel.GetChild(0);
         var panel = new GameObject("Ap menu");
-        panel.transform.parent = modPanel.transform;
+        panel.transform.SetParent(modPanel.transform);
 
         var layout = panel.AddComponent<GridLayoutGroup>();
         layout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;

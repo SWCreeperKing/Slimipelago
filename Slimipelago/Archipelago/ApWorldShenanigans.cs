@@ -24,7 +24,19 @@ public static class ApWorldShenanigans
                  .Split('\n')
                  .Skip(1)
                  .Where(arr => arr.Length > 0)
-                 .Select(s => new CsvLine(s.Split(',').Skip(1).ToArray()))
+                 .Select((s, i) =>
+                  {
+                      try
+                      {
+                          return new CsvLine(s.Split(',').Skip(1).ToArray());
+                      }
+                      catch (Exception e)
+                      {
+                          Core.Log.Msg($"=== ERROR ON CSV LINE [{i}] ===");
+                          Core.Log.Error(e);
+                          throw e;
+                      }
+                  })
                  .ToArray();
 
         var rawInteractables = csv.Where(line => line.HasInteractable && line.IsValidZone).ToArray();
@@ -38,6 +50,8 @@ public static class ApWorldShenanigans
         var upgradeRules = upgrades.Where(line => line.UpgradeRules.Length > 0)
                                    .ToDictionary(line => line.UpgradeName, line => line.UpgradeRules);
 
+        var corporateLocations = csv.Where(line => line.HasCorporate).ToArray();
+
         File.WriteAllText("Mods/SW_CreeperKing.Slimipelago/Data/Locations.txt",
             string.Join("\n",
                 interactables.Select(line => line.GetInteractableText)
@@ -48,6 +62,9 @@ public static class ApWorldShenanigans
         File.WriteAllText("Mods/SW_CreeperKing.Slimipelago/Data/Upgrades.txt",
             string.Join("\n", upgrades.Select(line => $"{line.UpgradeName},{line.UpgradeId}")));
 
+        File.WriteAllLines("Mods/SW_CreeperKing.Slimipelago/Data/7Zee.txt",
+            corporateLocations.Select(line => $"{line.CorporateLocation},{line.CorporateLevel}"));
+        
         File.WriteAllText("output/Locations.py",
             $"""
              # File is Auto-generated, see: https://github.com/SWCreeperKing/Slimipelago/blob/master/Slimipelago/ApWorldShenanigans.cs
@@ -68,10 +85,15 @@ public static class ApWorldShenanigans
                  {string.Join(",\n\t", dlcInteractables.Select(line => $"[\"{line.InteractableName}\", \"{line.InteractableArea}\"]"))}
              ]
 
+             corporate_locations = [
+                 {string.Join(",\n\t", corporateLocations.Select(line => $"[\"{line.CorporateLocation}\", \"{line.CorporateArea}\"]"))}
+             ]
+
              location_dict = [
              	*[items for items in upgrades],
              	*[items[0] for items in interactables],
              	*[items[0] for items in dlc_interactables],
+             	*[items[0] for items in corporate_locations],
              ]
              """);
 
@@ -82,8 +104,7 @@ public static class ApWorldShenanigans
               def get_rule_map(player, world):
                   return {
                       {{string.Join(",\n\t\t", interactables.Concat(dlcInteractables).Select(line => GenRule(line.InteractableName, line.InteractableCrackerLevel, line.InteractableJetpackRequirement, line.InteractableMinJetpackEnergy.Split(' ')[0], true)).Where(s => s != ""))}},
-                      {{string.Join(",\n\t\t", upgradeRules.Where(kv => !kv.Value.Contains("7z")).Select(kv => $"\"{kv.Key}\": lambda state: {string.Join(" and ", kv.Value.Select(GenItemRule))}"))}},
-                      {{string.Join(",\n\t\t", upgradeRules.Where(kv => kv.Value.Contains("7z")).Select(kv => $"\"{kv.Key}\": lambda state: has_region(state, player, \"Indigo Quarry\")"))}},
+                      {{string.Join(",\n\t\t", upgradeRules.Select(kv => $"\"{kv.Key}\": lambda state: {string.Join(" and ", kv.Value.Select(GenItemRule).Where(s => s.Trim() != ""))}"))}},
                   }
 
               def has_cracker(state, player, level) -> bool:
@@ -179,14 +200,18 @@ public readonly struct CsvLine(string[] line)
     public readonly string[] UpgradeRules =
         line[25].Split(['&'], StringSplitOptions.RemoveEmptyEntries).Select(rule => rule.Trim()).ToArray();
 
+    public readonly string CorporateLocation = line[27].Trim();
+    public readonly int CorporateLevel = line[27] != "" ? int.Parse(line[27].Split(':')[0].Split('.')[1]) : -1;
+    public readonly string CorporatePrice = line[28];
+    public readonly string CorporateArea = line[29];
+    
     public bool HasInteractable => InteractableId != "";
     public bool HasGate => GateId != "";
     public bool HasGordo => GordoId != "";
     public bool HasUpgrade => UpgradeName != "";
-
+    public bool HasCorporate => CorporateLocation != "";
     public bool IsValidZone => ApSlimeClient.Zones.Contains(InteractableArea);
     public bool IsSecretStyle => InteractableCrackerLevel == "Secret Style";
-
     public string GetInteractableText => $"{InteractableId},{InteractableName},{InteractableSummary}";
     public string GetGateText => $"{GateId},{GateName}";
     public string GetGordoText => $"{GordoId},{GordoName},Favorite: {GordoFavoriteFood}";

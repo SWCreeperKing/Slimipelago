@@ -27,27 +27,33 @@ public static class PlayerStatePatch
     [HarmonyPatch(typeof(PlayerState), "Awake"), HarmonyPostfix]
     public static void PlayerAwake(PlayerState __instance)
     {
-        PlayerState = __instance;
-        PlayerInWorld = GameObject.Find("SimplePlayer");
-        PlayerInWorldBody = PlayerInWorld.GetComponent<Rigidbody>();
-        SaveAndQuitButton = GameObject.Find("HUD Root/PauseMenu/PauseUI/Buttons/QuitButton").GetComponent<Button>();
-        FirestormActivator = PlayerInWorld.GetComponent<FirestormActivator>();
-
-        MainMenuPatch.OnGamePotentialExit += () =>
+        if (__instance is null) return;
+        try
         {
-            OnFirstUpdate = null;
-            PlayerState = null;
-            PlayerInWorld = null;
-            PlayerInWorldBody = null;
-            PlayerMap = null;
-            SaveAndQuitButton = null;
-            FirstUpdate = false;
-        };
+            PlayerState = __instance;
+            PlayerInWorld = GameObject.Find("SimplePlayer");
+            PlayerInWorldBody = PlayerInWorld.GetComponent<Rigidbody>();
+            SaveAndQuitButton = GameObject.Find("HUD Root/PauseMenu/PauseUI/Buttons/QuitButton").GetComponent<Button>();
+            FirestormActivator = PlayerInWorld.GetComponent<FirestormActivator>();
 
-        OnFirstUpdate += () => Core.Log.Msg("First Update");
+            MainMenuPatch.OnGamePotentialExit += () =>
+            {
+                OnFirstUpdate = null;
+                PlayerState = null;
+                PlayerInWorld = null;
+                PlayerInWorldBody = null;
+                PlayerMap = null;
+                SaveAndQuitButton = null;
+                FirstUpdate = false;
+            };
 
-        Core.Log.Msg("Player Awake");
-        GameLoader.ResetData();
+            Core.Log.Msg("Player Awake");
+            GameLoader.ResetData();
+        }
+        catch (Exception e)
+        {
+            Core.Log.Msg(e);
+        }
     }
 
     [HarmonyPatch(typeof(PlayerState), "Update"), HarmonyPostfix]
@@ -56,6 +62,7 @@ public static class PlayerStatePatch
         try
         {
             if (FirstUpdate) return;
+            Core.Log.Msg("First Update");
             foreach (var accessDoor in Resources.FindObjectsOfTypeAll<AccessDoor>())
             {
                 AccessDoorPatch.RunDoorCheck(accessDoor);
