@@ -1,6 +1,10 @@
 ### Help support me, this and future projects on [Patreon](https://www.patreon.com/c/SW_CreeperKing)
 
+---
+
 ### DISCLAIMER: THIS MOD WILL >>NOT<< GIVE YOU THE PAID DLC FOR FREE
+
+---
 
 ## How to install
 
@@ -20,8 +24,10 @@
 
 > [!Note]
 > This mod will most likely not work with the SRModLoader
-> Double/triple/quadruple check the mod folder, melon might rename it to `~SW_CreeperKing.ArchipelagoSurvivors`
+> Double/triple/quadruple check the mod folder, melon might rename it to `~SW_CreeperKing.Slimipelago`
 > which will prevent the mod from loading correctly
+
+---
 
 # Randomizer Information
 
@@ -47,6 +53,8 @@ Treasure Cracker Upgrades require the `Region Unlock: The Lab`
   - lv.1 requires 1 gadget crafted
   - lv.2 requires 20 gadgets crafted
   - lv.3 requires 50 gadgets crafted
+
+---
 
 ## Special Thanks
 
