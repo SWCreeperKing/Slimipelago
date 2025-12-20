@@ -3,11 +3,13 @@ using KaitoKid.ArchipelagoUtilities.AssetDownloader.ItemSprites;
 using MelonLoader;
 using Newtonsoft.Json;
 using Slimipelago.Archipelago;
+using Slimipelago.Patches.Interactables;
 using Slimipelago.Patches.PlayerPatches;
 using Slimipelago.Patches.UiPatches;
 using UnityEngine;
 using static Slimipelago.GameLoader;
 using Logger = Slimipelago.Archipelago.Logger;
+using Object = UnityEngine.Object;
 
 [assembly: MelonInfo(typeof(Slimipelago.Core), "Slimipelago", "1.0.0", "SW_CreeperKing", null)]
 [assembly: MelonGame("Monomi Park", "Slime Rancher")]
@@ -104,14 +106,22 @@ public class Core : MelonMod
         Log.Msg("Loading Songs");
 
         MusicPatch.LoadSongs();
+        
+        Log.Msg("Loading Traps");
 
+        TrapLoader.Init();
+        
         Log.Msg("Initialized.");
 
+        // DirectedSlimeSpawner
         // IntroUI
         // ExchangeFullUI
-        KeyRegistry.AddKey(KeyCode.P, () => Log.Msg(PlayerStatePatch.PlayerInWorld.transform.position));
-        KeyRegistry.AddKey(KeyCode.Backspace,
-            () => SRSingleton<SceneContext>.Instance.GadgetDirector?.AddGadget(Gadget.Id.DRONE_ADVANCED));
+        // KeyRegistry.AddKey(KeyCode.P, () => Log.Msg(PlayerStatePatch.PlayerInWorld.transform.position));
+        // KeyRegistry.AddKey(KeyCode.Backspace,
+        //     () => SRSingleton<SceneContext>.Instance.GadgetDirector?.AddGadget(Gadget.Id.DRONE_ADVANCED));
+        // KeyRegistry.AddKey(KeyCode.O, () =>
+        // {
+        // });
     }
 
     public override void OnUpdate()

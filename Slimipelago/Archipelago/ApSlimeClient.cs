@@ -42,21 +42,6 @@ public static class ApSlimeClient
 
     public static long CurrentItemIndex;
 
-    public static string[] Zones =
-    [
-        "The Ranch",
-        "The Lab",
-        "The Overgrowth",
-        "The Grotto",
-        "Dry Reef",
-        "Indigo Quarry",
-        "Moss Blanket",
-        "Ancient Ruins Transition",
-        "Ancient Ruins",
-        "Glass Desert",
-// "The Slime Sea",
-    ];
-
     public static string GameUUID = "";
 
     public static void Init()
@@ -188,6 +173,11 @@ public static class ApSlimeClient
             Items.Clear();
             ItemCache.Clear();
 
+            if (SRSingleton<GameContext>.Instance.AutoSaveDirector.IsNewGame())
+            {
+                CurrentItemIndex = 0;
+            }
+            
             foreach (var item in Items)
             {
                 ItemHandler.ProcessItem(item);

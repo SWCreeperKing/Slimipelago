@@ -7,7 +7,7 @@ using Slimipelago.Patches.UiPatches;
 using UnityEngine;
 using static Slimipelago.Patches.PlayerPatches.PlayerModelPatch;
 using static Slimipelago.Archipelago.ApSlimeClient;
-using ILogger = KaitoKid.Utilities.Interfaces.ILogger;
+using static Slimipelago.Archipelago.ItemConstants;
 
 namespace Slimipelago.Archipelago;
 
@@ -87,15 +87,15 @@ public static class ItemHandler
         {
             switch (name)
             {
-                case "Air Burst":
+                case AirBurst:
                     Model.hasAirBurst = true;
                     return;
-                case "Liquid Slot":
+                case LiquidSlot:
                     Model.ammoDict[PlayerState.AmmoMode.DEFAULT].IncreaseUsableSlots(5);
                     return;
-                case "Golden Sure Shot":
+                case SureShot:
                     return;
-                case "Progressive Max Health":
+                case MaxHealth:
                     Model.maxHealth = 150 + 50 * ItemCache[name];
                     if ((double)Model.currHealth >= Model.maxHealth)
                     {
@@ -107,15 +107,15 @@ public static class ItemHandler
                         Math.Min(Model.healthBurstAfter, PlayerModelPatch.WorldModel.worldTime + 300.0);
                     ItemCache[name]++;
                     return;
-                case "Progressive Max Ammo":
+                case MaxAmmo:
                     Model.maxAmmo = PlayerModel.DEFAULT_MAX_AMMO[ItemCache[name] + 1];
                     ItemCache[name]++;
                     return;
-                case "Progressive Run Efficiency":
+                case RunEfficency:
                     Model.runEfficiency = ItemCache[name] == 0 ? 0.667f : .5f;
                     ItemCache[name]++;
                     return;
-                case "Progressive Max Energy":
+                case MaxEnergy:
                     Model.maxEnergy = 150 + 50 * ItemCache[name];
                     if ((double)Model.currEnergy >= Model.maxEnergy)
                     {
@@ -127,7 +127,7 @@ public static class ItemHandler
                         PlayerModelPatch.WorldModel.worldTime + 300.0);
                     ItemCache[name]++;
                     return;
-                case "Progressive Jetpack":
+                case ProgJetpack:
                     switch (ItemCache[name])
                     {
                         case 0:
@@ -141,23 +141,23 @@ public static class ItemHandler
 
                     ItemCache[name]++;
                     return;
-                case "Progressive Treasure Cracker" or "Progressive Market Stonks":
+                case ProgTreasure or ProgMarket:
                     ItemCache[name]++;
                     break;
             }
 
             if (!firstReceive) return;
-            if (name.EndsWith("x Newbucks"))
+            if (name.EndsWith(NewBucksEnding))
             {
-                int.TryParse(name.Substring(0, name.IndexOf('x')), out var amount);
+                int.TryParse(name.Substring(0, name.IndexOf(NewBucksEnding[0])), out var amount);
                 PlayerStatePatch.PlayerState.AddCurrency(amount);
             }
             else switch (name)
             {
-                case "Drone":
+                case ItemConstants.Drone:
                     SRSingleton<SceneContext>.Instance.GadgetDirector?.AddGadget(Gadget.Id.DRONE);
                     break;
-                case "Advanced Drone":
+                case AdvDrone:
                     SRSingleton<SceneContext>.Instance.GadgetDirector?.AddGadget(Gadget.Id.DRONE_ADVANCED);
                     break;
             }
@@ -196,31 +196,4 @@ public static class ItemHandler
 
         return fallback;
     }
-}
-
-public class Logger : ILogger
-{
-    public void LogError(string message) => Core.Log?.Error(message);
-    public void LogError(string message, Exception e) => Core.Log?.Error(message, e);
-    public void LogWarning(string message) => Core.Log?.Warning(message);
-    public void LogInfo(string message) => Core.Log?.Msg(message);
-    public void LogMessage(string message) => Core.Log?.Msg(message);
-    public void LogDebug(string message) => Core.Log?.Msg(message);
-
-    public void LogDebugPatchIsRunning(string patchedType, string patchedMethod, string patchType, string patchMethod,
-        params object[] arguments)
-        => Core.Log?.Msg($"Debug Patch: [{patchedMethod}] -> [{patchMethod}]");
-
-    public void LogDebug(string message, params object[] arguments) => Core.Log?.Msg(message);
-    public void LogErrorException(string prefixMessage, Exception ex, params object[] arguments) => Core.Log?.Error(ex);
-
-    public void LogWarningException(string prefixMessage, Exception ex, params object[] arguments)
-        => Core.Log?.Error(ex);
-
-    public void LogErrorException(Exception ex, params object[] arguments) => Core.Log?.Error(ex);
-    public void LogWarningException(Exception ex, params object[] arguments) => Core.Log?.Error(ex);
-    public void LogErrorMessage(string message, params object[] arguments) => Core.Log?.Error(message);
-
-    public void LogErrorException(string patchType, string patchMethod, Exception ex, params object[] arguments)
-        => Core.Log?.Error(ex);
 }

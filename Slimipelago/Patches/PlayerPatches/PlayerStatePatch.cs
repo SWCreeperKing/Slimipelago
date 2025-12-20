@@ -6,6 +6,7 @@ using Slimipelago.Patches.Interactables;
 using Slimipelago.Patches.UiPatches;
 using UnityEngine;
 using UnityEngine.UI;
+using Object = System.Object;
 
 namespace Slimipelago.Patches.PlayerPatches;
 
@@ -63,6 +64,7 @@ public static class PlayerStatePatch
         {
             if (FirstUpdate) return;
             Core.Log.Msg("First Update");
+            
             foreach (var accessDoor in Resources.FindObjectsOfTypeAll<AccessDoor>())
             {
                 AccessDoorPatch.RunDoorCheck(accessDoor);

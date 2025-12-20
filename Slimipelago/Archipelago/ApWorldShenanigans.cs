@@ -8,17 +8,19 @@ namespace Slimipelago.Archipelago;
 // 24-28: glass
 public static class ApWorldShenanigans
 {
+    public const string CsvFile = "Slimerancher - Checkables.csv";
+    
     public static void RunShenanigans()
     {
         // downloaded from spreadsheet:
         // https://docs.google.com/spreadsheets/d/15PdrnGmkYdocX9RU-D5U_9OgihRNN9axX71mm-jOPUQ
-        if (!File.Exists("Slimerancher - Sheet1.csv")) return;
+        if (!File.Exists(CsvFile)) return;
         if (!Directory.Exists("output"))
         {
             Directory.CreateDirectory("output");
         }
 
-        var csvRaw = File.ReadAllText("Slimerancher - Sheet1.csv");
+        var csvRaw = File.ReadAllText(CsvFile);
         var csv = csvRaw
                  .Replace("\r", "")
                  .Split('\n')
@@ -127,12 +129,12 @@ public static class ApWorldShenanigans
                                   => $"{line.InteractableName}:{GenRule(line.InteractableName, line.InteractableCrackerLevel, line.InteractableJetpackRequirement, line.InteractableMinJetpackEnergy.Split(' ')[0], false)}:{line.InteractableArea}")
                              .Where(s => s != "")));
 
-        if (File.Exists("output/Slimerancher - Sheet1.csv"))
+        if (File.Exists($"output/{CsvFile}"))
         {
-            File.Delete("output/Slimerancher - Sheet1.csv");
+            File.Delete($"output/{CsvFile}");
         }
 
-        File.Move("Slimerancher - Sheet1.csv", "output/Slimerancher - Sheet1.csv");
+        File.Move(CsvFile, $"output/{CsvFile}");
         return;
 
         string GenRule(string location, string cracker, string needsJetpack, string energyNeeded, bool isPython)
@@ -210,7 +212,7 @@ public readonly struct CsvLine(string[] line)
     public bool HasGordo => GordoId != "";
     public bool HasUpgrade => UpgradeName != "";
     public bool HasCorporate => CorporateLocation != "";
-    public bool IsValidZone => ApSlimeClient.Zones.Contains(InteractableArea);
+    public bool IsValidZone => ZoneConstants.Zones.Contains(InteractableArea);
     public bool IsSecretStyle => InteractableCrackerLevel == "Secret Style";
     public string GetInteractableText => $"{InteractableId},{InteractableName},{InteractableSummary}";
     public string GetGateText => $"{GateId},{GateName}";

@@ -1,5 +1,6 @@
 using HarmonyLib;
 using Slimipelago.Archipelago;
+using static Slimipelago.Archipelago.ItemConstants;
 
 namespace Slimipelago.Patches.Interactables;
 
@@ -56,7 +57,7 @@ public static class PodPatch
     public static bool HasKey(TreasurePod __instance, ref bool __result)
     {
         __result = !__instance.needsUpgrade ||
-                   (ApSlimeClient.ItemCache.TryGetValue("Progressive Treasure Cracker", out var value) &&
+                   (ApSlimeClient.ItemCache.TryGetValue(ProgTreasure, out var value) &&
                     value >= (int)__instance.requiredUpgrade - 99);
         return false;
     }
@@ -64,7 +65,7 @@ public static class PodPatch
     [HarmonyPatch(typeof(TreasurePod), "HasAnyKey"), HarmonyPrefix]
     public static bool HasAnyKey(TreasurePod __instance, ref bool __result)
     {
-        __result = ApSlimeClient.ItemCache.TryGetValue("Progressive Treasure Cracker", out var value) && value > 0;
+        __result = ApSlimeClient.ItemCache.TryGetValue(ProgTreasure, out var value) && value > 0;
         return false;
     }
 }

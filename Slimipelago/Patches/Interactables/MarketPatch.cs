@@ -1,6 +1,7 @@
 using HarmonyLib;
 using MonomiPark.SlimeRancher.DataModel;
 using Slimipelago.Archipelago;
+using static Slimipelago.Archipelago.ItemConstants;
 
 namespace Slimipelago.Patches.Interactables;
 
@@ -25,7 +26,7 @@ public static class MarketPatch
     public static void AfterGetTargetValue(WorldModel worldModel, Identifiable.Id id, float baseValue, float fullSaturation,
         float day, ref float __result)
     {
-        if (!ApSlimeClient.ItemCache.TryGetValue("Progressive Market Stonks", out var value)) return;
+        if (!ApSlimeClient.ItemCache.TryGetValue(ProgMarket, out var value)) return;
         __result *= 5 * value / 100f + 1;
     }
 }

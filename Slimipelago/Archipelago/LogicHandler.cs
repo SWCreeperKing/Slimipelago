@@ -1,5 +1,7 @@
 using Slimipelago.Patches.PlayerPatches;
 using UnityEngine;
+using static Slimipelago.Archipelago.ItemConstants;
+using static Slimipelago.Archipelago.ZoneConstants;
 
 namespace Slimipelago.Archipelago;
 
@@ -18,8 +20,8 @@ public static class LogicHandler
     public static void LogicCheck()
     {
         var hasJetpack = JetpackPatch.EnableJetpack;
-        var crackerLevel = ApSlimeClient.ItemCache.TryGetValue("Progressive Treasure Cracker", out var val) ? val : 0;
-        var energyLevel = ApSlimeClient.ItemCache.TryGetValue("Progressive Max Energy", out var val1) ? val1 : 0;
+        var crackerLevel = ApSlimeClient.ItemCache.TryGetValue(ProgTreasure, out var val) ? val : 0;
+        var energyLevel = ApSlimeClient.ItemCache.TryGetValue(MaxEnergy, out var val1) ? val1 : 0;
         foreach (var kv in LogicLines)
         {
             LogicCache[kv.Key] = kv.Value.UpdateLogic(crackerLevel, hasJetpack, energyLevel);
@@ -62,6 +64,18 @@ public readonly struct LogicLine(int crackerLevel, bool needsJetpack, int energy
     public bool UpdateLogic(int currentCrackerLevel, bool currentlyHasJetpack, int currentEnergyLevel)
     {
         if (needsJetpack && !currentlyHasJetpack) return false;
-        return currentCrackerLevel >= crackerLevel && currentEnergyLevel >= energyLevel && PlayerTrackerPatch.AllowedZones.Contains(region);
+        return currentCrackerLevel >= crackerLevel && currentEnergyLevel >= energyLevel && HasRegion(region);
+    }
+
+    public bool HasRegion(string region)
+    {
+        return PlayerTrackerPatch.AllowedZones.Contains(region) && region switch
+        {
+            Glass => HasRegion(Ruins),
+            Ruins => HasRegion(Transition) && HasRegion(Moss) && HasRegion(Quarry),
+            Transition => HasRegion(Moss) || HasRegion(Quarry),
+            Moss or Quarry => HasRegion(Reef),
+            _ => true
+        }; 
     }
 }

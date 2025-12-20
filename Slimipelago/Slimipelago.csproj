@@ -276,8 +276,12 @@
         <Compile Include="Added\Playground.cs"/>
         <Compile Include="Archipelago\ApSlimeClient.cs"/>
         <Compile Include="Archipelago\ApWorldShenanigans.cs"/>
+        <Compile Include="Archipelago\ItemConstants.cs" />
         <Compile Include="Archipelago\ItemHandler.cs"/>
+        <Compile Include="Archipelago\Logger.cs" />
         <Compile Include="Archipelago\LogicHandler.cs" />
+        <Compile Include="Archipelago\TrapLoader.cs" />
+        <Compile Include="Archipelago\ZoneConstants.cs" />
         <Compile Include="Core.cs"/>
         <Compile Include="GameLoader.cs"/>
         <Compile Include="Helper.cs"/>
@@ -292,6 +296,7 @@
         <Compile Include="Patches\Interactables\MarketPatch.cs" />
         <Compile Include="Patches\Interactables\PodPatch.cs"/>
         <Compile Include="Patches\PlayerPatches\GordoMarkerPatch.cs" />
+        <Compile Include="Patches\PlayerPatches\IntroPatch.cs" />
         <Compile Include="Patches\PlayerPatches\JetpackPatch.cs"/>
         <Compile Include="Patches\PlayerPatches\PlayerModelPatch.cs"/>
         <Compile Include="Patches\PlayerPatches\PlayerStatePatch.cs"/>
