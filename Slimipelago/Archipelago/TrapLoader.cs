@@ -185,6 +185,6 @@ public class TrapAttribute(TrapLoader.Trap trap, string[] trapName, string descr
 
 public readonly struct TrapLinkTrap(string trap, string player)
 {
-    public readonly string Trap = trap;
+    public readonly string Trap = trap.Replace("Trap", "").Trim(' ');
     public readonly string Player = player;
 }

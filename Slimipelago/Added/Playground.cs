@@ -52,7 +52,7 @@ public static class Playground
     }
 
     [Trap(TrapLoader.Trap.Text,
-        ["Text", "Ghost Chat", "Laughter", "Cutscene","Literature", "Phone", "Aaa", "Tip", "Omo", "Spam", "Tutorial", "Exposition"],
+        ["Text", "Ghost Chat", "Math Quiz", "Pinball", "Breakout", "Snake", "UNO Challenge", "PONG Challenge", "Pong", "Trivia Trap", "Laughter", "Cutscene","Literature", "Phone", "Aaa", "Tip", "Omo", "Spam", "Tutorial", "Exposition"],
         "Puts text on the screen")]
     public static bool Note(string trapName)
     {
@@ -141,7 +141,7 @@ public static class Playground
     [Trap(TrapLoader.Trap.Smol, ["Tiny"], "Makes the player tiny")]
     public static bool Smol(string trapName)
         => ActivateTrapWithReset(() => PlayerInWorld.transform.DOScale(SmolScale, 1),
-            () => PlayerInWorld.transform.DOScale(NormalScale, 1));
+            () => PlayerInWorld.transform.DOScale(NormalScale, 1), 20);
 
     [Trap(TrapLoader.Trap.Wide, ["W I D E", "Squash", "Paper"], "Makes the player W I D E")]
     public static bool Wide(string trapName)
@@ -177,7 +177,7 @@ public static class Playground
     public static bool Freeze(string trapName)
         => ActivateTrapWithReset(() => PlayerLockOnDeath.Freeze(), () => PlayerLockOnDeath.Unfreeze());
 
-    [Trap(TrapLoader.Trap.NoVac, ["No Vac", "Disable A", "Disable B", "Disable C Up", "Disable Tag", "Disable Z"],
+    [Trap(TrapLoader.Trap.NoVac, ["No Vac", " No Guarding", "No Petals","No Revivals", "Disable A", "Disable B", "Disable C Up", "Disable Tag", "Disable Z"],
         "Disables the vacuum")]
     public static bool NoVac(string trapName)
         => ActivateTrapWithReset(() => PlayerVacuum.gameObject.SetActive(false),
@@ -198,7 +198,7 @@ public static class Playground
             Application.targetFrameRate = Fps;
         });
 
-    [Trap(TrapLoader.Trap.Underwater, ["Underwater", "Honey", "Iron Boots", "Slow", "Slowness", "Fishing"], "Gives you underwater effects")]
+    [Trap(TrapLoader.Trap.Underwater, ["Underwater", "Sticky Floor", "Rail", "Sticky Hands", "Honey", "Iron Boots", "Slow", "Slowness", "Fishing"], "Gives you underwater effects")]
     public static bool Underwater(string trapName)
     {
         if (PlayerEffects.Underwater.Active) return false;
@@ -262,7 +262,6 @@ public static class Playground
 ~ 144p Trap
 X Animal Bonus Trap
 X Bald Trap
-X Breakout Trap
 X Controller Drift Trap
 X Cursed Ball Trap
 ~ Fake Transition
@@ -275,29 +274,16 @@ X Frog Trap
 X Items to Bombs
 ~ Jumping Jacks Trap
 X Light Up Path Trap
-X Math Quiz Trap
 X My Turn! Trap
-X No Guarding
-X No Petals
-X No Revivals
 X Number Sequence Trap
-X Pinball Trap
 ~ Pixelate Trap -> 144p
 ~ Pixellation Trap -> 144p
 X Pokemon Count Trap
 X Pokemon Trivia Trap
-X PONG Challenge
-X Pong Trap
 X Posession Trap
-X Rail Trap
-X Snake Trap
 ~ Spotlight Trap
-~ Sticky Floor Trap
-~ Sticky Hands Trap
 X Swap Trap
 ~ Time Limit
 ~ Time Warp Trap
 ~ Timer Trap
-X Trivia Trap
-X UNO Challenge
  */

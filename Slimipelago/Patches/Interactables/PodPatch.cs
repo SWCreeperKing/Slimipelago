@@ -12,26 +12,7 @@ public static class PodPatch
     [HarmonyPatch(typeof(TreasurePod), "Awake"), HarmonyPostfix]
     public static void MarkPod(TreasurePod __instance)
     {
-        // var trying = "WTF?";
-        try
-        {
-            // trying = "Interactable";
-            __instance.InteractableInstanced(PodType[GetType(__instance)]);
-
-            // trying = "location dict";
-            // if (!ApSlimeClient.LocationDictionary.TryGetValue(__instance.transform.position.HashPos(),
-            //         out var itemName))
-            //     return;
-
-            // trying = "missing";
-            // if (!ApSlimeClient.Client.MissingLocations.Contains(itemName) ||
-            //     __instance.CurrState is TreasurePod.State.LOCKED) return;
-        }
-        catch (Exception e)
-        {
-            // Core.Log.Error($"Failing at [{trying}] | [{__instance is null}] | [{__}]");
-            Core.Log.Error(e);
-        } 
+        __instance.InteractableInstanced(PodType[GetType(__instance)]);
     }
 
     public static int GetType(TreasurePod pod)
@@ -50,6 +31,7 @@ public static class PodPatch
         {
             Core.Log.Msg($"{__instance.transform.position.HashPos()}: {__instance.blueprint}");
         }
+
         __instance.InteractableInteracted("Pod");
     }
 
