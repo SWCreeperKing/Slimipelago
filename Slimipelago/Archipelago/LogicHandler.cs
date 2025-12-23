@@ -34,6 +34,8 @@ public static class LogicHandler
 
             GameLoader.ChangeMarkerColor(kv.Key, _ =>
             {
+                if (marker.LocationName == "Null") return Color.red;
+                
                 var color = !ApSlimeClient.HintedItems.Contains(marker.LocationName)
                     ? Color.white
                     : Color.yellow;

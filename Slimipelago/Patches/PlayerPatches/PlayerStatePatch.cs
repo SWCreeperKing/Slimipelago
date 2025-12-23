@@ -5,8 +5,8 @@ using Slimipelago.Archipelago;
 using Slimipelago.Patches.Interactables;
 using Slimipelago.Patches.UiPatches;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using Object = System.Object;
 
 namespace Slimipelago.Patches.PlayerPatches;
 
@@ -17,6 +17,10 @@ public static class PlayerStatePatch
     public static FirestormActivator FirestormActivator;
     public static GameObject PlayerInWorld = null;
     public static Rigidbody PlayerInWorldBody;
+    public static vp_FPPlayerEventHandler PlayerEffects;
+    public static Camera PlayerCamera;
+    public static LockOnDeath PlayerLockOnDeath;
+    public static PlayerDamageable PlayerDamageable;
     public static Map PlayerMap;
     public static Button SaveAndQuitButton;
     public static bool FirstUpdate { get; private set; }
@@ -28,6 +32,7 @@ public static class PlayerStatePatch
     [HarmonyPatch(typeof(PlayerState), "Awake"), HarmonyPostfix]
     public static void PlayerAwake(PlayerState __instance)
     {
+        if (SceneManager.GetActiveScene().name is "MainMenu") return;
         if (__instance is null) return;
         try
         {
@@ -36,7 +41,12 @@ public static class PlayerStatePatch
             PlayerInWorldBody = PlayerInWorld.GetComponent<Rigidbody>();
             SaveAndQuitButton = GameObject.Find("HUD Root/PauseMenu/PauseUI/Buttons/QuitButton").GetComponent<Button>();
             FirestormActivator = PlayerInWorld.GetComponent<FirestormActivator>();
-
+            PlayerLockOnDeath = PlayerInWorld.GetComponent<LockOnDeath>();
+            PlayerDamageable = PlayerInWorld.GetComponent<PlayerDamageable>();
+            PlayerEffects = PlayerInWorld.GetComponent<vp_FPPlayerEventHandler>();
+            PlayerCamera = PlayerInWorld.GetChild(0).GetComponent<Camera>();
+            PlayerCamera.orthographicSize = 1;
+            
             MainMenuPatch.OnGamePotentialExit += () =>
             {
                 OnFirstUpdate = null;
@@ -45,6 +55,10 @@ public static class PlayerStatePatch
                 PlayerInWorldBody = null;
                 PlayerMap = null;
                 SaveAndQuitButton = null;
+                PlayerLockOnDeath = null;
+                PlayerDamageable = null;
+                PlayerCamera = null;
+                PlayerEffects = null;
                 FirstUpdate = false;
             };
 
@@ -53,7 +67,7 @@ public static class PlayerStatePatch
         }
         catch (Exception e)
         {
-            Core.Log.Msg(e);
+            Core.Log.Error(e);
         }
     }
 
@@ -94,5 +108,8 @@ public static class PlayerStatePatch
         pos.y += 5;
         PlayerModelPatch.Model.SetCurrRegionSet(region);
         PlayerInWorld.transform.position = pos;
+        SRSingleton<SceneContext>.Instance.AmbianceDirector.ExitAllLiquid();
+        PlayerEffects.Underwater.Stop();
+        PlayerState.SetAmmoMode(PlayerState.AmmoMode.DEFAULT);
     }
 }

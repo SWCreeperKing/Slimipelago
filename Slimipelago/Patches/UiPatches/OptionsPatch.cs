@@ -43,53 +43,49 @@ public static class OptionsPatch
         var g1 = CreateHorizontalGroup(panel).gameObject;
         CreateText("Address:Port", Color.black, g1);
         var address = CreateInputField("Ap Address", g1);
-        address.text = AddressPort;
+        address.text = Data.AddressPort;
 
         var g2 = CreateHorizontalGroup(panel).gameObject;
         CreateText("Password    ", Color.black, g2);
         var password = CreateInputField("Ap Password", g2);
         password.contentType = InputField.ContentType.Password;
-        password.text = Password;
+        password.text = Data.Password;
 
         var g3 = CreateHorizontalGroup(panel).gameObject;
         CreateText("Slot name    ", Color.black, g3);
         var slot = CreateInputField("Ap Slot", g3);
-        slot.text = SlotName;
+        slot.text = Data.SlotName;
 
         var g4 = CreateHorizontalGroup(panel).gameObject;
-        CreateCheckbox(__instance.modTogglePrefab, g4, DeathLink, "DeathLink\n ", b =>
+        CreateCheckbox(__instance.modTogglePrefab, g4, Data.DeathLink, "DeathLink\n ", b =>
             {
-                DeathLink = b;
+                Data.DeathLink = b;
                 if (!Client.IsConnected) return;
                 if (Client.Tags[ArchipelagoTag.DeathLink]) _ = Client.Tags - ArchipelagoTag.DeathLink;
                 else _ = Client.Tags + ArchipelagoTag.DeathLink;
-            })
-           .interactable = false;
-        CreateCheckbox(__instance.modTogglePrefab, g4, DeathLinkTeleport, "Teleport to Ranch\ninstead of dying",
-                b => DeathLinkTeleport = b)
-           .interactable = false;
+            });
+        CreateCheckbox(__instance.modTogglePrefab, g4, Data.DeathLinkTrap, "Deathlink does Trap\ninstead of dying",
+                b => Data.DeathLinkTrap = b);
 
         var g42 = CreateHorizontalGroup(panel).gameObject;
-        CreateCheckbox(__instance.modTogglePrefab, g42, TrapLink, "TrapLink\n ", b =>
+        CreateCheckbox(__instance.modTogglePrefab, g42, Data.TrapLink, "TrapLink\n ", b =>
             {
-                DeathLink = b;
+                Data.TrapLink = b;
                 if (!Client.IsConnected) return;
-                if (Client.Tags[ArchipelagoTag.DeathLink]) _ = Client.Tags - ArchipelagoTag.DeathLink;
-                else _ = Client.Tags + ArchipelagoTag.DeathLink;
-            })
-           .interactable = false;
-        CreateCheckbox(__instance.modTogglePrefab, g42, TrapLinkRandom, "Give random traps\nfor unknown traps",
-                b => TrapLinkRandom = b)
-           .interactable = false;
+                if (Client.Tags[ArchipelagoTag.TrapLink]) _ = Client.Tags - ArchipelagoTag.TrapLink;
+                else _ = Client.Tags + ArchipelagoTag.TrapLink;
+            });
+        CreateCheckbox(__instance.modTogglePrefab, g42, Data.TrapLinkRandom, "Give random traps\nfor unknown traps",
+                b => Data.TrapLinkRandom = b);
 
         var g5 = CreateHorizontalGroup(panel).gameObject;
-        CreateCheckbox(__instance.modTogglePrefab, g5, MusicRando, "Music Rando\n ", b => MusicRando = b);
-        CreateCheckbox(__instance.modTogglePrefab, g5, MusicRandoRandomizeOnce, "Music Rando:\nRandomize Once",
-            b => MusicRandoRandomizeOnce = b);
+        CreateCheckbox(__instance.modTogglePrefab, g5, Data.MusicRando, "Music Rando\n ", b => Data.MusicRando = b);
+        CreateCheckbox(__instance.modTogglePrefab, g5, Data.MusicRandoRandomizeOnce, "Music Rando:\nRandomize Once",
+            b => Data.MusicRandoRandomizeOnce = b);
 
         var g6 = CreateHorizontalGroup(panel).gameObject;
-        CreateCheckbox(__instance.modTogglePrefab, g6, UseCustomAssets, "Use Archipelago Utilities\n Custom Assets",
-                b => UseCustomAssets = b);
+        CreateCheckbox(__instance.modTogglePrefab, g6, Data.UseCustomAssets, "Use Archipelago Utilities\n Custom Assets",
+                b => Data.UseCustomAssets = b);
 
         var connectButton = CreateButton(Client.IsConnected ? "Disconnect" : "Connect", g6,
             null, out var buttonText);
@@ -112,9 +108,9 @@ public static class OptionsPatch
                     if (error is null)
                     {
                         buttonText.text = "Disconnect";
-                        AddressPort = address.text;
-                        Password = password.text;
-                        SlotName = slot.text;
+                        Data.AddressPort = address.text;
+                        Data.Password = password.text;
+                        Data.SlotName = slot.text;
                         SaveFile();
                     }
                     else

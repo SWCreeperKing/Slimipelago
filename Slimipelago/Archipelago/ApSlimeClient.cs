@@ -7,9 +7,12 @@ using CreepyUtil.Archipelago;
 using CreepyUtil.Archipelago.ApClient;
 using JetBrains.Annotations;
 using KaitoKid.ArchipelagoUtilities.AssetDownloader.ItemSprites;
+using Newtonsoft.Json;
+using Slimipelago.Added;
 using Slimipelago.Patches.Interactables;
 using Slimipelago.Patches.PlayerPatches;
 using Slimipelago.Patches.UiPatches;
+using static Slimipelago.Archipelago.TrapLoader;
 
 namespace Slimipelago.Archipelago;
 
@@ -26,16 +29,7 @@ public static class ApSlimeClient
     public static string[] HintedItems = [];
     public static ApClient Client = new();
 
-    public static string AddressPort = "archipelago.gg:12345";
-    public static string Password = "";
-    public static string SlotName = "Rancher1";
-    public static bool DeathLink = false;
-    public static bool DeathLinkTeleport = false;
-    public static bool TrapLink = false;
-    public static bool TrapLinkRandom = false;
-    public static bool MusicRando = false;
-    public static bool MusicRandoRandomizeOnce = false;
-    public static bool UseCustomAssets = true;
+    public static ApData Data;
     public static bool HackTheMarket = true;
     public static bool QueueReLogic;
     public static long GoalType;
@@ -46,24 +40,17 @@ public static class ApSlimeClient
 
     public static void Init()
     {
+        if (File.Exists("ApConnection.json"))
+        {
+            Data = JsonConvert.DeserializeObject<ApData>(File.ReadAllText("ApConnection.json").Replace("\r", ""));
+        }
+
         if (File.Exists("ApConnection.txt"))
         {
-            var fileText = File.ReadAllText("ApConnection.txt").Replace("\r", "").Split('\n');
-            AddressPort = fileText[0];
-            Password = fileText[1];
-            SlotName = fileText[2];
-
-            if (fileText.Length > 3)
-            {
-                var boolArr = fileText[3].ToCharArray();
-                DeathLink = StrBool(boolArr[0]);
-                DeathLinkTeleport = StrBool(boolArr[1]);
-                TrapLink = StrBool(boolArr[2]);
-                TrapLinkRandom = StrBool(boolArr[3]);
-                MusicRando = StrBool(boolArr[4]);
-                MusicRandoRandomizeOnce = StrBool(boolArr[5]);
-                if (boolArr.Length > 6) UseCustomAssets = StrBool(boolArr[6]);
-            }
+            Data = new ApData();
+            Data.Init();
+            SaveFile();
+            File.Delete("ApConnection.txt");
         }
 
         Client.OnConnectionLost += () =>
@@ -90,9 +77,27 @@ public static class ApSlimeClient
 
             using var sha = SHA1.Create();
             RandoSeeds[seed!] = BitConverter.ToInt32(sha.ComputeHash(Encoding.UTF8.GetBytes(seed)), 0);
+            LoadTrapData();
         };
 
         Client.OnConnectionErrorReceived += (e, s) => { Core.Log.Error(e); };
+
+        Client.OnUnregisteredTrapLinkReceived +=
+            (player, trap) => TrapLinkTraps.Enqueue(new TrapLinkTrap(trap, player));
+
+        Client.OnDeathLinkPacketReceived += (player, message) =>
+        {
+            if (Data.DeathLinkTrap)
+            {
+                TrapLinkTraps.Enqueue(new TrapLinkTrap(BaseTrapNames[Playground.Random.Next(BaseTrapNames.Count)],
+                    $"(DeathLink) {player}"));
+            }
+            else
+            {
+                PlayerDeathHandlerPatch.DeathlinkRecieved = true;
+                DeathHandler.Kill(PlayerStatePatch.PlayerInWorld, DeathHandler.Source.CHICKEN_VAMPIRISM, null, "DeathLink");
+            }
+        };
     }
 
     [CanBeNull]
@@ -104,7 +109,13 @@ public static class ApSlimeClient
         if (!int.TryParse(addressSplit[1], out var port)) return ["Port is incorrect"];
 
         var login = new LoginInfo(port, slotName, addressSplit[0], password);
-        return Client.TryConnect(login, "Slime Rancher", ItemsHandlingFlags.AllItems);
+
+        List<ArchipelagoTag> tags = [];
+
+        if (Data.DeathLink) tags.Add(ArchipelagoTag.DeathLink);
+        if (Data.TrapLink) tags.Add(ArchipelagoTag.TrapLink);
+
+        return Client.TryConnect(login, "Slime Rancher", ItemsHandlingFlags.AllItems, tags: tags.ToArray());
     }
 
     public static void Update()
@@ -122,7 +133,7 @@ public static class ApSlimeClient
                 QueueReLogic = false;
                 LogicHandler.LogicCheck();
             }
-            
+
             if (Client.PushUpdatedVariables(false, out var hints))
             {
                 var player = Client.PlayerSlot;
@@ -149,12 +160,7 @@ public static class ApSlimeClient
         }
     }
 
-    public static void SaveFile()
-        => File.WriteAllText("ApConnection.txt",
-            $"{AddressPort}\n{Password}\n{SlotName}\n{BoolStr(DeathLink)}{BoolStr(DeathLinkTeleport)}{BoolStr(TrapLink)}{BoolStr(TrapLinkRandom)}{BoolStr(MusicRando)}{BoolStr(MusicRandoRandomizeOnce)}{BoolStr(UseCustomAssets)}");
-
-    private static char BoolStr(bool b) => b ? '1' : '0';
-    private static bool StrBool(char c) => c == '1';
+    public static void SaveFile() => File.WriteAllText("ApConnection.json", JsonConvert.SerializeObject(Data));
 
     public static void WorldOpened()
     {
@@ -177,7 +183,7 @@ public static class ApSlimeClient
             {
                 CurrentItemIndex = 0;
             }
-            
+
             foreach (var item in Items)
             {
                 ItemHandler.ProcessItem(item);
@@ -195,11 +201,11 @@ public static class ApSlimeClient
         {
             QueueItemPopup(locationType, location);
         }
-        
+
         Client.SendLocations(locations);
         UpdateGoal();
     }
-    
+
     public static void SendItem(string locationType, string location)
     {
         QueueItemPopup(locationType, location);

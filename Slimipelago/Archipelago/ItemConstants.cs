@@ -17,4 +17,7 @@ public static class ItemConstants
 
     public const string Drone = "Drone";
     public const string AdvDrone = "Advanced Drone";
+    public const string MarketLink = "Market Link"; 
+
+    public const string TrapSlime = "Trap Slime";
 }

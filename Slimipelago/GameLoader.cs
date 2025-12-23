@@ -147,7 +147,14 @@ public static class GameLoader
         // obj.SetPrivateField("regionSetId", region);
         obj.Region = region;
         gobj.SetActive(true);
-        if (ApSlimeClient.LocationDictionary.TryGetValue(posHash, out var locName)) obj.LocationName = locName;
+        
+        if (id != "fast_travel")
+        {
+            obj.LocationName = ApSlimeClient.LocationDictionary.TryGetValue(posHash, out var locName)
+                ? locName
+                : "Null";
+        }
+
         obj.Image.overrideSprite = Spritemap[id];
 
         MarkerDictionary[posHash] = obj;

@@ -1,8 +1,8 @@
 using HarmonyLib;
 using JetBrains.Annotations;
-using Slimipelago.Archipelago;
 using TMPro;
 using UnityEngine;
+using static Slimipelago.Archipelago.ApSlimeClient;
 
 namespace Slimipelago.Patches.UiPatches;
 
@@ -22,7 +22,7 @@ public static class MainMenuPatch
         
         try
         {
-            ApSlimeClient.DisconnectAndReset();
+            DisconnectAndReset();
         }
         catch (Exception e)
         {
@@ -35,8 +35,8 @@ public static class MainMenuPatch
         NewGameButton = container.GetChild(2);
 
         ContinueButton.AddComponent<Invisinator>();
-        NewGameButton.gameObject.SetActive(ApSlimeClient.Client.IsConnected);
-        LoadButton.gameObject.SetActive(ApSlimeClient.Client.IsConnected);
+        NewGameButton.gameObject.SetActive(Client.IsConnected);
+        LoadButton.gameObject.SetActive(Client.IsConnected);
     }
 
     [HarmonyPatch(typeof(NewGameUI), "Start"), HarmonyPostfix]
@@ -46,11 +46,11 @@ public static class MainMenuPatch
         container.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Create New Archipelago Game";
 
         var infoPanel = container.GetChild(1);
-        infoPanel.GetChild(0).GetComponent<TextMeshProUGUI>().text = $"Slot: [{ApSlimeClient.SlotName}]";
+        infoPanel.GetChild(0).GetComponent<TextMeshProUGUI>().text = $"Slot: [{Data.SlotName}]";
 
         var inputField = infoPanel.GetChild(1).GetComponent<SRInputField>();
         inputField.readOnly = true;
-        inputField.text = ApSlimeClient.GameUUID;
+        inputField.text = GameUUID;
 
         var modeList = infoPanel.GetChild(7).GetChild(0);
         modeList.GetChild(2).SetActive(false);
@@ -77,13 +77,13 @@ public static class MainMenuPatch
         foreach (var child in __instance.loadButtonPanel.gameObject.GetChildren())
         {
             var name = child.GetChild(2).GetComponent<TextMeshProUGUI>();
-            if (name.text != ApSlimeClient.GameUUID)
+            if (name.text != GameUUID)
             {
                 child.SetActive(false);
                 continue;
             }
 
-            name.text = ApSlimeClient.SlotName;
+            name.text = Data.SlotName;
             hasAny = true;
             child.GetComponent<SRToggle>().Select();
         }
@@ -96,7 +96,7 @@ public static class MainMenuPatch
     [HarmonyPatch(typeof(GameSummaryPanel), "Init"), HarmonyPostfix]
     public static void PostSummarySetData(GameSummaryPanel __instance, GameData.Summary gameSummary)
     {
-        if (gameSummary.displayName != ApSlimeClient.GameUUID) return;
-        __instance.gameNameText.text = ApSlimeClient.SlotName;
+        if (gameSummary.displayName != GameUUID) return;
+        __instance.gameNameText.text = Data.SlotName;
     }
 }

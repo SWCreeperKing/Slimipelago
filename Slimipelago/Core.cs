@@ -3,13 +3,10 @@ using KaitoKid.ArchipelagoUtilities.AssetDownloader.ItemSprites;
 using MelonLoader;
 using Newtonsoft.Json;
 using Slimipelago.Archipelago;
-using Slimipelago.Patches.Interactables;
-using Slimipelago.Patches.PlayerPatches;
 using Slimipelago.Patches.UiPatches;
 using UnityEngine;
 using static Slimipelago.GameLoader;
 using Logger = Slimipelago.Archipelago.Logger;
-using Object = UnityEngine.Object;
 
 [assembly: MelonInfo(typeof(Slimipelago.Core), "Slimipelago", "1.0.0", "SW_CreeperKing", null)]
 [assembly: MelonGame("Monomi Park", "Slime Rancher")]
@@ -26,6 +23,7 @@ public class Core : MelonMod
 
     public override void OnInitializeMelon()
     {
+        
         if (File.Exists("debug.txt"))
         {
             DebugLevel = int.TryParse(File.ReadAllText("debug.txt"), out var debugLvl) ? debugLvl : 0;
@@ -34,7 +32,9 @@ public class Core : MelonMod
         Log = LoggerInstance;
         Logger = new Logger();
         ItemSpritesManager = new ArchipelagoItemSprites(Logger, JsonConvert.DeserializeObject<ItemSpriteAliases>);
-
+        
+        Log.Msg("Starting Shenanigans");
+        
         ApWorldShenanigans.RunShenanigans();
         var locationFileData = File
                               .ReadAllText("Mods/SW_CreeperKing.Slimipelago/Data/Locations.txt")
@@ -55,7 +55,9 @@ public class Core : MelonMod
             if (data.Length < 3) continue;
             ApSlimeClient.LocationInfoDictionary[data[0]] = data[2];
         }
-
+        
+        Log.Msg("Loading Shenanigans");
+        
         ApSlimeClient.UpgradeLocations = File
                                         .ReadAllText("Mods/SW_CreeperKing.Slimipelago/Data/Upgrades.txt")
                                         .Replace("\r", "")
@@ -80,7 +82,13 @@ public class Core : MelonMod
         {
             LogicHandler.AddLogic(line);
         }
-
+        
+        Log.Msg("Trapping Shenanigans");
+        
+        TrapLoader.Init();
+        
+        Log.Msg("Finalizing Shenanigans");
+        
         ApSlimeClient.Init();
 
         Log.Msg("Shenanigans finished");
@@ -106,22 +114,8 @@ public class Core : MelonMod
         Log.Msg("Loading Songs");
 
         MusicPatch.LoadSongs();
-        
-        Log.Msg("Loading Traps");
 
-        TrapLoader.Init();
-        
         Log.Msg("Initialized.");
-
-        // DirectedSlimeSpawner
-        // IntroUI
-        // ExchangeFullUI
-        // KeyRegistry.AddKey(KeyCode.P, () => Log.Msg(PlayerStatePatch.PlayerInWorld.transform.position));
-        // KeyRegistry.AddKey(KeyCode.Backspace,
-        //     () => SRSingleton<SceneContext>.Instance.GadgetDirector?.AddGadget(Gadget.Id.DRONE_ADVANCED));
-        // KeyRegistry.AddKey(KeyCode.O, () =>
-        // {
-        // });
     }
 
     public override void OnUpdate()
@@ -129,5 +123,6 @@ public class Core : MelonMod
         KeyRegistry.Update();
         PopupPatch.UpdateQueue();
         ApSlimeClient.Update();
+        TrapLoader.Update();
     }
 }

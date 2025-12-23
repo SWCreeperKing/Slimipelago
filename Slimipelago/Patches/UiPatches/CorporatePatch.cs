@@ -13,7 +13,8 @@ public static class CorporatePatch
     {
         var progress = progressDir.GetProgress(ProgressDirector.ProgressType.CORPORATE_PARTNER);
         if (progress >= level || progress < level - 1 || PlayerStatePatch.PlayerState.GetCurrency() < cost) return;
-        if (!CorporateLocations.TryGetValue(level, out var locations)) return;
+        if (!CorporateLocations.TryGetValue(level, out var locations) || locations.Length == 0) return;
+        if (!locations.Any(Client.MissingLocations.Contains)) return;
         SendItems("Ranked up!", locations);
         // Core.Log.Msg($"Bought 7Zee Lsevel: [{level}] for [{cost:###,###}] Newbucks");
     }

@@ -78,7 +78,7 @@ public static class ItemHandler
 
     public static void UpgradeItem(string name, bool firstReceive)
     {
-        if (name.StartsWith("Progressive"))
+        if (name.StartsWith("Progressive") || name is TrapSlime)
         {
             ItemCache.TryAdd(name, 0);
         }
@@ -141,7 +141,7 @@ public static class ItemHandler
 
                     ItemCache[name]++;
                     return;
-                case ProgTreasure or ProgMarket:
+                case ProgTreasure or ProgMarket or TrapSlime:
                     ItemCache[name]++;
                     break;
             }
@@ -152,15 +152,19 @@ public static class ItemHandler
                 int.TryParse(name.Substring(0, name.IndexOf(NewBucksEnding[0])), out var amount);
                 PlayerStatePatch.PlayerState.AddCurrency(amount);
             }
-            else switch (name)
-            {
-                case ItemConstants.Drone:
-                    SRSingleton<SceneContext>.Instance.GadgetDirector?.AddGadget(Gadget.Id.DRONE);
-                    break;
-                case AdvDrone:
-                    SRSingleton<SceneContext>.Instance.GadgetDirector?.AddGadget(Gadget.Id.DRONE_ADVANCED);
-                    break;
-            }
+            else
+                switch (name)
+                {
+                    case ItemConstants.Drone:
+                        AddGadget(Gadget.Id.DRONE);
+                        break;
+                    case AdvDrone:
+                        AddGadget(Gadget.Id.DRONE_ADVANCED);
+                        break;
+                    case MarketLink:
+                        AddGadget(Gadget.Id.MARKET_LINK);
+                        break;
+                }
         }
         catch (Exception e)
         {
@@ -170,12 +174,14 @@ public static class ItemHandler
         }
     }
 
+    public static void AddGadget(Gadget.Id id) => SRSingleton<SceneContext>.Instance.GadgetDirector?.AddGadget(id);
+
     public static Sprite ItemImage(AssetItem location)
     {
         var fallback = GameLoader.Spritemap[GameLoader.GetSpriteFromItemFlag(location.ItemFlags)];
         try
         {
-            if (!UseCustomAssets) return fallback;
+            if (!Data.UseCustomAssets) return fallback;
 
             var res = Core.ItemSpritesManager.TryGetCustomAsset(location, "Slime Rancher", false, true,
                 out var spriteData);

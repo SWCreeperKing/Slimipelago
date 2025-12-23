@@ -57,6 +57,9 @@ public static class CorralPatch
         return false;
     }
 
+    [HarmonyPatch(typeof(AirNet), "OnCollisionEnter"), HarmonyPrefix]
+    public static bool AirNet() => false;
+
     [HarmonyPatch(typeof(GardenUI), "Demolish"), HarmonyPrefix]
     public static bool Demolish(GardenUI __instance)
     {

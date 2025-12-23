@@ -20,6 +20,7 @@
   the [latest release page](https://github.com/SWCreeperKing/Slimipelago/releases).
   - Copy the `Mods` and `UserLibs` folders from the zip into the game's directory.
 - Launch the game again and you should see no new or load game options!
+  - There should be the archipelago connection menu in the options
 - To uninstall the mod, either remove/delete the `Mods/SW_CreeperKing.Slimipelago` folder
 
 > [!Note]
