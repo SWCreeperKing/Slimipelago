@@ -14,10 +14,11 @@ namespace Slimipelago.Patches.PlayerPatches;
 public static class PlayerStatePatch
 {
     public static PlayerState PlayerState;
-    public static FirestormActivator FirestormActivator;
     public static GameObject PlayerInWorld = null;
     public static Rigidbody PlayerInWorldBody;
+    public static TeleportablePlayer PlayerTeleporter;
     public static vp_FPPlayerEventHandler PlayerEffects;
+    public static GameObject HouseTrigger;
     public static Camera PlayerCamera;
     public static LockOnDeath PlayerLockOnDeath;
     public static PlayerDamageable PlayerDamageable;
@@ -40,11 +41,12 @@ public static class PlayerStatePatch
             PlayerInWorld = GameObject.Find("SimplePlayer");
             PlayerInWorldBody = PlayerInWorld.GetComponent<Rigidbody>();
             SaveAndQuitButton = GameObject.Find("HUD Root/PauseMenu/PauseUI/Buttons/QuitButton").GetComponent<Button>();
-            FirestormActivator = PlayerInWorld.GetComponent<FirestormActivator>();
+            PlayerTeleporter = PlayerInWorld.GetComponent<TeleportablePlayer>();
             PlayerLockOnDeath = PlayerInWorld.GetComponent<LockOnDeath>();
             PlayerDamageable = PlayerInWorld.GetComponent<PlayerDamageable>();
             PlayerEffects = PlayerInWorld.GetComponent<vp_FPPlayerEventHandler>();
             PlayerCamera = PlayerInWorld.GetChild(0).GetComponent<Camera>();
+            HouseTrigger = GameObject.Find("zoneRANCH/cellRanch_Home/Sector/Ranch Features/ranchHouse/interactTrigger");
             PlayerCamera.orthographicSize = 1;
             
             MainMenuPatch.OnGamePotentialExit += () =>
@@ -59,6 +61,8 @@ public static class PlayerStatePatch
                 PlayerDamageable = null;
                 PlayerCamera = null;
                 PlayerEffects = null;
+                HouseTrigger = null;
+                PlayerTeleporter = null;
                 FirstUpdate = false;
             };
 
@@ -102,14 +106,20 @@ public static class PlayerStatePatch
         GameLoader.LoadMapMarkers();
         Core.Log.Msg("Map Alive");
     }
-
+    
     public static void TeleportPlayer(Vector3 pos, RegionRegistry.RegionSetId region)
     {
-        pos.y += 5;
-        PlayerModelPatch.Model.SetCurrRegionSet(region);
-        PlayerInWorld.transform.position = pos;
-        SRSingleton<SceneContext>.Instance.AmbianceDirector.ExitAllLiquid();
-        PlayerEffects.Underwater.Stop();
-        PlayerState.SetAmmoMode(PlayerState.AmmoMode.DEFAULT);
+        try
+        {
+            pos.y += 5;
+            PlayerTeleporter.TeleportTo(pos, region, audioEnabled: false);
+            SRSingleton<SceneContext>.Instance.AmbianceDirector.ExitAllLiquid();
+            PlayerEffects.Underwater.Stop();
+            PlayerState.SetAmmoMode(PlayerState.AmmoMode.DEFAULT);
+        }
+        catch (Exception e)
+        {
+            Core.Log.Error(e);
+        }
     }
 }

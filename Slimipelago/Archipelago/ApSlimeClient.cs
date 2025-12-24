@@ -220,13 +220,13 @@ public static class ApSlimeClient
         {
             if (item is null)
             {
-                PopupPatch.AddItemToQueue(new ApPopupData(GameLoader.Spritemap["normal"], locationType,
+                PopupPatch.AddItemToQueue(new ApPopup(GameLoader.Spritemap["normal"], locationType,
                     location));
             }
             else
             {
                 var loc = new AssetItem(item.ItemGame, item.ItemName, item.Flags);
-                PopupPatch.AddItemToQueue(new ApPopupData(ItemHandler.ItemImage(loc), locationType,
+                PopupPatch.AddItemToQueue(new ApPopup(ItemHandler.ItemImage(loc), locationType,
                     $"sent: [{item.ItemName}]", $"to: {item.Player.Name}"));
             }
         }
@@ -257,7 +257,6 @@ public static class ApSlimeClient
             ItemsWaiting.Clear();
             AccessDoorPatch.TeleportMarkers.Clear();
             PersonalUpgradePatch.PurchaseNameKeyToLocation.Clear();
-            PopupPatch.Reset();
         }
         catch (Exception e)
         {

@@ -41,6 +41,8 @@ public static class PlayerDeathHandlerPatch
         if (!ApSlimeClient.Client.IsConnected) return;
         if (!ApSlimeClient.Client.Tags[ArchipelagoTag.DeathLink]) return;
         if (gameObject.name is not "SimplePlayer") return;
+        TrapLoader.EMERGENCY_END_TRAP();
+        
         if (DeathlinkRecieved)
         {
             DeathlinkRecieved = false;

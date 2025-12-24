@@ -37,7 +37,7 @@ public static class ItemHandler
         var sprite = GameLoader.GetSpriteFromItemFlag(item.Flags);
         if (sprite is "trap") sprite = "got_trap";
 
-        PopupPatch.AddItemToQueue(new ApPopupData(GameLoader.Spritemap[sprite], "Item Received", item.ItemName,
+        PopupPatch.AddItemToQueue(new ApPopup(GameLoader.Spritemap[sprite], "Item Received", item.ItemName,
             $"from: {item.Player.Name}", () =>
             {
                 if (ItemNumberTracker <= CurrentItemIndex) return;

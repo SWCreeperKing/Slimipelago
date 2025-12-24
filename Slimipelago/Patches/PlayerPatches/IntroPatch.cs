@@ -1,5 +1,4 @@
 using HarmonyLib;
-using Object = UnityEngine.Object;
 
 namespace Slimipelago.Patches.PlayerPatches;
 
@@ -10,7 +9,7 @@ public static class IntroPatch
     public static bool Awake(IntroUI __instance)
     {
         Core.Log.Msg("New Save");
-        Object.Destroy(__instance.gameObject);
+        Destroyer.Destroy(__instance.gameObject, "IntroPatch.Awake");
         return false;
     }
 }

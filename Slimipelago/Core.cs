@@ -4,7 +4,6 @@ using MelonLoader;
 using Newtonsoft.Json;
 using Slimipelago.Archipelago;
 using Slimipelago.Patches.UiPatches;
-using UnityEngine;
 using static Slimipelago.GameLoader;
 using Logger = Slimipelago.Archipelago.Logger;
 
@@ -121,7 +120,6 @@ public class Core : MelonMod
     public override void OnUpdate()
     {
         KeyRegistry.Update();
-        PopupPatch.UpdateQueue();
         ApSlimeClient.Update();
         TrapLoader.Update();
     }

@@ -107,7 +107,7 @@ public static class Playground
             {
                 spawned.Add(SpawnTarr(trapName == "Bee" ? .4f :2f/(i + 1)));
             }
-        }, () => spawned.ForEach(Object.Destroy), 15);
+        }, () => spawned.ForEach(tarr => Destroyer.Destroy(tarr, "TarrTrap.Reset")), 15);
     }
 
     [Trap(TrapLoader.Trap.MarketCrash, ["Market Crash", "Expensive Stocks", "Empty Item Box"],
@@ -136,7 +136,7 @@ public static class Playground
             {
                 PlayerCamera.projectionMatrix *= CameraFlipMatrix4X4;
                 GL.invertCulling = false;
-            });
+            }, 20);
 
     [Trap(TrapLoader.Trap.Smol, ["Tiny"], "Makes the player tiny")]
     public static bool Smol(string trapName)
@@ -180,7 +180,11 @@ public static class Playground
     [Trap(TrapLoader.Trap.NoVac, ["No Vac", " No Guarding", "No Petals","No Revivals", "Disable A", "Disable B", "Disable C Up", "Disable Tag", "Disable Z"],
         "Disables the vacuum")]
     public static bool NoVac(string trapName)
-        => ActivateTrapWithReset(() => PlayerVacuum.gameObject.SetActive(false),
+        => ActivateTrapWithReset(() =>
+            {
+                PlayerVacuum.DropAllVacced();
+                PlayerVacuum.gameObject.SetActive(false);
+            },
             () => PlayerVacuum.gameObject.SetActive(true));
 
     [Trap(TrapLoader.Trap.FrameSlime, ["Frame Slime", "PowerPoint", "Bullet Time"],
@@ -220,6 +224,7 @@ public static class Playground
         try
         {
             trapAction();
+            HouseTrigger.SetActive(false);
         }
         catch (Exception e)
         {
@@ -238,6 +243,7 @@ public static class Playground
                 Core.Log.Error("Error correcting trap");
                 Core.Log.Error(e);
             }
+            HouseTrigger.SetActive(true);
         }, resetTime);
     }
     

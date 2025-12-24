@@ -89,6 +89,7 @@ public static class TrapLoader
     {
         if (!PlayerStatePatch.FirstUpdate) return;
         if (SRSingleton<SceneContext>.Instance.TimeDirector.HasPauser()) return;
+        if (SRSingleton<SceneContext>.Instance.TimeDirector.IsFastForwarding()) return;
 
         if (TrapTimer > 0 && TrapReset is null && (TrapLinkTraps.Any() || GetTrapAmount() > TrapSlimesUsedCount))
         {
@@ -147,7 +148,7 @@ public static class TrapLoader
         if (TrapReset is not null) return false;
         if (player is not null)
         {
-            PopupPatch.AddItemToQueue(new ApPopupData(Spritemap["got_trap"], "Trapped",
+            PopupPatch.AddItemToQueue(new ApPopup(Spritemap["got_trap"], "Trapped",
                 $"{trap} Trap", $"From [{player}]"));
         }
         else if (ApSlimeClient.Data.TrapLink)
@@ -170,6 +171,14 @@ public static class TrapLoader
 
     public static int GetTrapAmount()
         => ApSlimeClient.ItemCache.TryGetValue(ItemConstants.TrapSlime, out var traps) ? traps : 0;
+
+    public static void EMERGENCY_END_TRAP()
+    {
+        if (TrapReset is null) return;
+        TrapReset();
+        TrapReset = null;
+        TrapTimer = Playground.Random.Next(30, 60);
+    }
 }
 
 [AttributeUsage(AttributeTargets.Class)]

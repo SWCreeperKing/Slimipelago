@@ -123,8 +123,8 @@ public static class GameLoader
             {
                 if (ApSlimeClient.LocationDictionary.TryGetValue(posHash, out var itemName))
                 {
-                    PopupPatch.AddItemToQueue(new ApPopupData(Spritemap["got_trap"], "Marker Name", itemName,
-                        timer: 0.1f));
+                    PopupPatch.AddItemToQueue(new ApPopup(Spritemap["got_trap"], "Marker Name", itemName,
+                        timer: .1f));
                 }
 
                 Core.Log.Msg($"Marker id: \"{posHash}\"");
@@ -139,15 +139,13 @@ public static class GameLoader
             }
         };
         gobj.SetActive(false);
-        // gobj.AddComponent<RegionMember>();
 
         var obj = gobj.AddComponent<ItemDisplayOnMap>();
         obj.Pos = mapPos;
         obj.OnPress = onPressed;
-        // obj.SetPrivateField("regionSetId", region);
         obj.Region = region;
         gobj.SetActive(true);
-        
+
         if (id != "fast_travel")
         {
             obj.LocationName = ApSlimeClient.LocationDictionary.TryGetValue(posHash, out var locName)

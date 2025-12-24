@@ -1,3 +1,13 @@
+v0.2.1
+
+- [Client] Changed teleportation code slightly
+- [Client] Changed popup code slightly
+- [Client] Prevented traps from activating during time fast forward
+- [Client] Deactivates traps when dying
+- [Client] Can no longer go into house if a trap is active
+- [Client] Changed Camera Flip trap active time from 10s to 20s
+
+---
 v0.2
 
 - [Client] Added DeathLink and TrapLink
