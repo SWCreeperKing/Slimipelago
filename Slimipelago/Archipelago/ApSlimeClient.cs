@@ -29,7 +29,7 @@ public static class ApSlimeClient
     public static string[] HintedItems = [];
     public static ApClient Client = new();
 
-    public static ApData Data;
+    public static ApData Data = new ApData();
     public static bool HackTheMarket = true;
     public static bool QueueReLogic;
     public static long GoalType;
@@ -236,11 +236,10 @@ public static class ApSlimeClient
     {
         QueueReLogic = true;
 
+        if (GoalType is not 0) return;
         if (Client.MissingLocations.Any(loc => GoalType switch
             {
                 0 => loc.ToLower().Contains("note"),
-                1 => loc.ToLower().Contains("7zee lv."),
-                _ => true
             })) return;
         Client.Goal();
     }

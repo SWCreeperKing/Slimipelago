@@ -1,3 +1,10 @@
+v0.2.2
+
+- [Client] Fixed a bug with options menu not being created correctly if you hadn't played v0.1 or any of the public betas
+- [Client] Prevented 7zee goal from happening if all the locations were collected
+  - this still happens with all notes goal, idk if i will fix/change it
+
+---
 v0.2.1
 
 - [Client] Changed teleportation code slightly
@@ -6,6 +13,7 @@ v0.2.1
 - [Client] Deactivates traps when dying
 - [Client] Can no longer go into house if a trap is active
 - [Client] Changed Camera Flip trap active time from 10s to 20s
+- [Client] Added more messages for text trap
 
 ---
 v0.2

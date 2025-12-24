@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using HarmonyLib;
 using Slimipelago.Archipelago;
 using Slimipelago.Patches.PlayerPatches;
@@ -8,15 +9,22 @@ namespace Slimipelago.Patches.UiPatches;
 [PatchAll]
 public static class CorporatePatch
 {
+    public static readonly Regex LevelRegex = new(@"7Zee lv.(\d+):", RegexOptions.Compiled);
+    
     [HarmonyPatch(typeof(CorporatePartnerUI), "BuyLevel"), HarmonyPrefix]
     public static void BuyLevel(ProgressDirector progressDir, int level, int cost)
     {
         var progress = progressDir.GetProgress(ProgressDirector.ProgressType.CORPORATE_PARTNER);
         if (progress >= level || progress < level - 1 || PlayerStatePatch.PlayerState.GetCurrency() < cost) return;
-        if (!CorporateLocations.TryGetValue(level, out var locations) || locations.Length == 0) return;
-        if (!locations.Any(Client.MissingLocations.Contains)) return;
-        SendItems("Ranked up!", locations);
-        // Core.Log.Msg($"Bought 7Zee Lsevel: [{level}] for [{cost:###,###}] Newbucks");
+        
+        SendItems("Ranked Up!", Client.MissingLocations.Where(loc =>
+        {
+            if (!LevelRegex.IsMatch(loc)) return false;
+            return int.Parse(LevelRegex.Match(loc).Groups[1].Value) <= level;
+        }).ToArray());
+        
+        if (level < 28) return;
+        Client.Goal();
     }
 
     [HarmonyPatch(typeof(CorporatePartnerUI), "EnableReward"), HarmonyPostfix]
