@@ -31,9 +31,9 @@ Help support me, this and future projects on [Patreon](https://www.patreon.com/c
 
 ---
 <details>
-<summary><h1 style="display: inline"> Randomizer Information</h1></summary>
+<summary><h1 style="display: inline">Randomizer Information</h1></summary>
 
-<h3>[Logic Spread Sheet](https://docs.google.com/spreadsheets/d/15PdrnGmkYdocX9RU-D5U_9OgihRNN9axX71mm-jOPUQ)</h3>
+<h3><a href="https://docs.google.com/spreadsheets/d/15PdrnGmkYdocX9RU-D5U_9OgihRNN9axX71mm-jOPUQ" target="_blank">Logic Spread Sheet</h3>
 
 ---
 <details>
