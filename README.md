@@ -4,7 +4,7 @@ Help support me, this and future projects on [Patreon](https://www.patreon.com/c
 ### DISCLAIMER: THIS MOD WILL >>NOT<< GIVE YOU THE PAID DLC FOR FREE
 
 ---
-<details>
+<details open>
 <summary><h1 style="display: inline"> How to install</h1></summary>
 
 (tutorial totally not copy and pasted from Tunic AP mod and BTD6 Mod helper)
