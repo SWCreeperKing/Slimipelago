@@ -138,7 +138,7 @@ Tarr music is special as it doesn't take from the `Any` region, nor does any reg
   
     > Cause: Unknown  
   
-    > Solution: Quit to Main Menu and re-enter save 
+    > Solution: Quit to Main Menu and you can go back into the game, "Turn it off and then on again"
   </details>
 
 </details>
