@@ -122,8 +122,8 @@ Tarr music is special as it doesn't take from the `Any` region, nor does any reg
 <details>
 <summary><h3 style="display:inline">Custom Text Trap Messages</h3></summary>
 
-To add/remove text trap messages go to `D:\Programs\steam\steamapps\common\Slime Rancher\Mods\SW_CreeperKing.Slimipelago\TextTrap`
-and add/remove the text file
+To add/change/remove text trap messages go to `Slime Rancher\Mods\SW_CreeperKing.Slimipelago\TextTrap`
+and add/change/remove the text file
 
 you can remove all if you like, just be aware that there is a default hard coded in
 
