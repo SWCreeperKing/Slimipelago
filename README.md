@@ -33,7 +33,8 @@ Help support me, this and future projects on [Patreon](https://www.patreon.com/c
 <details>
 <summary><h1 style="display: inline">Randomizer Information</h1></summary>
 
-<h3><a href="https://docs.google.com/spreadsheets/d/15PdrnGmkYdocX9RU-D5U_9OgihRNN9axX71mm-jOPUQ" target="_blank">Logic Spread Sheet</h3>
+<h3><a href="https://docs.google.com/spreadsheets/d/15PdrnGmkYdocX9RU-D5U_9OgihRNN9axX71mm-jOPUQ">Logic Spread Sheet</h3>
+> Ctrl + Click to open link in new tab
 
 ---
 <details>
@@ -114,6 +115,17 @@ the folders for music rando is first made into areas then time of day (`day`/`ni
 music in the `Any` region folder can appear in any region
 
 Tarr music is special as it doesn't take from the `Any` region, nor does any region take from the Tarr folder
+
+</details>
+
+---
+<details>
+<summary><h3 style="display:inline">Custom Text Trap Messages</h3></summary>
+
+To add/remove text trap messages go to `D:\Programs\steam\steamapps\common\Slime Rancher\Mods\SW_CreeperKing.Slimipelago\TextTrap`
+and add/remove the text file
+
+you can remove all if you like, just be aware that there is a default hard coded in
 
 </details>
 
