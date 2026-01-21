@@ -1,3 +1,5 @@
+using CreepyUtil.Archipelago;
+
 namespace Slimipelago.Archipelago;
 
 // 1-2: nothing
@@ -9,7 +11,8 @@ namespace Slimipelago.Archipelago;
 public static class ApWorldShenanigans
 {
     public const string CsvFile = "Slimerancher - Checkables.csv";
-    
+    public const string DataFolder = "Mods/SW_CreeperKing.Slimipelago/Data";
+
     public static void RunShenanigans()
     {
         // downloaded from spreadsheet:
@@ -20,113 +23,65 @@ public static class ApWorldShenanigans
             Directory.CreateDirectory("output");
         }
 
-        var csvRaw = File.ReadAllText(CsvFile);
-        var csv = csvRaw
-                 .Replace("\r", "")
-                 .Split('\n')
-                 .Skip(1)
-                 .Where(arr => arr.Length > 0)
-                 .Select((s, i) =>
-                  {
-                      try
-                      {
-                          return new CsvLine(s.Split(',').Skip(1).ToArray());
-                      }
-                      catch (Exception e)
-                      {
-                          Core.Log.Msg($"=== ERROR ON CSV LINE [{i}] ===");
-                          Core.Log.Error(e);
-                          throw e;
-                      }
-                  })
-                 .ToArray();
+        new CsvParser(CsvFile, 1, 1)
+           .ToFactory((e, i) =>
+            {
+                Core.Log.Msg($"=== ERROR ON CSV LINE [{i}] ===");
+                Core.Log.Error(e);
+            })
+           .ReadTable(new InteractableCreator(), 7, out var rawInteractables).SkipColumn()
+           .ReadTable(new GateCreator(), 5, out var gates).SkipColumn()
+           .ReadTable(new GordoCreator(), 8, out var gordos).SkipColumn()
+           .ReadTable(new UpgradeCreator(), 3, out var upgrades).SkipColumn()
+           .ReadTable(new CorporateCreator(), 3, out var corporateLocations);
 
-        var rawInteractables = csv.Where(line => line.HasInteractable && line.IsValidZone).ToArray();
         var interactables = rawInteractables.Where(line => !line.IsSecretStyle).ToArray();
         var dlcInteractables = rawInteractables.Where(line => line.IsSecretStyle).ToArray();
 
-        var gates = csv.Where(line => line.HasGate).ToArray();
-        var gordos = csv.Where(line => line.HasGordo).ToArray();
+        var noteLocations = File.Exists($"{DataFolder}/NoteLocations.txt") ? File.ReadAllText($"{DataFolder}/NoteLocations.txt").Replace("\r", "").Split('\n').ToList() : [];
+        noteLocations.AddRange(interactables.Where(inter => inter.IsNote && !noteLocations.Contains(inter.Id)).Select(inter => inter.Id));
 
-        var upgrades = csv.Where(line => line.HasUpgrade).ToArray();
-        var upgradeRules = upgrades.Where(line => line.UpgradeRules.Length > 0)
-                                   .ToDictionary(line => line.UpgradeName, line => line.UpgradeRules);
-
-        var corporateLocations = csv.Where(line => line.HasCorporate).ToArray();
-
-        File.WriteAllText("Mods/SW_CreeperKing.Slimipelago/Data/Locations.txt",
+        File.WriteAllText($"{DataFolder}/Locations.txt",
             string.Join("\n",
-                interactables.Select(line => line.GetInteractableText)
-                             .Concat(dlcInteractables.Select(line => line.GetInteractableText))
-                             .Concat(gates.Select(line => line.GetGateText))
-                             .Concat(gordos.Select(line => line.GetGordoText))));
+                interactables.Select(line => line.GetText)
+                             .Concat(dlcInteractables.Select(line => line.GetText))
+                             .Concat(gates.Select(line => line.GetText))
+                             .Concat(gordos.Select(line => line.GetText))));
 
-        File.WriteAllText("Mods/SW_CreeperKing.Slimipelago/Data/Upgrades.txt",
-            string.Join("\n", upgrades.Select(line => $"{line.UpgradeName},{line.UpgradeId}")));
+        File.WriteAllText($"{DataFolder}/Upgrades.txt",
+            string.Join("\n", upgrades.Select(line => $"{line.Name},{line.Id}")));
 
-        File.WriteAllLines("Mods/SW_CreeperKing.Slimipelago/Data/7Zee.txt",
-            corporateLocations.Select(line => $"{line.CorporateLocation},{line.CorporateLevel}"));
-        
-        File.WriteAllText("output/Locations.py",
-            $"""
-             # File is Auto-generated, see: https://github.com/SWCreeperKing/Slimipelago/blob/master/Slimipelago/ApWorldShenanigans.cs
+        File.WriteAllLines($"{DataFolder}/7Zee.txt",
+            corporateLocations.Select(line => $"{line.Location},{line.Level}"));
 
-             upgrades = [
-                 {string.Join(",\n\t", upgrades.Select(line => $"\"{line.UpgradeName}\""))}
-             ]
+        WorldFactory worldFactory = new()
+        {
+            LocationGeneratorLink = "https://github.com/SWCreeperKing/Slimipelago/blob/master/Slimipelago/ApWorldShenanigans.cs",
+            LogicGeneratorLink = "https://github.com/SWCreeperKing/Slimipelago/blob/master/Slimipelago/ApWorldShenanigans.cs",
+        };
 
-             upgrades_7z = [
-                 {string.Join(",\n\t", upgradeRules.Where(kv => kv.Value.Contains("7z")).Select(kv => $"\"{kv.Key}\""))}
-             ]
+        worldFactory
+           .AddLocations("upgrades", upgrades.Select(line => line.Name))
+           .AddLocations("upgrades_7z", upgrades.Where(up => up.Rules.Contains("7z")).Select(up => up.Name), addToFinalList: false)
+           .AddLocations("interactables", interactables.Select(line => (string[])[line.Name, line.Area]))
+           .AddLocations("dlc_interactables", dlcInteractables.Select(line => (string[])[line.Name, line.Area]))
+           .AddLocations("corporate_locations", corporateLocations.Select(line => (string[])[line.Location, line.Area]))
+           .GenerateLocationFile("output/Locations.py");
 
-             interactables = [
-                 {string.Join(",\n\t", interactables.Select(line => $"[\"{line.InteractableName}\", \"{line.InteractableArea}\"]"))}
-             ]
+        worldFactory
+           .SetOnCompilerError((e, s) => Core.Log.Error(s, e))
+           .AddLogicFunction("cracker", "has_cracker", "return state.has(\"Progressive Treasure Cracker\", player, level)", "level")
+           .AddLogicFunction("energy", "has_energy", "return state.has(\"Progressive Max Energy\", player, amount)", "amount")
+           .AddLogicFunction("jetpack", "has_jetpack", "return state.has(\"Progressive Jetpack\", player)")
+           .AddLogicFunction("region", "has_region", "return state.has(f\"Region Unlock: {region}\", player)", "region")
+           .AddLogicRules(rawInteractables.ToDictionary(inter => inter.Name, inter => inter.GenRule(true)))
+           .AddLogicRules(upgrades.ToDictionary(up => up.Name, up => up.GenRule()))
+           .GenerateRulesFile("output/Rules.py");
 
-             dlc_interactables = [
-                 {string.Join(",\n\t", dlcInteractables.Select(line => $"[\"{line.InteractableName}\", \"{line.InteractableArea}\"]"))}
-             ]
-
-             corporate_locations = [
-                 {string.Join(",\n\t", corporateLocations.Select(line => $"[\"{line.CorporateLocation}\", \"{line.CorporateArea}\"]"))}
-             ]
-
-             location_dict = [
-             	*[items for items in upgrades],
-             	*[items[0] for items in interactables],
-             	*[items[0] for items in dlc_interactables],
-             	*[items[0] for items in corporate_locations],
-             ]
-             """);
-
-        File.WriteAllText("output/Rules.py",
-            $$"""
-              # File is Auto-generated, see: https://github.com/SWCreeperKing/Slimipelago/blob/master/Slimipelago/ApWorldShenanigans.cs
-
-              def get_rule_map(player, world):
-                  return {
-                      {{string.Join(",\n\t\t", interactables.Concat(dlcInteractables).Select(line => GenRule(line.InteractableName, line.InteractableCrackerLevel, line.InteractableJetpackRequirement, line.InteractableMinJetpackEnergy.Split(' ')[0], true)).Where(s => s != ""))}},
-                      {{string.Join(",\n\t\t", upgradeRules.Select(kv => $"\"{kv.Key}\": lambda state: {string.Join(" and ", kv.Value.Select(GenItemRule).Where(s => s.Trim() != ""))}"))}},
-                  }
-
-              def has_cracker(state, player, level) -> bool:
-                  return state.has("Progressive Treasure Cracker", player, level)
-
-              def has_energy(state, player, amount) -> bool:
-                  return state.has("Progressive Max Energy", player, amount) 
-
-              def has_jetpack(state, player) -> bool:
-                  return state.has("Progressive Jetpack", player)
-                  
-              def has_region(state, player, region) -> bool:
-                  return state.has(f"Region Unlock: {region}", player) 
-              """);
-
-        File.WriteAllText("Mods/SW_CreeperKing.Slimipelago/Data/Logic.txt",
+        File.WriteAllText($"{DataFolder}/Logic.txt",
             string.Join("\n",
                 interactables.Concat(dlcInteractables)
-                             .Select(line
-                                  => $"{line.InteractableName}:{GenRule(line.InteractableName, line.InteractableCrackerLevel, line.InteractableJetpackRequirement, line.InteractableMinJetpackEnergy.Split(' ')[0], false)}:{line.InteractableArea}")
+                             .Select(line => $"{line.Name}:{line.GenRule(false)}:{line.Area}")
                              .Where(s => s != "")));
 
         if (File.Exists($"output/{CsvFile}"))
@@ -135,86 +90,116 @@ public static class ApWorldShenanigans
         }
 
         File.Move(CsvFile, $"output/{CsvFile}");
-        return;
-
-        string GenRule(string location, string cracker, string needsJetpack, string energyNeeded, bool isPython)
-        {
-            List<string> rules = [];
-
-            if (cracker.Contains("Treasure Cracker"))
-            {
-                var level = Math.Max(1, cracker.Count(c => c == 'I'));
-                rules.Add(isPython
-                    ? $"has_cracker(state, player, {level})"
-                    : string.Join("", Enumerable.Repeat('c', level)));
-            }
-
-            if (needsJetpack == "Yes")
-            {
-                rules.Add(isPython ? "has_jetpack(state, player)" : "j");
-            }
-
-            if (energyNeeded is not ("0" or "50" or "100"))
-            {
-                var energyLevel = (energyNeeded[0] == '1' ? 0 : 2) + (energyNeeded[1] == '0' ? 0 : 1);
-                rules.Add(isPython
-                    ? $"has_energy(state, player, {energyLevel})"
-                    : string.Join("", Enumerable.Repeat('e', energyLevel)));
-            }
-
-            return rules.Count == 0 ? "" :
-                isPython ? $"\"{location}\": lambda state: {string.Join(" and ", rules)}" : string.Join("", rules);
-        }
-
-        string GenItemRule(string rule)
-            => rule.StartsWith("Region ") ? $"has_region(state, player, \"{rule.Substring(7)}\")" : "";
     }
 }
 
-public readonly struct CsvLine(string[] line)
+file readonly struct InteractableRowData(string[] line)
 {
-    public readonly string InteractableId = line[0];
-    public readonly string InteractableName = line[1];
-    public readonly string InteractableArea = line[2];
-    public readonly string InteractableCrackerLevel = line[3];
-    public readonly string InteractableJetpackRequirement = line[4];
-    public readonly string InteractableMinJetpackEnergy = line[5];
-    public readonly string InteractableSummary = line[6];
+    public readonly string Id = line[0];
+    public readonly string Name = line[1].Trim();
+    public readonly string Area = line[2];
+    public readonly string CrackerLevel = line[3].Trim();
+    public readonly bool NeedsJetpack = line[4] == "Yes";
+    public readonly string MinJetpackEnergy = line[5].Split(' ')[0];
+    public readonly string Summary = line[6];
+    public bool IsSecretStyle => CrackerLevel == "Secret Style";
+    public bool IsNote => CrackerLevel == "Note";
+    public string GetText => $"{Id},{Name},{Summary}";
 
-    public readonly string GateId = line[8];
-    public readonly string GateName = line[9];
-    public readonly string GateFromArea = line[10];
-    public readonly string GateToArea = line[11];
-    public readonly string GateSkippableWithJetpack = line[12];
+    public string GenRule(bool forCompiler)
+    {
+        List<string> rules = [];
 
-    public readonly string GordoId = line[14];
-    public readonly string GordoName = line[15];
-    public readonly string GordoArea = line[16];
-    public readonly string GordoContents = line[17];
-    public readonly string GordoTeleporterLocation = line[18];
-    public readonly string GordoJetpackRequirement = line[19];
-    public readonly string GordoNormalFoodRequirement = line[20];
-    public readonly string GordoFavoriteFood = line[21];
+        if (CrackerLevel.Contains("Treasure Cracker"))
+        {
+            var level = Math.Max(1, CrackerLevel.Count(c => c == 'I'));
+            rules.Add(forCompiler ? $"cracker[{level}]" : string.Join("", Enumerable.Repeat('c', level)));
+        }
 
-    public readonly string UpgradeName = line[23];
-    public readonly string UpgradeId = line[24];
+        if (NeedsJetpack)
+        {
+            rules.Add(forCompiler ? "jetpack" : "j");
+        }
 
-    public readonly string[] UpgradeRules =
-        line[25].Split(['&'], StringSplitOptions.RemoveEmptyEntries).Select(rule => rule.Trim()).ToArray();
+        if (MinJetpackEnergy is not ("0" or "50" or "100"))
+        {
+            var energyLevel = (MinJetpackEnergy[0] == '1' ? 0 : 2) + (MinJetpackEnergy[1] == '0' ? 0 : 1);
+            rules.Add(forCompiler ? $"energy[{energyLevel}]" : string.Join("", Enumerable.Repeat('e', energyLevel)));
+        }
 
-    public readonly string CorporateLocation = line[27].Trim();
-    public readonly int CorporateLevel = line[27] != "" ? int.Parse(line[27].Split(':')[0].Split('.')[1]) : -1;
-    public readonly string CorporatePrice = line[28];
-    public readonly string CorporateArea = line[29];
-    
-    public bool HasInteractable => InteractableId != "";
-    public bool HasGate => GateId != "";
-    public bool HasGordo => GordoId != "";
-    public bool HasUpgrade => UpgradeName != "";
-    public bool HasCorporate => CorporateLocation != "";
-    public bool IsValidZone => ZoneConstants.Zones.Contains(InteractableArea);
-    public bool IsSecretStyle => InteractableCrackerLevel == "Secret Style";
-    public string GetInteractableText => $"{InteractableId},{InteractableName},{InteractableSummary}";
-    public string GetGateText => $"{GateId},{GateName}";
-    public string GetGordoText => $"{GordoId},{GordoName},Favorite: {GordoFavoriteFood}";
+        return forCompiler ? string.Join(" and ", rules) : string.Join("", rules);
+    }
+}
+
+file readonly struct GateRowData(string[] line)
+{
+    public readonly string Id = line[0];
+    public readonly string Name = line[1];
+    public readonly string FromArea = line[2];
+    public readonly string ToArea = line[3];
+    public readonly string SkippableWithJetpack = line[4];
+    public string GetText => $"{Id},{Name}";
+}
+
+file readonly struct GordoRowData(string[] line)
+{
+    public readonly string Id = line[0];
+    public readonly string Name = line[1];
+    public readonly string Area = line[2];
+    public readonly string Contents = line[3];
+    public readonly string TeleporterLocation = line[4];
+    public readonly string JetpackRequirement = line[5];
+    public readonly string NormalFoodRequirement = line[6];
+    public readonly string FavoriteFood = line[7];
+    public string GetText => $"{Id},{Name},Favorite: {FavoriteFood}";
+}
+
+file readonly struct UpgradeRowData(string[] line)
+{
+    public readonly string Name = line[0];
+    public readonly string Id = line[1];
+
+    public readonly string[] Rules =
+        line[2].Split(['&'], StringSplitOptions.RemoveEmptyEntries).Select(rule => rule.Trim()).ToArray();
+
+    public string GenRule()
+        => string.Join(" and ", Rules.Where(rule => rule is not "7z").Select(rule => $"region[\"{rule}\"]"));
+}
+
+file readonly struct CorporateRowData(string[] line)
+{
+    public readonly string Location = line[0].Trim();
+    public readonly int Level = line[0] != "" ? int.Parse(line[0].Split(':')[0].Split('.')[1]) : -1;
+    public readonly string Price = line[1];
+    public readonly string Area = line[2];
+}
+
+file class InteractableCreator : CsvTableRowCreator<InteractableRowData>
+{
+    public override InteractableRowData CreateRowData(string[] param) => new(param);
+    public override bool IsValidData(InteractableRowData t) => t.Id != "" && ZoneConstants.Zones.Contains(t.Area);
+}
+
+file class GateCreator : CsvTableRowCreator<GateRowData>
+{
+    public override GateRowData CreateRowData(string[] param) => new(param);
+    public override bool IsValidData(GateRowData t) => t.Id != "";
+}
+
+file class GordoCreator : CsvTableRowCreator<GordoRowData>
+{
+    public override GordoRowData CreateRowData(string[] param) => new(param);
+    public override bool IsValidData(GordoRowData t) => t.Id != "";
+}
+
+file class UpgradeCreator : CsvTableRowCreator<UpgradeRowData>
+{
+    public override UpgradeRowData CreateRowData(string[] param) => new(param);
+    public override bool IsValidData(UpgradeRowData t) => t.Name != "";
+}
+
+file class CorporateCreator : CsvTableRowCreator<CorporateRowData>
+{
+    public override CorporateRowData CreateRowData(string[] param) => new(param);
+    public override bool IsValidData(CorporateRowData t) => t.Location != "";
 }
