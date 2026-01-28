@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using System.Text;
+using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Models;
 using CreepyUtil.Archipelago;
@@ -16,6 +17,13 @@ using static Slimipelago.Archipelago.TrapLoader;
 
 namespace Slimipelago.Archipelago;
 
+public enum GoalType
+{
+    Notes = 0,
+    Corporate = 1,
+    Credits = 2,
+}
+
 public static class ApSlimeClient
 {
     public static Dictionary<string, int> RandoSeeds = [];
@@ -27,12 +35,14 @@ public static class ApSlimeClient
     public static List<ItemInfo> ItemsWaiting = [];
     public static ConcurrentDictionary<string, int> ItemCache = [];
     public static string[] HintedItems = [];
-    public static ApClient Client = new();
+    public static ApClient Client = new(new TimeSpan(0, 1, 0));
+    public static bool QueuedDeathLink = false;
+    public static LoseFlag<string> NoteLocations;
 
-    public static ApData Data = new ApData();
+    public static ApData Data = new();
     public static bool HackTheMarket = true;
     public static bool QueueReLogic;
-    public static long GoalType;
+    public static GoalType GoalType;
 
     public static long CurrentItemIndex;
 
@@ -40,6 +50,7 @@ public static class ApSlimeClient
 
     public static void Init()
     {
+        Core.Log.Msg($"TIMEOUT: [{ArchipelagoSession.ArchipelagoConnectionTimeoutInSeconds}]");
         if (File.Exists("ApConnection.json"))
         {
             Data = JsonConvert.DeserializeObject<ApData>(File.ReadAllText("ApConnection.json").Replace("\r", ""));
@@ -61,12 +72,16 @@ public static class ApSlimeClient
 
         Client.OnConnectionEvent += _ =>
         {
+            QueuedDeathLink = false;
+            PlayerDeathHandlerPatch.DeathlinkRecieved = false;
             HintedItems = [];
             GameUUID = (string)Client.SlotData["uuid"];
             CurrentItemIndex = Client.GetFromStorage("new_item_index", def: 0L);
 
             HackTheMarket = !Client.SlotData.TryGetValue("fix_market_rates", out var value) || (bool)value;
-            GoalType = Client.SlotData.TryGetValue("goal_type", out var value1) ? (long)value1 : 0;
+            GoalType = (GoalType)(Client.SlotData.TryGetValue("goal_type", out var value1) ? (long)value1 : 0);
+
+            NoteLocations.SetFlag(Client.GetFromStorage("note_locations", def: 0ul));
 
             var seed = Client.Seed;
             if (seed is null)
@@ -94,8 +109,8 @@ public static class ApSlimeClient
             }
             else
             {
+                QueuedDeathLink = true;
                 PlayerDeathHandlerPatch.DeathlinkRecieved = true;
-                DeathHandler.Kill(PlayerStatePatch.PlayerInWorld, DeathHandler.Source.CHICKEN_VAMPIRISM, null, "DeathLink");
             }
         };
     }
@@ -153,6 +168,13 @@ public static class ApSlimeClient
             Items.AddRange(ItemsWaiting);
             ItemsWaiting.Clear();
             QueueReLogic = true;
+
+            if (!PlayerStatePatch.FirstUpdate) return;
+            if (!QueuedDeathLink) return;
+            if (SRSingleton<SceneContext>.Instance.TimeDirector.HasPauser()) return;
+            if (SRSingleton<SceneContext>.Instance.TimeDirector.IsFastForwarding()) return;
+            DeathHandler.Kill(PlayerStatePatch.PlayerInWorld, DeathHandler.Source.CHICKEN_VAMPIRISM, null, "DeathLink");
+            QueuedDeathLink = false;
         }
         catch (Exception e)
         {
@@ -216,19 +238,17 @@ public static class ApSlimeClient
     public static void QueueItemPopup(string locationType, string location)
     {
         var item = Client.ScoutLocation(location);
-        if (item?.Player.Slot != Client.PlayerSlot)
+        if (item?.Player.Slot == Client.PlayerSlot) return;
+
+        if (item is null)
         {
-            if (item is null)
-            {
-                PopupPatch.AddItemToQueue(new ApPopup(GameLoader.Spritemap["normal"], locationType,
-                    location));
-            }
-            else
-            {
-                var loc = new AssetItem(item.ItemGame, item.ItemName, item.Flags);
-                PopupPatch.AddItemToQueue(new ApPopup(ItemHandler.ItemImage(loc), locationType,
-                    $"sent: [{item.ItemName}]", $"to: {item.Player.Name}"));
-            }
+            PopupPatch.AddItemToQueue(new ApPopup(GameLoader.Spritemap["normal"], locationType,
+                location));
+        }
+        else
+        {
+            PopupPatch.AddItemToQueue(new ApPopup(ItemHandler.ItemImage(item), locationType,
+                $"sent: [{item.ItemName}]", $"to: {item.Player.Name}"));
         }
     }
 
@@ -236,11 +256,7 @@ public static class ApSlimeClient
     {
         QueueReLogic = true;
 
-        if (GoalType is not 0) return;
-        if (Client.MissingLocations.Any(loc => GoalType switch
-            {
-                0 => loc.ToLower().Contains("note"),
-            })) return;
+        if (GoalType is not GoalType.Notes || !NoteLocations.IsMaxFlag()) return;
         Client.Goal();
     }
 
@@ -270,4 +286,6 @@ public class AssetItem(string game, string item, ItemFlags flags) : IAssetLocati
     public string GameName { get; } = game;
     public string ItemName { get; } = item;
     public ItemFlags ItemFlags { get; } = flags;
+
+    public static implicit operator AssetItem(ScoutedItemInfo item) => new(item.ItemGame, item.ItemName, item.Flags);
 }
