@@ -135,8 +135,21 @@ you can remove all if you like, just be aware that there is a default hard coded
 <details>
 <summary><h1 style="display: inline">FaQ</h1></summary>
 
-<h3>WIP</h3>
-
+  <details>
+  <summary><h3 style="display: inline">Is there a poptracker?</h3></summary>
+      The in game tracker is capable of showing you where everything is and should suffice.
+      It shows hinted items in green.
+      It however does not show shop or 7zee, which you can just check yourself.
+  </details>
+  
+  <details>
+  <summary><h3 style="display: inline">Why am i getting teleported out of the ancient ruins while i have the item</h3></summary>
+      Ancient ruins and ancient ruins transition are 2 seperate locations.
+      Ancient ruins is the place beyond the slime door.
+      Ancient ruins transition has the slime statues to open the slime door.
+      In order to enter ancient ruins, you need both items.
+  </details>
+  
 </details>
 
 ---
