@@ -1,4 +1,4 @@
-Help support me, this and future projects on [Patreon](https://www.patreon.com/c/SW_CreeperKing)
+
 
 ---
 ### DISCLAIMER: THIS MOD WILL >>NOT<< GIVE YOU THE PAID DLC FOR FREE
@@ -11,12 +11,10 @@ Help support me, this and future projects on [Patreon](https://www.patreon.com/c
 
 1. Make sure to have [.Net6.0](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) installed
 2. Download and Install [Melon Loader](https://melonwiki.xyz/#/?id=automated-installation).
-    - The default Slime Rancher install directory (for steam): C:\Program Files (x86)\Steam\steamapps\common\Slime
-      Rancher
+    - The default Slime Rancher install directory (for steam): C:\Program Files (x86)\Steam\steamapps\common\Slime Rancher
     - Recommended melon version: 7.1
 3. Launch the game and close it. This will finalize the Melon installation.
-4. Download and extract the `Slimipelago.zip` from
-  the [latest release page](https://github.com/SWCreeperKing/Slimipelago/releases).
+4. Download and extract the `Slimipelago.zip` from the [latest release page](https://github.com/SWCreeperKing/Slimipelago/releases).
     - Copy the `Mods` and `UserLibs` folders from the zip into the game's directory.
 5. Launch the game again and you should see no new or load game options!
     - There should be the archipelago connection menu in the options

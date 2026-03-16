@@ -9,12 +9,11 @@ namespace Slimipelago.Patches.Interactables;
 public static class CorralPatch
 {
     [HarmonyPatch(typeof(SlimeFeeder), "ProcessFeedOperation"), HarmonyPrefix]
-    public static bool Feeder(SlimeFeeder __instance, bool ejectFood)
+    public static bool Feeder(SlimeFeeder __instance, bool ejectFood, LandPlotModel ___model, SiloStorage ___storage)
     {
         try
         {
-            var storage = __instance.GetPrivateField<SiloStorage>("storage");
-            var relevantAmmo = storage.GetRelevantAmmo();
+            var relevantAmmo = ___storage.GetRelevantAmmo();
             relevantAmmo.SetAmmoSlot(0);
             if (relevantAmmo.HasSelectedAmmo())
             {
@@ -27,9 +26,8 @@ public static class CorralPatch
                                        .slots[relevantAmmo.GetPrivateField<int>("selectedAmmoIdx")];
                 slot.count = Math.Max(slot.count - 1, 0);
             }
-
-            var model = __instance.GetPrivateField<LandPlotModel>("model");
-            model.remainingFeedOperations = Math.Max(0, model.remainingFeedOperations - 1);
+            
+            ___model.remainingFeedOperations = Math.Max(0, ___model.remainingFeedOperations - 1);
         }
         catch (Exception e)
         {
@@ -52,7 +50,7 @@ public static class CorralPatch
         RefundBuilding(__instance, __instance.demolish.plotPrefab,
         [
             __instance.walls, __instance.musicBox, __instance.airNet, __instance.solarShield, __instance.plortCollector,
-            __instance.feeder
+            __instance.feeder,
         ], 250);
         return false;
     }

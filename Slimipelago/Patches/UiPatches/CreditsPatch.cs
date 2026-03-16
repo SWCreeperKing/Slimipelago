@@ -11,7 +11,7 @@ public static class CreditsPatch
     public static void OnEnable()
     {
         if (SceneManager.GetActiveScene().name is "MainMenu") return;
-        if (ApSlimeClient.GoalType != 2) return;
+        if (ApSlimeClient.GoalType is not GoalType.Credits) return;
         ApSlimeClient.Client.Goal();
     }
 }

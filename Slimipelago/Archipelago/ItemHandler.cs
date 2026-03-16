@@ -1,3 +1,4 @@
+using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Models;
 using MonomiPark.SlimeRancher.DataModel;
 using Newtonsoft.Json;
@@ -33,11 +34,10 @@ public static class ItemHandler
         }
 
         if (!firstTime) return;
-
-        var sprite = GameLoader.GetSpriteFromItemFlag(item.Flags);
-        if (sprite is "trap") sprite = "got_trap";
-
-        PopupPatch.AddItemToQueue(new ApPopup(GameLoader.Spritemap[sprite], "Item Received", item.ItemName,
+        
+        var sprite =  item.Flags is ItemFlags.Trap ? GameLoader.Spritemap["got_trap"] : ItemImage(new AssetItem(item.ItemGame, item.ItemName, item.Flags));
+        
+        PopupPatch.AddItemToQueue(new ApPopup(sprite, "Item Received", item.ItemName,
             $"from: {item.Player.Name}", () =>
             {
                 if (ItemNumberTracker <= CurrentItemIndex) return;

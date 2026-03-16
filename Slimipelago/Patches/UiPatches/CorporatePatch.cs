@@ -3,6 +3,7 @@ using HarmonyLib;
 using Slimipelago.Archipelago;
 using Slimipelago.Patches.PlayerPatches;
 using static Slimipelago.Archipelago.ApSlimeClient;
+using GoalType = Slimipelago.Archipelago.GoalType;
 
 namespace Slimipelago.Patches.UiPatches;
 
@@ -10,20 +11,23 @@ namespace Slimipelago.Patches.UiPatches;
 public static class CorporatePatch
 {
     public static readonly Regex LevelRegex = new(@"7Zee lv.(\d+):", RegexOptions.Compiled);
-    
+
     [HarmonyPatch(typeof(CorporatePartnerUI), "BuyLevel"), HarmonyPrefix]
     public static void BuyLevel(ProgressDirector progressDir, int level, int cost)
     {
         var progress = progressDir.GetProgress(ProgressDirector.ProgressType.CORPORATE_PARTNER);
         if (progress >= level || progress < level - 1 || PlayerStatePatch.PlayerState.GetCurrency() < cost) return;
-        
-        SendItems("Ranked Up!", Client.MissingLocations.Where(loc =>
-        {
-            if (!LevelRegex.IsMatch(loc)) return false;
-            return int.Parse(LevelRegex.Match(loc).Groups[1].Value) <= level;
-        }).ToArray());
-        
-        if (level < 28) return;
+
+        SendItems(
+            "Ranked Up!", Client.MissingLocations.Where(loc =>
+                {
+                    if (!LevelRegex.IsMatch(loc)) return false;
+                    return int.Parse(LevelRegex.Match(loc).Groups[1].Value) <= level;
+                }
+            ).ToArray()
+        );
+
+        if (level < 28 || ApSlimeClient.GoalType is not GoalType.Corporate) return;
         Client.Goal();
     }
 
@@ -33,9 +37,12 @@ public static class CorporatePatch
         if (!CorporateLocations.TryGetValue(rank, out var locations)) return;
         var location = locations[rewardIndex];
         if (!Client.MissingLocations.Contains(location)) return;
-        var item = Client.ScoutLocation(location);
-        var loc = new AssetItem(item.ItemGame, item.ItemName, item.Flags);
-        __instance.rewardTitles[rewardIndex].text = loc.ItemName;
-        __instance.rewardIcons[rewardIndex].overrideSprite = ItemHandler.ItemImage(loc);
+
+
+        AssetItem item = ScoutedLocations.TryGetValue(location, out var scoutedItem) ? scoutedItem
+            : ScoutedLocations[location] = Client.ScoutLocation(location);
+        
+        __instance.rewardTitles[rewardIndex].text = item.ItemName;
+        __instance.rewardIcons[rewardIndex].overrideSprite = ItemHandler.ItemImage(item);
     }
 }

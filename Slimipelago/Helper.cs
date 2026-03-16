@@ -9,72 +9,67 @@ namespace Slimipelago;
 public static class Helper
 {
     public static Dictionary<Vector3, string> PosHashCache = [];
-    
-    extension(GameObject gobj)
+
+    public static GameObject[] GetChildren(this GameObject gobj)
     {
-        public GameObject[] GetChildren()
-        {
-            var transform = gobj.transform;
-            var count = transform.childCount;
-            var children = new GameObject[count];
+        var transform = gobj.transform;
+        var count = transform.childCount;
+        var children = new GameObject[count];
 
-            for (var i = 0; i < count; i++)
-            {
-                children[i] = transform.GetChild(i).gameObject;
-            }
+        for (var i = 0; i < count; i++) { children[i] = transform.GetChild(i).gameObject; }
 
-            return children;
-        }
-
-        public GameObject GetParent() => gobj.transform.parent.gameObject;
-        public GameObject GetChild(int index) => gobj.GetChildren()[index];
+        return children;
     }
 
-    extension<TMonoBehavior>(TMonoBehavior behavior) where TMonoBehavior : MonoBehaviour
+    public static GameObject GetParent(this GameObject gobj) => gobj.transform.parent.gameObject;
+    public static GameObject GetChild(this GameObject gobj, int index) => gobj.GetChildren()[index];
+
+    public static GameObject[] GetChildren<TMonoBehavior>(this TMonoBehavior behavior)
+        where TMonoBehavior : MonoBehaviour
+        => behavior.gameObject.GetChildren();
+
+    public static GameObject GetChild<TMonoBehavior>(this TMonoBehavior behavior, int index)
+        where TMonoBehavior : MonoBehaviour
+        => behavior.gameObject.GetChild(index);
+
+    public static GameObject GetParent<TMonoBehavior>(this TMonoBehavior behavior) where TMonoBehavior : MonoBehaviour
+        => behavior.transform.parent.gameObject;
+
+    public static TOut GetPrivateField<TOut>(this object obj, string field)
     {
-        public GameObject[] GetChildren() => behavior.gameObject.GetChildren();
-        public GameObject GetChild(int index) => behavior.gameObject.GetChild(index);
-        public GameObject GetParent() => behavior.transform.parent.gameObject;
+        var fieldInfo = obj.GetType().GetField(field, BindingFlags.NonPublic | BindingFlags.Instance);
+        if (fieldInfo is null) throw new ArgumentException($"Field [{field}] is null");
+        var value = fieldInfo.GetValue(obj);
+        if (value is null) throw new ArgumentException($"Value for [{field}] is null");
+        return (TOut)value;
     }
 
-    extension(object obj)
+    public static void SetPrivateField(this object obj, string field, object value)
+        => obj.GetType().GetField(field, BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(obj, value);
+
+    public static TOut CallPrivateMethod<TOut>(this object obj, string methodName, params object[] param)
     {
-        public TOut GetPrivateField<TOut>(string field)
-        {
-            var fieldInfo = obj.GetType().GetField(field, BindingFlags.NonPublic | BindingFlags.Instance);
-            if (fieldInfo is null) throw new ArgumentException($"Field [{field}] is null");
-            var value = fieldInfo.GetValue(obj);
-            if (value is null) throw new ArgumentException($"Value for [{field}] is null");
-            return (TOut)value;
-        }
-
-        public void SetPrivateField(string field, object value)
-            => obj.GetType().GetField(field, BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(obj, value);
-
-        public TOut CallPrivateMethod<TOut>(string methodName, params object[] param)
-        {
-            var methodInfo = obj.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
-            if (methodInfo is null) throw new ArgumentException($"Method [{methodName}] is null");
-            var value = methodInfo!.Invoke(obj, param);
-            if (value is null) throw new ArgumentException($"Value for [{methodName}] is null");
-            return (TOut)value;
-        }
-
-        public void CallPrivateMethod(string methodName, params object[] param)
-        {
-            var methodInfo = obj.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
-            if (methodInfo is null) throw new ArgumentException($"Method [{methodName}] is null");
-            methodInfo.Invoke(obj, param);
-        }
+        var methodInfo = obj.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
+        if (methodInfo is null) throw new ArgumentException($"Method [{methodName}] is null");
+        var value = methodInfo!.Invoke(obj, param);
+        if (value is null) throw new ArgumentException($"Value for [{methodName}] is null");
+        return (TOut)value;
     }
-    
+
+    public static void CallPrivateMethod(this object obj, string methodName, params object[] param)
+    {
+        var methodInfo = obj.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
+        if (methodInfo is null) throw new ArgumentException($"Method [{methodName}] is null");
+        methodInfo.Invoke(obj, param);
+    }
+
     public static HorizontalLayoutGroup CreateHorizontalGroup(GameObject parent)
     {
         var hGroup = new GameObject("HorizontalLayoutGroup (custom)").AddComponent<HorizontalLayoutGroup>();
         hGroup.transform.SetParent(parent.transform);
         return hGroup;
     }
-    
+
     public static TextMeshProUGUI CreateText(string text, Color color, GameObject parent, int fontSize = 24)
     {
         var textObj = new GameObject("TextMeshProUGUI (custom)").AddComponent<TextMeshProUGUI>();
@@ -129,10 +124,7 @@ public static class Helper
 
         var button = bGobj.AddComponent<Button>();
         button.onClick = new Button.ButtonClickedEvent();
-        if (onPressed is not null)
-        {
-            button.onClick.AddListener(onPressed);
-        }
+        if (onPressed is not null) { button.onClick.AddListener(onPressed); }
 
         button.targetGraphic = img;
 
@@ -146,8 +138,10 @@ public static class Helper
         return button;
     }
 
-    public static Toggle CreateCheckbox(GameObject prefab, GameObject parent, bool setting, string name,
-        UnityAction<bool> valueChanged)
+    public static Toggle CreateCheckbox(
+        GameObject prefab, GameObject parent, bool setting, string name,
+        UnityAction<bool> valueChanged
+    )
     {
         var gameObject = UnityEngine.Object.Instantiate(prefab, parent.transform, false);
         var component = gameObject.GetComponent<Toggle>();
@@ -156,7 +150,7 @@ public static class Helper
         gameObject.transform.Find("Label").GetComponent<TMP_Text>().text = name;
         return component;
     }
-    
+
     public static string HashPos(this Vector3 pos)
     {
         if (PosHashCache.TryGetValue(pos, out var hashPos)) return hashPos;

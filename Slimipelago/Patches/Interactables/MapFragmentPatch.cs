@@ -12,5 +12,13 @@ public static class MapFragmentPatch
     }
 
     [HarmonyPatch(typeof(MapDataEntry), "Activate"), HarmonyPrefix]
-    public static void ActivateMapDataEntry(MapDataEntry __instance) => __instance.InteractableInteracted("Map");
+    public static void ActivateMapDataEntry(MapDataEntry __instance)
+    {
+        if (Core.DebugLevel > 0)
+        {
+            Core.Log.Msg($"map: {__instance.transform.position.HashPos()}: {__instance}");
+        }
+        
+        __instance.InteractableInteracted("Map");
+    }
 }

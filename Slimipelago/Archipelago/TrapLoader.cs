@@ -111,7 +111,7 @@ public static class TrapLoader
             var trap = TrapAttributes[Playground.Random.Next(TrapAttributes.Count)];
             if (RunTrap(trap.Trap))
             {
-                TrapTimer = Playground.Random.Next(30, 60);
+                TrapTimer = Playground.Random.Next(12, 60);
                 ApSlimeClient.Client.SendToStorage("used_traps", ++TrapSlimesUsedCount);
             }
             else

@@ -20,6 +20,11 @@ public static class JournalPatch
     [HarmonyPatch(typeof(JournalEntry), "Activate"), HarmonyPostfix]
     public static void ActivateJournal(JournalEntry __instance)
     {
+        if (Core.DebugLevel > 0)
+        {
+            Core.Log.Msg($"note: {__instance.transform.position.HashPos()}");
+        }
+        
         __instance.InteractableInteracted("Entry");
     }
 }

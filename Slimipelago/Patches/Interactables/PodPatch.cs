@@ -29,7 +29,7 @@ public static class PodPatch
     {
         if (Core.DebugLevel > 0)
         {
-            Core.Log.Msg($"{__instance.transform.position.HashPos()}: {__instance.blueprint}");
+            Core.Log.Msg($"pod: {__instance.transform.position.HashPos()}: {__instance.blueprint}");
         }
 
         __instance.InteractableInteracted("Pod");

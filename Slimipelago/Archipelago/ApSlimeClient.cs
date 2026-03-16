@@ -13,7 +13,9 @@ using Slimipelago.Added;
 using Slimipelago.Patches.Interactables;
 using Slimipelago.Patches.PlayerPatches;
 using Slimipelago.Patches.UiPatches;
+using UnityEngine;
 using static Slimipelago.Archipelago.TrapLoader;
+using static Slimipelago.Patches.UiPatches.PersonalUpgradePatch;
 
 namespace Slimipelago.Archipelago;
 
@@ -38,6 +40,7 @@ public static class ApSlimeClient
     public static ApClient Client = new(new TimeSpan(0, 1, 0));
     public static bool QueuedDeathLink = false;
     public static LoseFlag<string> NoteLocations;
+    public static Dictionary<string, ScoutedItemInfo> ScoutedLocations = [];
 
     public static ApData Data = new();
     public static bool HackTheMarket = true;
@@ -93,6 +96,45 @@ public static class ApSlimeClient
             using var sha = SHA1.Create();
             RandoSeeds[seed!] = BitConverter.ToInt32(sha.ComputeHash(Encoding.UTF8.GetBytes(seed)), 0);
             LoadTrapData();
+
+            if (!Data.UseCustomAssets) return;
+            ScoutedLocations.Clear();
+            ItemHandler.ItemSprites.Clear();
+            var list = UpgradeLocations.Values.Concat(LocationDictionary.Values)
+                                       .Concat(CorporateLocations.Values.SelectMany(s => s))
+                                       .Where(s => Client.MissingLocations.Contains(s))
+                                       .ToArray();
+            
+            /*
+             *
+             * [22:31:06.075] [Slimipelago] The given key was not present in the dictionary.
+  at System.Collections.Generic.Dictionary`2[TKey,TValue].get_Item (TKey key) [0x0001e] in <eae584ce26bc40229c1b1aa476bfa589>:0
+  at Archipelago.MultiClient.Net.TwoWayLookup`2[TA,TB].get_Item (TB b) [0x00000] in <556ef98775af4d1e96dd781e7bb19356>:0
+  at CreepyUtil.Archipelago.ApClient.ApClient.ScoutLocation (System.String id) [0x00007] in <556ef98775af4d1e96dd781e7bb19356>:0
+  at Slimipelago.Archipelago.ApSlimeClient+<>c.<Init>b__19_1 (CreepyUtil.Archipelago.ApClient.ApClient _) [0x001b7] in <422c36e329df4dc7a279eadeb58b29f2>:0
+  at CreepyUtil.Archipelago.ApClient.ApClient.TryConnect (CreepyUtil.Archipelago.LoginInfo info, System.String gameName, Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags flags, System.Version version, CreepyUtil.Archipelago.ArchipelagoTag[] tags, System.Boolean requestSlotData) [0x002f0] in <556ef98775af4d1e96dd781e7bb19356>:0
+             * 
+             */
+            
+            
+            foreach (var loc in list)
+            {
+                try
+                {
+                    if (!ScoutedLocations.TryGetValue(loc, out var itemInfo))
+                    {
+                        var scoutedLoc = Client.ScoutLocation(loc);
+                        if (scoutedLoc is null) return;
+                        itemInfo = ScoutedLocations[loc] = scoutedLoc;
+                    }
+                    
+                    ItemHandler.ItemImage(itemInfo);
+                }
+                catch
+                {
+                    Core.Log.Error($"Could not scout location: [{loc}]");
+                }
+            }
         };
 
         Client.OnConnectionErrorReceived += (e, s) => { Core.Log.Error(e); };
@@ -189,7 +231,6 @@ public static class ApSlimeClient
         try
         {
             Core.Log.Msg("World Opened");
-            PersonalUpgradePatch.ScoutedUpgrades.Clear();
             ItemHandler.ItemNumberTracker = 0;
             PlayerTrackerPatch.AllowedZones.Clear();
 
@@ -271,7 +312,7 @@ public static class ApSlimeClient
 
             ItemsWaiting.Clear();
             AccessDoorPatch.TeleportMarkers.Clear();
-            PersonalUpgradePatch.PurchaseNameKeyToLocation.Clear();
+            PurchaseNameKeyToLocation.Clear();
         }
         catch (Exception e)
         {

@@ -276,7 +276,6 @@
         <Compile Include="Added\Playground.cs"/>
         <Compile Include="Archipelago\ApData.cs" />
         <Compile Include="Archipelago\ApSlimeClient.cs"/>
-        <Compile Include="Archipelago\ApWorldShenanigans.cs"/>
         <Compile Include="Archipelago\ItemConstants.cs" />
         <Compile Include="Archipelago\ItemHandler.cs"/>
         <Compile Include="Archipelago\Logger.cs" />
@@ -313,6 +312,7 @@
         <Compile Include="Patches\UiPatches\PauserPatch.cs" />
         <Compile Include="Patches\UiPatches\PersonalUpgradePatch.cs"/>
         <Compile Include="Patches\UiPatches\PopupPatch.cs"/>
+        <Compile Include="Patches\UiPatches\SaveErrorCheck.cs" />
         <Compile Include="Patches\UiPatches\TranslationPatch.cs"/>
     </ItemGroup>
 

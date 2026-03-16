@@ -116,6 +116,7 @@ public static class OptionsPatch
                     else
                     {
                         errorText.text = string.Join("\n", error);
+                        Core.Log.Error(string.Join("\n", error));
                     }
                 }
                 else
