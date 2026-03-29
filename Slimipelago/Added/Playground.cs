@@ -31,7 +31,7 @@ public static class Playground
     [Trap(TrapLoader.Trap.Whoops,
         [
             "Whoops!", "Ice Floor", "Icy Hot Pants", "Push", "Gravity", "Banana", "Jump", "Banana Peel",
-            "Eject Ability", "Spring", "Slip", "Hiccup"
+            "Eject Ability", "Spring", "Slip", "Hiccup", "Whirlpool"
         ],
         "Teleports the player into the sky")]
     public static bool Whoops(string trapName)
@@ -52,7 +52,11 @@ public static class Playground
     }
 
     [Trap(TrapLoader.Trap.Text,
-        ["Text", "Ghost Chat", "Math Quiz", "Pinball", "Breakout", "Snake", "UNO Challenge", "PONG Challenge", "Pong", "Trivia Trap", "Laughter", "Cutscene","Literature", "Phone", "Aaa", "Tip", "Omo", "Spam", "Tutorial", "Exposition"],
+        [
+            "Text", "Ghost Chat", "Math Quiz", "Pinball", "Breakout", "Snake", "UNO Challenge", "PONG Challenge",
+            "Pong", "Trivia Trap", "Laughter", "Cutscene", "Literature", "Phone", "Aaa", "Tip", "Omo", "Spam",
+            "Tutorial", "Exposition", "Help", "Hey!"
+        ],
         "Puts text on the screen")]
     public static bool Note(string trapName)
     {
@@ -62,10 +66,7 @@ public static class Playground
             {
                 if (NoteObj.activeSelf) return false;
             }
-            catch
-            {
-                NoteObj = null;
-            }
+            catch { NoteObj = null; }
         }
 
         if (!Directory.Exists("Mods/SW_CreeperKing.Slimipelago/TextTrap"))
@@ -82,7 +83,8 @@ public static class Playground
         return true;
     }
 
-    [Trap(TrapLoader.Trap.Ranch, ["Ranch", "Home", "Resistance", "Sleep", "Instant Death", "Get Out"],
+    [Trap(TrapLoader.Trap.Ranch,
+        ["Ranch", "Home", "Resistance", "Sleep", "Instant Death", "Get Out", "Clear Image", "Undo", "Teleport"],
         "Teleports the player back to the Ranch")]
     public static bool BanishPlayer(string trapName = "")
     {
@@ -93,8 +95,9 @@ public static class Playground
 
     [Trap(TrapLoader.Trap.Tarr,
         [
-            "Tarr", "Fishin' Boo", "Buyon", "Gooey", "Army", "Thwimp", "Bomb", "Ghost", "Animal", "Bonk",
-            "Fear", "Nut", "Pie", "Bee", "Police", "Meteor", "Rockfall", "Spike Ball", "TNT Barrel"
+            "Tarr", "Fishin' Boo", "Buyon", "Gooey", "Army", "Thwimp", "Bomb", "Ghost", "Animal", "Bonk", "Fear", "Nut",
+            "Pie", "Bee", "Police", "Meteor", "Rockfall", "Spike Ball", "TNT Barrel", "Chaser", "Banner",
+            "Ninja", "Person", "TNT"
         ],
         "Spawns 1 to 5 Tarrs on top of the player (unless . . . ???)")]
     public static bool SpawnTarr(string trapName)
@@ -105,7 +108,7 @@ public static class Playground
         {
             for (var i = 0; i < (trapName == "Bee" ? 10 : Random.Next(1, 5)); i++)
             {
-                spawned.Add(SpawnTarr(trapName == "Bee" ? .4f :2f/(i + 1)));
+                spawned.Add(SpawnTarr(trapName == "Bee" ? .4f : 2f / (i + 1)));
             }
         }, () => spawned.ForEach(tarr => Destroyer.Destroy(tarr, "TarrTrap.Reset")), 15);
     }
@@ -119,12 +122,16 @@ public static class Playground
         return true;
     }
 
-    [Trap(TrapLoader.Trap.Zoom, ["Zoom", "Deisometric", "Spooky"], "Zooms the camera in, in a strange way")]
+    [Trap(TrapLoader.Trap.Zoom, ["Zoom", "Deisometric", "Spooky", "Zoom In", "Zoom Out"],
+        "Zooms the camera in, in a strange way")]
     public static bool Zoom(string trapName)
         => ActivateTrapWithReset(() => PlayerCamera.orthographic = true, () => PlayerCamera.orthographic = false);
 
     [Trap(TrapLoader.Trap.ScreenFlip,
-        ["Screen Flip", "Flip", "Mirror", "Monkey Mash", "Reversal", "Camera Rotate", "Confound", "Confuse", "Confusion", "Reverse"],
+        [
+            "Screen Flip", "Flip", "Mirror", "Monkey Mash", "Reversal", "Camera Rotate", "Confound", "Confuse",
+            "Confusion", "Reverse", "Flip Horizontal", "Flip Vertical", "Gas", "Inverted Mouse", "Reverse Controls"
+        ],
         "Flips the camera horizontally")]
     public static bool CameraFlip(string trapName)
         => ActivateTrapWithReset(() =>
@@ -148,7 +155,7 @@ public static class Playground
         => ActivateTrapWithReset(() => PlayerInWorld.transform.DOScale(WideScale, 1),
             () => PlayerInWorld.transform.DOScale(NormalScale, 1));
 
-    [Trap(TrapLoader.Trap.Damage, ["Damage", "Blue Balls Curse", "One Hit KO", "Instant Crystal"],
+    [Trap(TrapLoader.Trap.Damage, ["Damage", "Blue Balls Curse", "One Hit KO", "Instant Crystal", "Explosion"],
         "Hurts the player, lots")]
     public static bool Damage(string trapName)
     {
@@ -165,19 +172,28 @@ public static class Playground
         return true;
     }
 
-    [Trap(TrapLoader.Trap.EnergyDrain, ["Energy Drain", "No Stocks", "Depletion", "SvC Effect", "Dry"], "Sets player's energy to 0")]
+    [Trap(TrapLoader.Trap.EnergyDrain, ["Energy Drain", "No Stocks", "Depletion", "SvC Effect", "Dry", "Mana Drain"],
+        "Sets player's energy to 0")]
     public static bool EnergyDrain(string trapName)
     {
         PlayerStatePatch.PlayerState.SetEnergy(0);
         return true;
     }
 
-    [Trap(TrapLoader.Trap.Freeze, ["Freeze", "Input Sequence", "Paralysis", "Paralyze", "Chaos Control", "Bubble", "Stun", "Ice", "Frozen"],
+    [Trap(TrapLoader.Trap.Freeze,
+        [
+            "Freeze", "Input Sequence", "Paralysis", "Paralyze", "Chaos Control", "Bubble", "Stun", "Ice", "Frozen",
+            "Frost"
+        ],
         "Freezes the player in place")]
     public static bool Freeze(string trapName)
         => ActivateTrapWithReset(() => PlayerLockOnDeath.Freeze(), () => PlayerLockOnDeath.Unfreeze());
 
-    [Trap(TrapLoader.Trap.NoVac, ["No Vac", " No Guarding", "No Petals","No Revivals", "Disable A", "Disable B", "Disable C Up", "Disable Tag", "Disable Z"],
+    [Trap(TrapLoader.Trap.NoVac,
+        [
+            "No Vac", " No Guarding", "No Petals", "No Revivals", "Disable A", "Disable B", "Disable C Up",
+            "Disable Tag", "Disable Z", "Disarm", "Tool Swap"
+        ],
         "Disables the vacuum")]
     public static bool NoVac(string trapName)
         => ActivateTrapWithReset(() =>
@@ -202,7 +218,12 @@ public static class Playground
             Application.targetFrameRate = Fps;
         });
 
-    [Trap(TrapLoader.Trap.Underwater, ["Underwater", "Sticky Floor", "Rail", "Sticky Hands", "Honey", "Iron Boots", "Slow", "Slowness", "Fishing"], "Gives you underwater effects")]
+    [Trap(TrapLoader.Trap.Underwater,
+        [
+            "Underwater", "Sticky Floor", "Rail", "Sticky Hands", "Honey", "Iron Boots", "Slow", "Slowness", "Fishing",
+            "Sandstorm"
+        ],
+        "Gives you underwater effects")]
     public static bool Underwater(string trapName)
     {
         if (PlayerEffects.Underwater.Active) return false;
@@ -234,10 +255,7 @@ public static class Playground
 
         return TrapLoader.SetTrapReSetter(() =>
         {
-            try
-            {
-                trapResetAction();
-            }
+            try { trapResetAction(); }
             catch (Exception e)
             {
                 Core.Log.Error("Error correcting trap");
@@ -246,18 +264,16 @@ public static class Playground
             HouseTrigger.SetActive(true);
         }, resetTime);
     }
-    
+
     public static GameObject SpawnTarr(float scale)
     {
-        var pos = PlayerInWorld.transform.position + new Vector3(Random.Next(-4, 4), Random.Next(5, 15), Random.Next(-4, 4));
+        var pos = PlayerInWorld.transform.position
+                  + new Vector3(Random.Next(-4, 4), Random.Next(5, 15), Random.Next(-4, 4));
         var prefab = SRSingleton<GameContext>.Instance.LookupDirector.GetPrefab(Identifiable.Id.TARR_SLIME);
         var spawned =
             SRBehaviour.InstantiateActor(prefab, PlayerModelPatch.Model.currRegionSetId, pos, Quaternion.identity);
 
-        foreach (var listener in spawned.GetComponentsInChildren<SpawnListener>(true))
-        {
-            listener.DidSpawn();
-        }
+        foreach (var listener in spawned.GetComponentsInChildren<SpawnListener>(true)) { listener.DidSpawn(); }
 
         spawned.transform.DOScale(new Vector3(scale, scale, scale), 1);
         return spawned;

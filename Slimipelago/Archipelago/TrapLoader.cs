@@ -7,6 +7,7 @@ using Slimipelago.Patches.PlayerPatches;
 using Slimipelago.Patches.UiPatches;
 using UnityEngine;
 using static Slimipelago.GameLoader;
+using Random = System.Random;
 
 namespace Slimipelago.Archipelago;
 
@@ -31,6 +32,11 @@ public static class TrapLoader
         FrameSlime, // https://imgur.com/a/dA0afHO
         Underwater, // https://www.youtube.com/shorts/-enuIBVmKy4
     }
+
+    public static string[] RandomTrapNames = ["Chaos", "Extreme Chaos Mode", "Random Status"];
+
+    public static Trap[] AllTrapTypes = Enum.GetNames(typeof(Trap))
+                                            .Select(s => (Trap)Enum.Parse(typeof(Trap), s, true)).ToArray();
 
     public static List<string> BaseTrapNames = [];
     public static Dictionary<Trap, string> TrapTypeToName = [];
@@ -63,10 +69,7 @@ public static class TrapLoader
                 TrapTypeToName[method.trap.Trap] = method.trap.TrapNames[0];
                 BaseTrapNames.Add(method.trap.TrapNames[0]);
 
-                foreach (var trapName in method.trap.TrapNames)
-                {
-                    Traps[trapName] = action;
-                }
+                foreach (var trapName in method.trap.TrapNames) { Traps[trapName] = action; }
             }
         }
 
@@ -97,14 +100,8 @@ public static class TrapLoader
         }
         else if (TrapReset is null && TrapLinkTraps.TryPeek(out var traplink))
         {
-            if (RunTrap(traplink.Trap, traplink.Player))
-            {
-                TrapLinkTraps.TryDequeue(out _);
-            }
-            else
-            {
-                TrapTimer += 3;
-            }
+            if (RunTrap(traplink.Trap, traplink.Player)) { TrapLinkTraps.TryDequeue(out _); }
+            else { TrapTimer += 3; }
         }
         else if (TrapTimer <= 0 && TrapReset is null && GetTrapAmount() > TrapSlimesUsedCount)
         {
@@ -114,10 +111,7 @@ public static class TrapLoader
                 TrapTimer = Playground.Random.Next(12, 60);
                 ApSlimeClient.Client.SendToStorage("used_traps", ++TrapSlimesUsedCount);
             }
-            else
-            {
-                TrapTimer += 3;
-            }
+            else { TrapTimer += 3; }
         }
 
         if (TrapReset is null) return;
@@ -140,21 +134,22 @@ public static class TrapLoader
         MarketPatch.Crash = false;
     }
 
-    public static bool RunTrap(Trap trap) => RunTrap(TrapTypeToName[trap]);
+    public static bool RunRandomTrap()
+    {
+        var traps = TrapTypeToName.Values.ToArray();
+        return RunTrap(traps[new Random().Next(traps.Length)]);
+    }
+
+    public static bool RunTrap(Trap trap, [CanBeNull] string player = null) => RunTrap(TrapTypeToName[trap], player);
 
     public static bool RunTrap(string trap, [CanBeNull] string player = null)
     {
-        if (!Traps.ContainsKey(trap)) return false;
+        if (RandomTrapNames.Contains(trap))
+            return RunTrap(AllTrapTypes[new Random().Next(AllTrapTypes.Length)], player);
+        if (!Traps.ContainsKey(trap)) return ApSlimeClient.Data.TrapLinkRandom && RunTrap("Chaos", player);
         if (TrapReset is not null) return false;
-        if (player is not null)
-        {
-            PopupPatch.AddItemToQueue(new ApPopup(Spritemap["got_trap"], "Trapped",
-                $"{trap} Trap", $"From [{player}]"));
-        }
-        else if (ApSlimeClient.Data.TrapLink)
-        {
-            ApSlimeClient.Client.SendTrapLink($"{trap} Trap");
-        }
+        PopupPatch.AddItemToQueue(new ApPopup(Spritemap["got_trap"], "Trapped", $"{trap} Trap", $"From [{player}]"));
+        if (player is null && ApSlimeClient.Data.TrapLink) { ApSlimeClient.Client.SendTrapLink($"{trap} Trap"); }
 
         return Traps[trap](trap);
     }

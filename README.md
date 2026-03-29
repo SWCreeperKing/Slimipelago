@@ -17,7 +17,7 @@
     - If melon doesn't correctly install, then something is interferring with it like an antivirus/antimalware
 4. Download and extract the `Slimipelago.zip` from the [latest release page](https://github.com/SWCreeperKing/Slimipelago/releases).
     - Copy the `Mods` and `UserLibs` folders from the zip into the game's directory.
-    - To verify this is done correctly, the mod's path should be `Slime Rancher/Mods/SW_CreeperKing.Slimipelago/Slimipelago.dll`
+    - To verify this is done correctly, the mod's path should be `Slime Rancher/Mods/Slimipelago.dll`
 5. Launch the game again and you should see no new or load game options!
     - There should be the archipelago connection menu in the options
     - If melon is fine but the mod doesn't load check to make sure there isn't a `~` infront of `SW_CreeperKing.Slimipelago`, if so remove it

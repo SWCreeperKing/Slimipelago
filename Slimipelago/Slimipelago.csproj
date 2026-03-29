@@ -22,7 +22,7 @@
         </Reference>
         <Reference Include="BundledApClient">
             <HintPath>Lib\BundledApClient.dll</HintPath>
-        </Reference>
+        </Reference>        
         <Reference Include="DOTween">
             <HintPath>D:\Programs\steam\steamapps\common\Slime Rancher\SlimeRancher_Data\Managed\DOTween.dll</HintPath>
         </Reference>
@@ -31,12 +31,6 @@
         </Reference>
         <Reference Include="InControl.Examples">
             <HintPath>D:\Programs\steam\steamapps\common\Slime Rancher\SlimeRancher_Data\Managed\InControl.Examples.dll</HintPath>
-        </Reference>
-        <Reference Include="KaitoKid.ArchipelagoUtilities.AssetDownloader">
-          <HintPath>Lib\KaitoKid.ArchipelagoUtilities.AssetDownloader.dll</HintPath>
-        </Reference>
-        <Reference Include="KaitoKid.Utilities.Interfaces">
-          <HintPath>Lib\KaitoKid.Utilities.Interfaces.dll</HintPath>
         </Reference>
         <Reference Include="Logger">
             <HintPath>D:\Programs\steam\steamapps\common\Slime Rancher\SlimeRancher_Data\Managed\Logger.dll</HintPath>
@@ -47,7 +41,7 @@
         <Reference Include="Mono.Posix">
             <HintPath>D:\Programs\steam\steamapps\common\Slime Rancher\SlimeRancher_Data\Managed\Mono.Posix.dll</HintPath>
         </Reference>
-        <Reference Include="System.IO.Compression" />
+        <Reference Include="System.IO.Compression"/>
         <Reference Include="Unity.Analytics.DataPrivacy">
             <HintPath>D:\Programs\steam\steamapps\common\Slime Rancher\SlimeRancher_Data\Managed\Unity.Analytics.DataPrivacy.dll</HintPath>
         </Reference>
@@ -270,60 +264,69 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="Added\InteractableController.cs" />
+        <Compile Include="Added\InteractableController.cs"/>
         <Compile Include="Added\ItemDisplayOnMap.cs"/>
         <Compile Include="Added\ItemMapMarker.cs"/>
         <Compile Include="Added\Playground.cs"/>
-        <Compile Include="Archipelago\ApData.cs" />
+        <Compile Include="Archipelago\ApData.cs"/>
         <Compile Include="Archipelago\ApSlimeClient.cs"/>
-        <Compile Include="Archipelago\ItemConstants.cs" />
+        <Compile Include="Archipelago\ItemConstants.cs"/>
         <Compile Include="Archipelago\ItemHandler.cs"/>
-        <Compile Include="Archipelago\Logger.cs" />
-        <Compile Include="Archipelago\LogicHandler.cs" />
-        <Compile Include="Archipelago\TrapLoader.cs" />
-        <Compile Include="Archipelago\ZoneConstants.cs" />
+        <Compile Include="Archipelago\Logger.cs"/>
+        <Compile Include="Archipelago\LogicHandler.cs"/>
+        <Compile Include="Archipelago\TrapLoader.cs"/>
+        <Compile Include="Archipelago\ZoneConstants.cs"/>
         <Compile Include="Core.cs"/>
         <Compile Include="GameLoader.cs"/>
         <Compile Include="Helper.cs"/>
         <Compile Include="Invisinator.cs"/>
         <Compile Include="KeyRegistry.cs"/>
-        <Compile Include="Patches\GadgetPatches\DronePatch.cs" />
-        <Compile Include="Patches\GadgetPatches\ExtractorPatch.cs" />
+        <Compile Include="Patches\GadgetPatches\DronePatch.cs"/>
+        <Compile Include="Patches\GadgetPatches\ExtractorPatch.cs"/>
         <Compile Include="Patches\Interactables\AccessDoorPatch.cs"/>
-        <Compile Include="Patches\Interactables\LandLotPatch.cs" />
+        <Compile Include="Patches\Interactables\LandLotPatch.cs"/>
         <Compile Include="Patches\Interactables\JournalPatch.cs"/>
         <Compile Include="Patches\Interactables\MapFragmentPatch.cs"/>
-        <Compile Include="Patches\Interactables\MarketPatch.cs" />
+        <Compile Include="Patches\Interactables\MarketPatch.cs"/>
         <Compile Include="Patches\Interactables\PodPatch.cs"/>
-        <Compile Include="Patches\PlayerPatches\GordoMarkerPatch.cs" />
-        <Compile Include="Patches\PlayerPatches\IntroPatch.cs" />
+        <Compile Include="Patches\PlayerPatches\GordoMarkerPatch.cs"/>
+        <Compile Include="Patches\PlayerPatches\IntroPatch.cs"/>
         <Compile Include="Patches\PlayerPatches\JetpackPatch.cs"/>
-        <Compile Include="Patches\PlayerPatches\PlayerDeathHandlerPatch.cs" />
+        <Compile Include="Patches\PlayerPatches\PlayerDeathHandlerPatch.cs"/>
         <Compile Include="Patches\PlayerPatches\PlayerModelPatch.cs"/>
         <Compile Include="Patches\PlayerPatches\PlayerStatePatch.cs"/>
         <Compile Include="Patches\PlayerPatches\PlayerTrackerPatch.cs"/>
-        <Compile Include="Patches\PlayerPatches\VacuumPatch.cs" />
-        <Compile Include="Patches\UiPatches\CorporatePatch.cs" />
-        <Compile Include="Patches\UiPatches\CreditsPatch.cs" />
+        <Compile Include="Patches\PlayerPatches\VacuumPatch.cs"/>
+        <Compile Include="Patches\UiPatches\CorporatePatch.cs"/>
+        <Compile Include="Patches\UiPatches\CreditsPatch.cs"/>
         <Compile Include="Patches\UiPatches\KillTutorialPatch.cs"/>
         <Compile Include="Patches\UiPatches\MainMenuPatch.cs"/>
         <Compile Include="Patches\UiPatches\MusicPatch.cs"/>
         <Compile Include="Patches\UiPatches\OptionsPatch.cs"/>
-        <Compile Include="Patches\UiPatches\PauserPatch.cs" />
+        <Compile Include="Patches\UiPatches\PauserPatch.cs"/>
         <Compile Include="Patches\UiPatches\PersonalUpgradePatch.cs"/>
         <Compile Include="Patches\UiPatches\PopupPatch.cs"/>
-        <Compile Include="Patches\UiPatches\SaveErrorCheck.cs" />
+        <Compile Include="Patches\UiPatches\SaveErrorCheck.cs"/>
         <Compile Include="Patches\UiPatches\TranslationPatch.cs"/>
     </ItemGroup>
 
     <ItemGroup>
         <Folder Include="Lib\"/>
+        <PackageReference Include="KaitoKid.ArchipelagoUtilities.AssetDownloader" Version="3.1.12"/>
     </ItemGroup>
 
     <Target Name="CopyCustomContent" AfterTargets="AfterBuild">
         <Copy
                 SourceFiles="bin/Debug/net472/Slimipelago.dll"
-                DestinationFolder="../../../Mods/SW_CreeperKing.Slimipelago"
+                DestinationFolder="../../../Mods"
+        />
+        <Copy
+                SourceFiles="bin/Debug/net472/KaitoKid.ArchipelagoUtilities.AssetDownloader.dll"
+                DestinationFolder="../../../UserLibs"
+        />
+        <Copy
+                SourceFiles="bin/Debug/net472/KaitoKid.Utilities.Interfaces.dll"
+                DestinationFolder="../../../UserLibs"
         />
     </Target>
 </Project>

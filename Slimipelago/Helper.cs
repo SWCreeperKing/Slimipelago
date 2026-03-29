@@ -35,6 +35,12 @@ public static class Helper
     public static GameObject GetParent<TMonoBehavior>(this TMonoBehavior behavior) where TMonoBehavior : MonoBehaviour
         => behavior.transform.parent.gameObject;
 
+    public static bool HasPrivateField(this object obj, string field)
+    {
+        var fieldInfo = obj.GetType().GetField(field, BindingFlags.NonPublic | BindingFlags.Instance);
+        return fieldInfo is not null;
+    }
+    
     public static TOut GetPrivateField<TOut>(this object obj, string field)
     {
         var fieldInfo = obj.GetType().GetField(field, BindingFlags.NonPublic | BindingFlags.Instance);

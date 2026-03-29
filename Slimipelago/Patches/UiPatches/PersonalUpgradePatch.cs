@@ -1,4 +1,3 @@
-using Archipelago.MultiClient.Net.Models;
 using HarmonyLib;
 using MonomiPark.SlimeRancher.DataModel;
 using Slimipelago.Archipelago;

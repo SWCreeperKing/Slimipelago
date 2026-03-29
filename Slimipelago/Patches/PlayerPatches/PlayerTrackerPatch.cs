@@ -1,5 +1,7 @@
 using HarmonyLib;
 using Slimipelago.Added;
+using Slimipelago.Patches.UiPatches;
+using static Slimipelago.GameLoader;
 
 namespace Slimipelago.Patches.PlayerPatches;
 
@@ -25,6 +27,7 @@ public static class PlayerTrackerPatch
         if (!ZoneTypeToName.TryGetValue(zone, out var zoneString)) return;
         if (AllowedZones.Contains(zoneString)) return;
         Core.Log.Msg($"Player Entered Restricted Area: [{zone}]");
+        PopupPatch.AddItemToQueue(new ApPopup(Spritemap["got_trap"], "Restricted", $"Player Entered Restricted Area: [{zone}]", "BEGONE"));
         Playground.BanishPlayer();
     }
 }

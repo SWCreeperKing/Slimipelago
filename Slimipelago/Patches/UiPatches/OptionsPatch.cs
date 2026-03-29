@@ -84,7 +84,7 @@ public static class OptionsPatch
             b => Data.MusicRandoRandomizeOnce = b);
 
         var g6 = CreateHorizontalGroup(panel).gameObject;
-        CreateCheckbox(__instance.modTogglePrefab, g6, Data.UseCustomAssets, "Use Archipelago Utilities\n Custom Assets",
+        CreateCheckbox(__instance.modTogglePrefab, g6, Data.UseCustomAssets, "Use Archipelago Utilities\nCustom Assets\n(lags on connect)",
                 b => Data.UseCustomAssets = b);
 
         var connectButton = CreateButton(Client.IsConnected ? "Disconnect" : "Connect", g6,

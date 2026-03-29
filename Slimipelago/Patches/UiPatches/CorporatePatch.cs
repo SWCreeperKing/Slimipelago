@@ -27,8 +27,8 @@ public static class CorporatePatch
             ).ToArray()
         );
 
-        if (level < 28 || ApSlimeClient.GoalType is not GoalType.Corporate) return;
-        Client.Goal();
+        if (level < 28) return;
+        Client.TryGoal(GoalType.Corporate);
     }
 
     [HarmonyPatch(typeof(CorporatePartnerUI), "EnableReward"), HarmonyPostfix]

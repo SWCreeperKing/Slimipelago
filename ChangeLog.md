@@ -1,14 +1,25 @@
 v0.2.3
 
+- [ApWorld] Minor fixes to logic and location names, there are 2 *possible* incompatible locations from worlds generated
+  with v0.2.2 due to them previously having an extra space
+    - Treasure Pod - Glass Desert Western Ruins
+    - Treasure Pod - Glass Desert Leftside Isle
+- [Client] (HOPEFULLY) Fixed save errors
 - [Client] Extended timeout timer from 4s to 60s
 - [Client] Extended the trap delay range from 30s-60s to 12s-60s
 - [Client] Fixed a bug where reaching 7Zee lvl 28 would goal regardless of goal type
 - [Client] Added version number
-- [Client] Fixed Note Goal being suseptable to collect
-- [ApWorld] Minor fixes to logic and location names, there are 2 possible incompatable locations from worlds generated
-  with v0.2.2 due to them previously having an extra space
-    - Treasure Pod - Glass Desert Western Ruins
-    - Treasure Pod - Glass Desert Leftside Isle
+- [Client] Fixed Note Goal being susceptible to collect
+- [Client] Custom Assets now loads on connect
+- [Client] Traplink, added support for the following traps:
+    - Banner, Chaser, Clear Image, Disarm, Explosion, Flip Horizontal, Flip Vertical, Frost, Gas, Help, Hey!, Inverted
+      Mouse, Mana Drain, Ninja, Person, Reverse Controls, Sandstorm, Teleport, TNT, Tool Swap, Undo, Whirlpool, Zoom In,
+      Zoom Out
+- [Client] Forgot to implement the functionality of `Give random traps for unknown traps`
+- [Client] Made the game tell you when trap linked, and if you have entered an area without an unlock
+- [Client] Changed how the mod is structured slightly (in preparation for updating to melon 7.2)
+    - IF YOU ARE UPDATING before running the game delete the `Slimipelago.dll` in the
+      `Slime Rancher/Mods/SW_CreeperKing.Slimipelago` folder
 
 ---
 v0.2.2

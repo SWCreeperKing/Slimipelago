@@ -16,7 +16,7 @@ public static class MusicPatch
     public static readonly string[] EventSongs = ["Tarr", "Firestorm"];
 
     public static readonly string[] RegionSongs =
-        ["Ranch", "Reef", "Quarry", "Moss", "Desert", "Sea", "Ruins", "Ruins Transition"];
+        ["Ranch", "Reef", "Quarry", "Moss", "Desert", "Sea", "Ruins", "Ruins Transition", "Any"];
 
     [HarmonyPatch(typeof(MusicDirector), "OnSceneLoaded"), HarmonyPostfix]
     private static void OnSceneLoaded(MusicDirector __instance, Scene scene, LoadSceneMode mode)
@@ -47,6 +47,7 @@ public static class MusicPatch
 
         foreach (var region in RegionSongs)
         {
+            if (region is "Any") continue;
             AddSongs(songs[region][0], region, 0, true);
             AddSongs(songs[region][1], region, 1, true);
         }
@@ -87,8 +88,7 @@ public static class MusicPatch
     {
         CheckDirectory("MusicRando");
 
-        var folders = RegionSongs.Append("Any").ToArray();
-        foreach (var folder in folders)
+        foreach (var folder in RegionSongs)
         {
             CheckDirectory($"MusicRando/{folder}/Day");
             CheckDirectory($"MusicRando/{folder}/Night");
@@ -100,7 +100,7 @@ public static class MusicPatch
             CheckDirectory($"MusicRando/{song}");
         }
 
-        foreach (var folder in folders)
+        foreach (var folder in RegionSongs)
         {
             try
             {

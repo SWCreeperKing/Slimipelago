@@ -7,13 +7,12 @@ using Archipelago.MultiClient.Net.Models;
 using CreepyUtil.Archipelago;
 using CreepyUtil.Archipelago.ApClient;
 using JetBrains.Annotations;
-using KaitoKid.ArchipelagoUtilities.AssetDownloader.ItemSprites;
+using KaitoKid.Utilities.Interfaces;
 using Newtonsoft.Json;
 using Slimipelago.Added;
 using Slimipelago.Patches.Interactables;
 using Slimipelago.Patches.PlayerPatches;
 using Slimipelago.Patches.UiPatches;
-using UnityEngine;
 using static Slimipelago.Archipelago.TrapLoader;
 using static Slimipelago.Patches.UiPatches.PersonalUpgradePatch;
 
@@ -21,9 +20,7 @@ namespace Slimipelago.Archipelago;
 
 public enum GoalType
 {
-    Notes = 0,
-    Corporate = 1,
-    Credits = 2,
+    Notes = 0, Corporate = 1, Credits = 2,
 }
 
 public static class ApSlimeClient
@@ -45,7 +42,6 @@ public static class ApSlimeClient
     public static ApData Data = new();
     public static bool HackTheMarket = true;
     public static bool QueueReLogic;
-    public static GoalType GoalType;
 
     public static long CurrentItemIndex;
 
@@ -82,7 +78,7 @@ public static class ApSlimeClient
             CurrentItemIndex = Client.GetFromStorage("new_item_index", def: 0L);
 
             HackTheMarket = !Client.SlotData.TryGetValue("fix_market_rates", out var value) || (bool)value;
-            GoalType = (GoalType)(Client.SlotData.TryGetValue("goal_type", out var value1) ? (long)value1 : 0);
+            Client.SetGoalType((GoalType)(Client.SlotData.TryGetValue("goal_type", out var value1) ? (long)value1 : 0));
 
             NoteLocations.SetFlag(Client.GetFromStorage("note_locations", def: 0ul));
 
@@ -104,19 +100,18 @@ public static class ApSlimeClient
                                        .Concat(CorporateLocations.Values.SelectMany(s => s))
                                        .Where(s => Client.MissingLocations.Contains(s))
                                        .ToArray();
-            
+
             /*
              *
              * [22:31:06.075] [Slimipelago] The given key was not present in the dictionary.
   at System.Collections.Generic.Dictionary`2[TKey,TValue].get_Item (TKey key) [0x0001e] in <eae584ce26bc40229c1b1aa476bfa589>:0
   at Archipelago.MultiClient.Net.TwoWayLookup`2[TA,TB].get_Item (TB b) [0x00000] in <556ef98775af4d1e96dd781e7bb19356>:0
   at CreepyUtil.Archipelago.ApClient.ApClient.ScoutLocation (System.String id) [0x00007] in <556ef98775af4d1e96dd781e7bb19356>:0
-  at Slimipelago.Archipelago.ApSlimeClient+<>c.<Init>b__19_1 (CreepyUtil.Archipelago.ApClient.ApClient _) [0x001b7] in <422c36e329df4dc7a279eadeb58b29f2>:0
+  at Slimipelago.Archipelago.ApSlimeClient+<>c.<Init>b__19_1 (CreepyUtil.Archipelago.ApClient.ApClient _) [0x001b7] in <422c36e329df4dc7a279eadeb8b29f2>:0
   at CreepyUtil.Archipelago.ApClient.ApClient.TryConnect (CreepyUtil.Archipelago.LoginInfo info, System.String gameName, Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags flags, System.Version version, CreepyUtil.Archipelago.ArchipelagoTag[] tags, System.Boolean requestSlotData) [0x002f0] in <556ef98775af4d1e96dd781e7bb19356>:0
-             * 
+             *
              */
-            
-            
+
             foreach (var loc in list)
             {
                 try
@@ -124,16 +119,13 @@ public static class ApSlimeClient
                     if (!ScoutedLocations.TryGetValue(loc, out var itemInfo))
                     {
                         var scoutedLoc = Client.ScoutLocation(loc);
-                        if (scoutedLoc is null) return;
+                        if (scoutedLoc is null) continue;
                         itemInfo = ScoutedLocations[loc] = scoutedLoc;
                     }
-                    
+
                     ItemHandler.ItemImage(itemInfo);
                 }
-                catch
-                {
-                    Core.Log.Error($"Could not scout location: [{loc}]");
-                }
+                catch { Core.Log.Error($"Could not scout location: [{loc}]"); }
             }
         };
 
@@ -154,6 +146,16 @@ public static class ApSlimeClient
                 QueuedDeathLink = true;
                 PlayerDeathHandlerPatch.DeathlinkRecieved = true;
             }
+        };
+
+        Client.HintsTrackedEvent += hints =>
+        {
+            var player = Client.PlayerSlot;
+            HintedItems = hints.Where(hint => hint.Status is HintStatus.Priority && hint.FindingPlayer == player)
+                               .Select(hint => Client.LocationIdToLocationName(hint.LocationId, player))
+                               .ToArray();
+            LogicHandler.LogicCheck();
+            QueueReLogic = true;
         };
     }
 
@@ -191,21 +193,8 @@ public static class ApSlimeClient
                 LogicHandler.LogicCheck();
             }
 
-            if (Client.PushUpdatedVariables(false, out var hints))
-            {
-                var player = Client.PlayerSlot;
-                HintedItems = hints.Where(hint => hint.Status is HintStatus.Priority && hint.FindingPlayer == player)
-                                   .Select(hint => Client.LocationIdToLocationName(hint.LocationId, player))
-                                   .ToArray();
-                LogicHandler.LogicCheck();
-                QueueReLogic = true;
-            }
-
             if (!PlayerStatePatch.FirstUpdate || !ItemsWaiting.Any()) return;
-            foreach (var item in ItemsWaiting)
-            {
-                ItemHandler.ProcessItem(item);
-            }
+            foreach (var item in ItemsWaiting) { ItemHandler.ProcessItem(item); }
 
             Items.AddRange(ItemsWaiting);
             ItemsWaiting.Clear();
@@ -218,10 +207,7 @@ public static class ApSlimeClient
             DeathHandler.Kill(PlayerStatePatch.PlayerInWorld, DeathHandler.Source.CHICKEN_VAMPIRISM, null, "DeathLink");
             QueuedDeathLink = false;
         }
-        catch (Exception e)
-        {
-            Core.Log.Error(e);
-        }
+        catch (Exception e) { Core.Log.Error(e); }
     }
 
     public static void SaveFile() => File.WriteAllText("ApConnection.json", JsonConvert.SerializeObject(Data));
@@ -242,28 +228,16 @@ public static class ApSlimeClient
             Items.Clear();
             ItemCache.Clear();
 
-            if (SRSingleton<GameContext>.Instance.AutoSaveDirector.IsNewGame())
-            {
-                CurrentItemIndex = 0;
-            }
+            if (SRSingleton<GameContext>.Instance.AutoSaveDirector.IsNewGame()) { CurrentItemIndex = 0; }
 
-            foreach (var item in Items)
-            {
-                ItemHandler.ProcessItem(item);
-            }
+            foreach (var item in Items) { ItemHandler.ProcessItem(item); }
         }
-        catch (Exception e)
-        {
-            Core.Log.Error(e);
-        }
+        catch (Exception e) { Core.Log.Error(e); }
     }
 
     public static void SendItems(string locationType, string[] locations)
     {
-        foreach (var location in locations)
-        {
-            QueueItemPopup(locationType, location);
-        }
+        foreach (var location in locations) { QueueItemPopup(locationType, location); }
 
         Client.SendLocations(locations);
         UpdateGoal();
@@ -297,8 +271,8 @@ public static class ApSlimeClient
     {
         QueueReLogic = true;
 
-        if (GoalType is not GoalType.Notes || !NoteLocations.IsMaxFlag()) return;
-        Client.Goal();
+        if (!NoteLocations.IsMaxFlag()) return;
+        Client.TryGoal(GoalType.Notes);
     }
 
     public static void DisconnectAndReset()
@@ -314,10 +288,7 @@ public static class ApSlimeClient
             AccessDoorPatch.TeleportMarkers.Clear();
             PurchaseNameKeyToLocation.Clear();
         }
-        catch (Exception e)
-        {
-            Core.Log.Error(e);
-        }
+        catch (Exception e) { Core.Log.Error(e); }
     }
 }
 

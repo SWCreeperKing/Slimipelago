@@ -1,5 +1,5 @@
 using HarmonyLib;
-using Slimipelago.Archipelago;
+using MonomiPark.SlimeRancher.DataModel;
 
 namespace Slimipelago.Patches.UiPatches;
 
@@ -11,10 +11,28 @@ public static class SaveErrorCheck
     {
         Core.Log.Error("FAILED TO SAVE", e);
     }
-    
-    [HarmonyPatch(typeof(AutoSaveDirector), "SaveGame"), HarmonyPrefix]
-    public static void SaveStopTrapsError()
+
+    [HarmonyPatch(typeof(GameModel), "AllActors"), HarmonyPostfix]
+    public static void ActorFix(GameModel __instance, ref Dictionary<long, ActorModel> __result)
     {
-        TrapLoader.EMERGENCY_END_TRAP();
+        __result = __result.Where(allActor =>
+        {
+            var ident = allActor.Value.ident;
+            if (!Identifiable.SCENE_OBJECTS.Contains(ident) && ident != Identifiable.Id.QUICKSILVER_SLIME)
+            {
+                var actor = allActor.Value;
+
+                try
+                {
+                    var pos = actor.GetPos();
+                }
+                catch
+                {
+                    Core.Log.Error($"Failed to get position of an actor of [{__instance.name}]: [{actor.actorId}]:[{actor.ident}]");
+                    return false;
+                }
+            }
+            return true;
+        }).ToDictionary(kv => kv.Key, kv => kv.Value);
     }
 }

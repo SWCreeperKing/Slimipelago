@@ -2,11 +2,11 @@
 using CreepyUtil.Archipelago;
 using KaitoKid.ArchipelagoUtilities.AssetDownloader.ItemSprites;
 using MelonLoader;
-using MonomiPark.SlimeRancher.Services;
 using Newtonsoft.Json;
 using Slimipelago;
 using Slimipelago.Archipelago;
 using Slimipelago.Patches.UiPatches;
+using UnityEngine;
 using static Slimipelago.GameLoader;
 using Logger = Slimipelago.Archipelago.Logger;
 
@@ -28,22 +28,22 @@ public class Core : MelonMod
 
     public override void OnInitializeMelon()
     {
+        Log = LoggerInstance;
         if (File.Exists("debug.txt"))
         {
             DebugLevel = int.TryParse(File.ReadAllText("debug.txt"), out var debugLvl) ? debugLvl : 0;
         }
-
-        Log = LoggerInstance;
+        
         Logger = new Logger();
         ItemSpritesManager = new ArchipelagoItemSprites(Logger, JsonConvert.DeserializeObject<ItemSpriteAliases>);
-
+        
         Log.Msg("Starting Shenanigans");
-
+        
         var locationFileData = File
                               .ReadAllLines($"{DataFolder}/Locations.txt")
                               .Select(s => s.Split(','))
                               .ToArray();
-
+        
         foreach (var data in locationFileData)
         {
             if (ApSlimeClient.LocationDictionary.ContainsKey(data[0]))
@@ -51,12 +51,12 @@ public class Core : MelonMod
                 Log.Msg($"Duplicate Key: {data[0]}");
                 continue;
             }
-
+        
             ApSlimeClient.LocationDictionary[data[0]] = data[1];
             if (data.Length < 3) continue;
             ApSlimeClient.LocationInfoDictionary[data[0]] = data[2];
         }
-
+        
         Log.Msg("Loading Shenanigans");
 
         ApSlimeClient.UpgradeLocations = File
@@ -116,6 +116,12 @@ public class Core : MelonMod
         MusicPatch.LoadSongs();
 
         Log.Msg("Initialized.");
+        
+        if (DebugLevel <= 0) return;
+        KeyRegistry.AddKey(KeyCode.J, () =>
+        {
+            Log.Msg(TrapLoader.RunRandomTrap() ? "Ran a random trap" : "Failed to run random trap");
+        });
     }
 
     public override void OnUpdate()
