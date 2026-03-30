@@ -35,7 +35,7 @@ public static class MarketPatch
         }
         
         if (!ApSlimeClient.ItemCache.TryGetValue(ProgMarket, out var value)) return;
-        __result *= 5 * value / 100f + 1;
+        __result *= 20 * value / 100f + 1;
     }
 
     [HarmonyPatch(typeof(EconomyDirector), "ResetPrices"), HarmonyPostfix]

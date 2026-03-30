@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 using static Slimipelago.Helper;
 using static Slimipelago.Archipelago.ApSlimeClient;
 
@@ -36,8 +37,8 @@ public static class OptionsPatch
         layout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
         layout.childAlignment = TextAnchor.MiddleCenter;
         layout.startAxis = GridLayoutGroup.Axis.Horizontal;
-        layout.cellSize = new Vector2(700, 50);
-        layout.spacing = new Vector2(20, 40);
+        layout.cellSize = new Vector2(850, 50);
+        layout.spacing = new Vector2(15, 45);
         layout.constraintCount = 1;
 
         var g1 = CreateHorizontalGroup(panel).gameObject;
@@ -56,31 +57,42 @@ public static class OptionsPatch
         var slot = CreateInputField("Ap Slot", g3);
         slot.text = Data.SlotName;
 
-        var g4 = CreateHorizontalGroup(panel).gameObject;
-        CreateCheckbox(__instance.modTogglePrefab, g4, Data.DeathLink, "DeathLink\n ", b =>
+        var g7 = CreateHorizontalGroup(panel).gameObject;
+        CreateText("DeathLink Group    ", Color.black, g7);
+        var deathLinkGroup = CreateInputField("DeathLinkGroup", g7);
+        deathLinkGroup.text = Data.DeathLinkGroup;
+        
+        var topRow = CreateHorizontalGroup(panel).gameObject;
+        var middleRow = CreateHorizontalGroup(panel).gameObject;
+        
+        CreateCheckbox(__instance.modTogglePrefab, topRow, Data.DeathLink, "DeathLink\n ", b =>
             {
                 Data.DeathLink = b;
                 if (!Client.IsConnected) return;
                 if (Client.Tags[ArchipelagoTag.DeathLink]) _ = Client.Tags - ArchipelagoTag.DeathLink;
-                else _ = Client.Tags + ArchipelagoTag.DeathLink;
+                else
+                {
+                    Data.DeathLinkGroup = deathLinkGroup.text;
+                    Client.DeathLinkGroups.Clear();
+                    Client.DeathLinkGroups.Add(Data.DeathLinkGroup);
+                    _ = Client.Tags + ArchipelagoTag.DeathLink;
+                }
             });
-        CreateCheckbox(__instance.modTogglePrefab, g4, Data.DeathLinkTrap, "Deathlink does Trap\ninstead of dying",
+        CreateCheckbox(__instance.modTogglePrefab, middleRow, Data.DeathLinkTrap, "Deathlink does Trap\ninstead of dying",
                 b => Data.DeathLinkTrap = b);
 
-        var g42 = CreateHorizontalGroup(panel).gameObject;
-        CreateCheckbox(__instance.modTogglePrefab, g42, Data.TrapLink, "TrapLink\n ", b =>
+        CreateCheckbox(__instance.modTogglePrefab, topRow, Data.TrapLink, "TrapLink\n ", b =>
             {
                 Data.TrapLink = b;
                 if (!Client.IsConnected) return;
                 if (Client.Tags[ArchipelagoTag.TrapLink]) _ = Client.Tags - ArchipelagoTag.TrapLink;
                 else _ = Client.Tags + ArchipelagoTag.TrapLink;
             });
-        CreateCheckbox(__instance.modTogglePrefab, g42, Data.TrapLinkRandom, "Give random traps\nfor unknown traps",
+        CreateCheckbox(__instance.modTogglePrefab, middleRow, Data.TrapLinkRandom, "Give random traps\nfor unknown traps",
                 b => Data.TrapLinkRandom = b);
 
-        var g5 = CreateHorizontalGroup(panel).gameObject;
-        CreateCheckbox(__instance.modTogglePrefab, g5, Data.MusicRando, "Music Rando\n ", b => Data.MusicRando = b);
-        CreateCheckbox(__instance.modTogglePrefab, g5, Data.MusicRandoRandomizeOnce, "Music Rando:\nRandomize Once",
+        CreateCheckbox(__instance.modTogglePrefab, topRow, Data.MusicRando, "Music Rando\n ", b => Data.MusicRando = b);
+        CreateCheckbox(__instance.modTogglePrefab, middleRow, Data.MusicRandoRandomizeOnce, "Music Rando:\nRandomize Once",
             b => Data.MusicRandoRandomizeOnce = b);
 
         var g6 = CreateHorizontalGroup(panel).gameObject;
@@ -103,6 +115,8 @@ public static class OptionsPatch
                 if (!Client.IsConnected)
                 {
                     errorText.text = "";
+                    Client.DeathLinkGroups.Clear();
+                    Client.DeathLinkGroups.Add(deathLinkGroup.text);
                     var error = TryConnect(address.text, password.text, slot.text);
 
                     if (error is null)
@@ -111,6 +125,7 @@ public static class OptionsPatch
                         Data.AddressPort = address.text;
                         Data.Password = password.text;
                         Data.SlotName = slot.text;
+                        Data.DeathLinkGroup = deathLinkGroup.text;
                         SaveFile();
                     }
                     else
@@ -133,6 +148,7 @@ public static class OptionsPatch
             MainMenuPatch.NewGameButton.gameObject.SetActive(Client.IsConnected);
             MainMenuPatch.LoadButton.gameObject.SetActive(Client.IsConnected);
         });
+        panel.transform.localPosition = Vector3.zero;
         return false;
     }
 }

@@ -48,17 +48,23 @@ public static class InteractableController
 
         if (itemFound is "Entry")
         {
-            ApSlimeClient.NoteLocations += hash;
-            ApSlimeClient.Client.SendToStorage("note_locations", (ulong)ApSlimeClient.NoteLocations);
-
-            if (Core.DebugLevel > 1)
+            try
             {
-                var flag = Convert.ToString((long)ApSlimeClient.NoteLocations.GetFlag(hash), 2);
-                var currentFlag = Convert.ToString((long)(ulong)ApSlimeClient.NoteLocations, 2);
-                var maxFlag = Convert.ToString((long)ApSlimeClient.NoteLocations.MaxFlag, 2);
-                Core.Log.Msg(
-                    $"Note location checked [{hash}], flag: [{flag}], total: [{currentFlag}], max: [{maxFlag}]"
-                );
+                ApSlimeClient.NoteLocations += hash;
+                ApSlimeClient.Client.SendToStorage("note_locations", (ulong)ApSlimeClient.NoteLocations);
+
+                if (Core.DebugLevel > 1)
+                {
+                    var flag = Convert.ToString((long)ApSlimeClient.NoteLocations.GetFlag(hash), 2);
+                    var currentFlag = Convert.ToString((long)(ulong)ApSlimeClient.NoteLocations, 2);
+                    var maxFlag = Convert.ToString((long)ApSlimeClient.NoteLocations.MaxFlag, 2);
+                    Core.Log.Msg(
+                        $"Note location checked [{hash}], flag: [{flag}], total: [{currentFlag}], max: [{maxFlag}]");
+                }
+            }
+            catch
+            {
+                Core.Log.Error($"Problem with the hash: '{hash}' for note flags");
             }
         }
 

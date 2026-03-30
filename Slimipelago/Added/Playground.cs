@@ -110,7 +110,18 @@ public static class Playground
             {
                 spawned.Add(SpawnTarr(trapName == "Bee" ? .4f : 2f / (i + 1)));
             }
-        }, () => spawned.ForEach(tarr => Destroyer.Destroy(tarr, "TarrTrap.Reset")), 15);
+        }, () => spawned.ForEach(tarr =>
+        {
+            try
+            {
+                tarr.GetComponentInChildren<SRBehaviour>().RequestDestroy("TarrTrap.Reset");
+                return;
+            }
+            catch
+            {
+            }
+            Destroyer.Destroy(tarr, "TarrTrap.Reset");
+        }), 15);
     }
 
     [Trap(TrapLoader.Trap.MarketCrash, ["Market Crash", "Expensive Stocks", "Empty Item Box"],
@@ -273,7 +284,8 @@ public static class Playground
         var spawned =
             SRBehaviour.InstantiateActor(prefab, PlayerModelPatch.Model.currRegionSetId, pos, Quaternion.identity);
 
-        foreach (var listener in spawned.GetComponentsInChildren<SpawnListener>(true)) { listener.DidSpawn(); }
+        foreach (var listener in spawned.GetComponentsInChildren<SpawnListener>(true)) listener.DidSpawn();
+        foreach (var listener in spawned.GetComponentsInChildren<OnTransformed>(true)) listener.OnTransformed();
 
         spawned.transform.DOScale(new Vector3(scale, scale, scale), 1);
         return spawned;

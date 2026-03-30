@@ -5,6 +5,7 @@ public class ApData
     public string AddressPort = "archipelago.gg:12345";
     public string Password = "";
     public string SlotName = "Rancher1";
+    public string DeathLinkGroup = "";
     public bool DeathLink = false;
     public bool DeathLinkTrap = false;
     public bool TrapLink = false;

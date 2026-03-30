@@ -134,8 +134,9 @@ public static class ApSlimeClient
         Client.OnUnregisteredTrapLinkReceived +=
             (player, trap) => TrapLinkTraps.Enqueue(new TrapLinkTrap(trap, player));
 
-        Client.OnDeathLinkPacketReceived += (player, message) =>
+        Client.OnDeathLinkPacketReceived += (group, player, message) =>
         {
+            Core.Log.Msg($"DeathLink from [{player}], [{group}]: [{message}] ({Data.DeathLinkTrap})");
             if (Data.DeathLinkTrap)
             {
                 TrapLinkTraps.Enqueue(new TrapLinkTrap(BaseTrapNames[Playground.Random.Next(BaseTrapNames.Count)],
@@ -145,6 +146,7 @@ public static class ApSlimeClient
             {
                 QueuedDeathLink = true;
                 PlayerDeathHandlerPatch.DeathlinkRecieved = true;
+                Core.Log.Msg($"DL queued: [{QueuedDeathLink}],[{PlayerDeathHandlerPatch.DeathlinkRecieved}]");
             }
         };
 
@@ -193,15 +195,23 @@ public static class ApSlimeClient
                 LogicHandler.LogicCheck();
             }
 
-            if (!PlayerStatePatch.FirstUpdate || !ItemsWaiting.Any()) return;
-            foreach (var item in ItemsWaiting) { ItemHandler.ProcessItem(item); }
+            switch (PlayerStatePatch.FirstUpdate)
+            {
+                case true when ItemsWaiting.Any():
+                {
+                    foreach (var item in ItemsWaiting) { ItemHandler.ProcessItem(item); }
+                    Items.AddRange(ItemsWaiting);
+                    ItemsWaiting.Clear();
+                    QueueReLogic = true;
+                    break;
+                }
+                case false: return;
+            }
 
-            Items.AddRange(ItemsWaiting);
-            ItemsWaiting.Clear();
-            QueueReLogic = true;
-
-            if (!PlayerStatePatch.FirstUpdate) return;
+            // Core.Log.Msg($"Update: [{QueuedDeathLink}]");
             if (!QueuedDeathLink) return;
+            // Core.Log.Msg(
+            //     $"{SRSingleton<SceneContext>.Instance.TimeDirector.HasPauser()}, {SRSingleton<SceneContext>.Instance.TimeDirector.IsFastForwarding()}");
             if (SRSingleton<SceneContext>.Instance.TimeDirector.HasPauser()) return;
             if (SRSingleton<SceneContext>.Instance.TimeDirector.IsFastForwarding()) return;
             DeathHandler.Kill(PlayerStatePatch.PlayerInWorld, DeathHandler.Source.CHICKEN_VAMPIRISM, null, "DeathLink");

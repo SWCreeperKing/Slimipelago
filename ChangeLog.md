@@ -1,3 +1,11 @@
+v0.2.4
+
+- [Client] Fixed a bug with DeathLink having delayed deaths
+- [Client] Buffed Progressive Market Stonks from +5% to +20%
+- [Client] Fixed a bug with 2 missing note locations
+- [Client] Support for DeathLink Groups
+
+---
 v0.2.3
 
 - [ApWorld] Minor fixes to logic and location names, there are 2 *possible* incompatible locations from worlds generated
