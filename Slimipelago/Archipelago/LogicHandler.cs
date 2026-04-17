@@ -63,7 +63,7 @@ public static class LogicHandler
 
             foreach (var kv in LogicLines)
             {
-                RegionCache.Clear();
+                PreviousLines.Clear();
                 try
                 {
                     LogicCache[kv.Key] = kv.Value.Any(logic => logic.UpdateLogic(
