@@ -10,39 +10,52 @@ namespace Slimipelago.Patches.UiPatches;
 [PatchAll]
 public static class CorporatePatch
 {
-    public static readonly Regex LevelRegex = new(@"7Zee lv.(\d+):", RegexOptions.Compiled);
-
     [HarmonyPatch(typeof(CorporatePartnerUI), "BuyLevel"), HarmonyPrefix]
     public static void BuyLevel(ProgressDirector progressDir, int level, int cost)
     {
-        var progress = progressDir.GetProgress(ProgressDirector.ProgressType.CORPORATE_PARTNER);
-        if (progress >= level || progress < level - 1 || PlayerStatePatch.PlayerState.GetCurrency() < cost) return;
+        Core.Log.Msg("Buying Level");
+        try
+        {
+            var progress = progressDir.GetProgress(ProgressDirector.ProgressType.CORPORATE_PARTNER);
+            if (progress >= level || progress < level - 1 || PlayerStatePatch.PlayerState.GetCurrency() < cost) return;
 
-        SendItems(
-            "Ranked Up!", Client.MissingLocations.Where(loc =>
-                {
-                    if (!LevelRegex.IsMatch(loc)) return false;
-                    return int.Parse(LevelRegex.Match(loc).Groups[1].Value) <= level;
-                }
-            ).ToArray()
-        );
+            SendItems(
+                "Ranked Up!", Client.MissingLocations.Where(loc =>
+                    {
+                        try
+                        {
+                            if (!loc.Contains("7Zee")) return false;
+                            var dot = loc.IndexOf('.');
+                            return int.Parse(loc.Substring(dot + 1, loc.IndexOf(':') - dot - 1)) <= level;
+                        }
+                        catch (Exception e) { Core.Log.Error(e); }
+                        return false;
+                    }
+                ).ToArray()
+            );
 
-        if (level < 28) return;
-        Client.TryGoal(GoalType.Corporate);
+            if (level < 28) return;
+            Client.TryGoal(GoalType.Corporate);
+        }
+        catch (Exception e) { Core.Log.Error(e); }
+        Core.Log.Msg($"Bought Level [{level}]");
     }
 
     [HarmonyPatch(typeof(CorporatePartnerUI), "EnableReward"), HarmonyPostfix]
     public static void EnableReward(CorporatePartnerUI __instance, int rank, int rewardIndex)
     {
-        if (!CorporateLocations.TryGetValue(rank, out var locations)) return;
-        var location = locations[rewardIndex];
-        if (!Client.MissingLocations.Contains(location)) return;
+        if (Core.DebugLevel > 0) Core.Log.Msg($"Reward; [{rank},{rewardIndex}]");
+        try
+        {
+            if (!CorporateLocations.TryGetValue(rank, out var locations)) return;
+            var location = locations[rewardIndex];
+            if (!Client.MissingLocations.Contains(location)) return;
 
-
-        AssetItem item = ScoutedLocations.TryGetValue(location, out var scoutedItem) ? scoutedItem
-            : ScoutedLocations[location] = Client.ScoutLocation(location);
-        
-        __instance.rewardTitles[rewardIndex].text = item.ItemName;
-        __instance.rewardIcons[rewardIndex].overrideSprite = ItemHandler.ItemImage(item);
+            AssetItem item = ScoutedLocations[location];
+            __instance.rewardTitles[rewardIndex].text = item.ItemName;
+            __instance.rewardIcons[rewardIndex].overrideSprite = ItemHandler.ItemImage(item);
+        }
+        catch (Exception e) { Core.Log.Error(e); }
+        if (Core.DebugLevel > 0) Core.Log.Msg($"Rewarded; [{rank},{rewardIndex}]");
     }
 }

@@ -1,3 +1,10 @@
+v0.3.0
+
+- [ApWorld] Reworked the entirety of the logic (thank sterlia)
+- [ApWorld] Changed how `treasure_cracker_checks` was checked
+- [Client] Added 2 missing note locations
+- [Client] You can no longer deposit quantum plorts for the Glass Desert teleporter if you don't have Glass Desert
+
 v0.2.4
 
 - [Client] Fixed a bug with DeathLink having delayed deaths

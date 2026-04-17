@@ -14,6 +14,7 @@ public class ItemDisplayOnMap : DisplayOnMap
     public UnityAction OnPress;
     public RegionRegistry.RegionSetId Region = RegionRegistry.RegionSetId.HOME;
     public string LocationName = "";
+    public bool IsNote;
 
     public override void Awake()
     {

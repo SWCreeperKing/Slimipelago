@@ -31,13 +31,14 @@ public static class ApSlimeClient
     public static Dictionary<PlayerState.Upgrade, string> UpgradeLocations;
     public static Dictionary<int, string[]> CorporateLocations;
     public static List<ItemInfo> Items = [];
-    public static List<ItemInfo> ItemsWaiting = [];
     public static ConcurrentDictionary<string, int> ItemCache = [];
     public static string[] HintedItems = [];
     public static ApClient Client = new(new TimeSpan(0, 1, 0));
     public static bool QueuedDeathLink = false;
     public static LoseFlag<string> NoteLocations;
     public static Dictionary<string, ScoutedItemInfo> ScoutedLocations = [];
+    public static Dictionary<string, string> GateLocks = [];
+    public static bool EnableJetpack = false;
 
     public static ApData Data = new();
     public static bool HackTheMarket = true;
@@ -82,6 +83,20 @@ public static class ApSlimeClient
 
             NoteLocations.SetFlag(Client.GetFromStorage("note_locations", def: 0ul));
 
+            LogicHandler.SkipLogic[SkipLogic.None] = true;
+            LogicHandler.SkipLogic[SkipLogic.EasySkips] = Client.SlotData.TryGetValue("easy_skips", out var l)
+                                                          && (bool)l;
+            LogicHandler.SkipLogic[SkipLogic.PreciseMovement]
+                = Client.SlotData.TryGetValue("precise_movement", out var l1) && (bool)l1;
+            LogicHandler.SkipLogic[SkipLogic.ObscureLocations]
+                = Client.SlotData.TryGetValue("obscure_locations", out var l2) && (bool)l2;
+            LogicHandler.SkipLogic[SkipLogic.JetpackBoosts] = Client.SlotData.TryGetValue("jetpack_boosts", out var l3)
+                                                              && (bool)l3;
+            LogicHandler.SkipLogic[SkipLogic.LargoJumps] = Client.SlotData.TryGetValue("largo_jumps", out var l4)
+                                                           && (bool)l4;
+            LogicHandler.SkipLogic[SkipLogic.DangerousSkips]
+                = Client.SlotData.TryGetValue("dangerous_skips", out var l5) && (bool)l5;
+
             var seed = Client.Seed;
             if (seed is null)
             {
@@ -93,24 +108,12 @@ public static class ApSlimeClient
             RandoSeeds[seed!] = BitConverter.ToInt32(sha.ComputeHash(Encoding.UTF8.GetBytes(seed)), 0);
             LoadTrapData();
 
-            if (!Data.UseCustomAssets) return;
             ScoutedLocations.Clear();
             ItemHandler.ItemSprites.Clear();
             var list = UpgradeLocations.Values.Concat(LocationDictionary.Values)
                                        .Concat(CorporateLocations.Values.SelectMany(s => s))
                                        .Where(s => Client.MissingLocations.Contains(s))
                                        .ToArray();
-
-            /*
-             *
-             * [22:31:06.075] [Slimipelago] The given key was not present in the dictionary.
-  at System.Collections.Generic.Dictionary`2[TKey,TValue].get_Item (TKey key) [0x0001e] in <eae584ce26bc40229c1b1aa476bfa589>:0
-  at Archipelago.MultiClient.Net.TwoWayLookup`2[TA,TB].get_Item (TB b) [0x00000] in <556ef98775af4d1e96dd781e7bb19356>:0
-  at CreepyUtil.Archipelago.ApClient.ApClient.ScoutLocation (System.String id) [0x00007] in <556ef98775af4d1e96dd781e7bb19356>:0
-  at Slimipelago.Archipelago.ApSlimeClient+<>c.<Init>b__19_1 (CreepyUtil.Archipelago.ApClient.ApClient _) [0x001b7] in <422c36e329df4dc7a279eadeb8b29f2>:0
-  at CreepyUtil.Archipelago.ApClient.ApClient.TryConnect (CreepyUtil.Archipelago.LoginInfo info, System.String gameName, Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags flags, System.Version version, CreepyUtil.Archipelago.ArchipelagoTag[] tags, System.Boolean requestSlotData) [0x002f0] in <556ef98775af4d1e96dd781e7bb19356>:0
-             *
-             */
 
             foreach (var loc in list)
             {
@@ -123,7 +126,7 @@ public static class ApSlimeClient
                         itemInfo = ScoutedLocations[loc] = scoutedLoc;
                     }
 
-                    ItemHandler.ItemImage(itemInfo);
+                    if (Data.UseCustomAssets) ItemHandler.ItemImage(itemInfo);
                 }
                 catch { Core.Log.Error($"Could not scout location: [{loc}]"); }
             }
@@ -139,8 +142,12 @@ public static class ApSlimeClient
             Core.Log.Msg($"DeathLink from [{player}], [{group}]: [{message}] ({Data.DeathLinkTrap})");
             if (Data.DeathLinkTrap)
             {
-                TrapLinkTraps.Enqueue(new TrapLinkTrap(BaseTrapNames[Playground.Random.Next(BaseTrapNames.Count)],
-                    $"(DeathLink) {player}"));
+                TrapLinkTraps.Enqueue(
+                    new TrapLinkTrap(
+                        BaseTrapNames[Playground.Random.Next(BaseTrapNames.Count)],
+                        $"(DeathLink) {player}"
+                    )
+                );
             }
             else
             {
@@ -156,7 +163,6 @@ public static class ApSlimeClient
             HintedItems = hints.Where(hint => hint.Status is HintStatus.Priority && hint.FindingPlayer == player)
                                .Select(hint => Client.LocationIdToLocationName(hint.LocationId, player))
                                .ToArray();
-            LogicHandler.LogicCheck();
             QueueReLogic = true;
         };
     }
@@ -187,26 +193,48 @@ public static class ApSlimeClient
             Client.UpdateConnection();
 
             if (!Client.IsConnected) return;
-            ItemsWaiting.AddRange(Client.GetOutstandingItems()!);
 
             if (QueueReLogic)
             {
-                QueueReLogic = false;
-                LogicHandler.LogicCheck();
+                try
+                {
+                    LogicHandler.LogicCheck();
+
+                    QueueReLogic = false;
+                }
+                catch (Exception e) { Core.Log.Error(e); }
+
             }
 
-            switch (PlayerStatePatch.FirstUpdate)
+
+            if (PlayerStatePatch.FirstUpdate)
             {
-                case true when ItemsWaiting.Any():
+                var items = Client.GetOutstandingItems();
+                if (items.Length > 0)
                 {
-                    foreach (var item in ItemsWaiting) { ItemHandler.ProcessItem(item); }
-                    Items.AddRange(ItemsWaiting);
-                    ItemsWaiting.Clear();
+                    for (var index = 0; index < items.Length; index++)
+                    {
+                        var item = items[index];
+                        if (Core.DebugLevel > 0)
+                        {
+                            Core.Log.Msg(
+                                $"Handling Item: [{item.ItemName}] | [{index + 1}/{items.Length + Items.Count}]"
+                            );
+                        }
+                        ItemHandler.ProcessItem(item);
+                        if (Core.DebugLevel > 0)
+                        {
+                            Core.Log.Msg(
+                                $"Handled Item: [{item.ItemName}] | [{index + 1}/{items.Length + Items.Count}]"
+                            );
+                        }
+                    }
+                    Items.AddRange(items);
                     QueueReLogic = true;
-                    break;
+                    Core.Log.Msg($"Handled all [{items.Length}] items");
                 }
-                case false: return;
             }
+            else return;
 
             // Core.Log.Msg($"Update: [{QueuedDeathLink}]");
             if (!QueuedDeathLink) return;
@@ -233,14 +261,9 @@ public static class ApSlimeClient
             AccessDoorPatch.LabDoor.CurrState = AccessDoor.State.CLOSED;
             AccessDoorPatch.OvergrowthDoor.CurrState = AccessDoor.State.CLOSED;
             AccessDoorPatch.GrottoDoor.CurrState = AccessDoor.State.CLOSED;
-            AccessDoorPatch.DocksDoor.CurrState = AccessDoor.State.OPEN;
-
-            Items.Clear();
-            ItemCache.Clear();
+            AccessDoorPatch.DocksDoor.CurrState = AccessDoor.State.CLOSED;
 
             if (SRSingleton<GameContext>.Instance.AutoSaveDirector.IsNewGame()) { CurrentItemIndex = 0; }
-
-            foreach (var item in Items) { ItemHandler.ProcessItem(item); }
         }
         catch (Exception e) { Core.Log.Error(e); }
     }
@@ -262,19 +285,31 @@ public static class ApSlimeClient
 
     public static void QueueItemPopup(string locationType, string location)
     {
-        var item = Client.ScoutLocation(location);
-        if (item?.Player.Slot == Client.PlayerSlot) return;
+        try
+        {
+            var item = Client.ScoutLocation(location);
+            if (item?.Player.Slot == Client.PlayerSlot) return;
 
-        if (item is null)
-        {
-            PopupPatch.AddItemToQueue(new ApPopup(GameLoader.Spritemap["normal"], locationType,
-                location));
+            if (item is null)
+            {
+                PopupPatch.AddItemToQueue(
+                    new ApPopup(
+                        GameLoader.Spritemap["normal"], locationType,
+                        location
+                    )
+                );
+            }
+            else
+            {
+                PopupPatch.AddItemToQueue(
+                    new ApPopup(
+                        ItemHandler.ItemImage(item), locationType,
+                        $"sent: [{item.ItemName}]", $"to: {item.Player.Name}"
+                    )
+                );
+            }
         }
-        else
-        {
-            PopupPatch.AddItemToQueue(new ApPopup(ItemHandler.ItemImage(item), locationType,
-                $"sent: [{item.ItemName}]", $"to: {item.Player.Name}"));
-        }
+        catch (Exception e) { Core.Log.Error(e); }
     }
 
     public static void UpdateGoal()
@@ -292,9 +327,7 @@ public static class ApSlimeClient
             if (Client.IsConnected) Client.TryDisconnect();
             GameUUID = null;
             CurrentItemIndex = 0;
-            JetpackPatch.EnableJetpack = false;
-
-            ItemsWaiting.Clear();
+            EnableJetpack = false;
             AccessDoorPatch.TeleportMarkers.Clear();
             PurchaseNameKeyToLocation.Clear();
         }
@@ -308,6 +341,7 @@ public class AssetItem(string game, string item, ItemFlags flags) : IAssetLocati
     public string GameName { get; } = game;
     public string ItemName { get; } = item;
     public ItemFlags ItemFlags { get; } = flags;
+    public string Uid = $"{game};{item};{flags}";
 
     public static implicit operator AssetItem(ScoutedItemInfo item) => new(item.ItemGame, item.ItemName, item.Flags);
 }

@@ -1,5 +1,7 @@
 using HarmonyLib;
 using Slimipelago.Added;
+using Slimipelago.Archipelago;
+using Slimipelago.Patches.PlayerPatches;
 using UnityEngine;
 
 namespace Slimipelago.Patches.Interactables;
@@ -34,20 +36,11 @@ public static class AccessDoorPatch
 
         switch (id)
         {
-            case PediaDirector.Id.LAB:
-                LabDoor = __instance;
-                break;
-            case PediaDirector.Id.GROTTO:
-                GrottoDoor = __instance;
-                break;
-            case PediaDirector.Id.OVERGROWTH:
-                OvergrowthDoor = __instance;
-                break;
-            case PediaDirector.Id.DOCKS:
-                DocksDoor = __instance;
-                break;
-            default:
-                return;
+            case PediaDirector.Id.LAB: LabDoor = __instance; break;
+            case PediaDirector.Id.GROTTO: GrottoDoor = __instance; break;
+            case PediaDirector.Id.OVERGROWTH: OvergrowthDoor = __instance; break;
+            case PediaDirector.Id.DOCKS: DocksDoor = __instance; break;
+            default: return;
         }
 
         foreach (var child in __instance.gameObject.GetChildren().Where(obj => obj.name.ToLower() != "barrier"))
@@ -57,18 +50,24 @@ public static class AccessDoorPatch
     }
 
     [HarmonyPatch(typeof(AccessDoor), "Update"), HarmonyPrefix]
-    public static void Update(AccessDoor __instance)
-    {
-        RunDoorCheck(__instance);
-    }
+    public static void Update(AccessDoor __instance) { RunDoorCheck(__instance); }
 
     public static void RunDoorCheck(AccessDoor door)
     {
         if (door.CurrState is not AccessDoor.State.OPEN) return;
         var hash = door.transform.position.HashPos();
-        
+
         if (!HashToTeleportLocation.TryGetValue(hash, out var destPos)) return;
         if (TeleportMarkers.ContainsKey(destPos)) return;
         TeleportMarkers[destPos] = GameLoader.MakeTeleporterMarker(destPos);
+    }
+
+    [HarmonyPatch(typeof(SlimeGateActivator), "Activate"), HarmonyPrefix]
+    public static bool Activate(AccessDoor ___gateDoor)
+    {
+        var doorHash = ___gateDoor.gameObject.transform.position.HashPos();
+
+        return !ApSlimeClient.GateLocks.TryGetValue(doorHash, out var region)
+               || PlayerTrackerPatch.AllowedZones.Contains(region);
     }
 }

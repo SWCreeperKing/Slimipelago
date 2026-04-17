@@ -93,7 +93,7 @@ public static class GameLoader
     }
 
     public static ItemDisplayOnMap MakeMarker(string id, Vector3 position, UnityAction onPressed = null,
-        RegionSetId region = RegionSetId.HOME)
+        RegionSetId region = RegionSetId.HOME, bool isNote = false)
     {
         if (region is not (RegionSetId.HOME or RegionSetId.DESERT)) return null;
         if (PlayerMap is null)
@@ -154,6 +154,7 @@ public static class GameLoader
         }
 
         obj.Image.overrideSprite = Spritemap[id];
+        obj.IsNote = isNote;
 
         MarkerDictionary[posHash] = obj;
         return obj;

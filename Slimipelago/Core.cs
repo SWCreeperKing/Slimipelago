@@ -5,6 +5,7 @@ using MelonLoader;
 using Newtonsoft.Json;
 using Slimipelago;
 using Slimipelago.Archipelago;
+using Slimipelago.Patches.PlayerPatches;
 using Slimipelago.Patches.UiPatches;
 using UnityEngine;
 using static Slimipelago.GameLoader;
@@ -17,9 +18,9 @@ namespace Slimipelago;
 
 public class Core : MelonMod
 {
-    public const string VersionNumber = "0.2.3";    
+    public const string VersionNumber = "0.3.0";
     public const string DataFolder = "Mods/SW_CreeperKing.Slimipelago/Data";
-    
+
     public static int DebugLevel;
     public static MelonLogger.Instance Log;
 
@@ -28,22 +29,25 @@ public class Core : MelonMod
 
     public override void OnInitializeMelon()
     {
+        // AchievementsDirector // for achievements
+        // ProgressDirector // for progression
+        
         Log = LoggerInstance;
         if (File.Exists("debug.txt"))
         {
             DebugLevel = int.TryParse(File.ReadAllText("debug.txt"), out var debugLvl) ? debugLvl : 0;
         }
-        
+
         Logger = new Logger();
         ItemSpritesManager = new ArchipelagoItemSprites(Logger, JsonConvert.DeserializeObject<ItemSpriteAliases>);
-        
+
         Log.Msg("Starting Shenanigans");
-        
+
         var locationFileData = File
                               .ReadAllLines($"{DataFolder}/Locations.txt")
                               .Select(s => s.Split(','))
                               .ToArray();
-        
+
         foreach (var data in locationFileData)
         {
             if (ApSlimeClient.LocationDictionary.ContainsKey(data[0]))
@@ -51,13 +55,20 @@ public class Core : MelonMod
                 Log.Msg($"Duplicate Key: {data[0]}");
                 continue;
             }
-        
+
             ApSlimeClient.LocationDictionary[data[0]] = data[1];
             if (data.Length < 3) continue;
             ApSlimeClient.LocationInfoDictionary[data[0]] = data[2];
         }
-        
+
         Log.Msg("Loading Shenanigans");
+
+        PlayerTrackerPatch.ZoneTypeToName = File.ReadAllLines($"{DataFolder}/Zones.txt")
+                                                .Select(s => s.Split(':'))
+                                                .Where(arr => arr[0] is not "-")
+                                                .ToDictionary(
+                                                     arr => (ZoneDirector.Zone)int.Parse(arr[0]), arr => arr[1]
+                                                 );
 
         ApSlimeClient.UpgradeLocations = File
                                         .ReadAllLines($"{DataFolder}/Upgrades.txt")
@@ -68,17 +79,23 @@ public class Core : MelonMod
                                           .ReadAllLines($"{DataFolder}/7Zee.txt")
                                           .Where(line => line.Trim() != "")
                                           .Select(s =>
-                                           {
-                                               var split = s.Split(',');
-                                               return (int.Parse(split[1]), split[0]);
-                                           })
+                                               {
+                                                   var split = s.Split(',');
+                                                   return (int.Parse(split[1]), split[0]);
+                                               }
+                                           )
                                           .GroupBy(t => t.Item1)
                                           .ToDictionary(g => g.Key, g => g.Select(t => t.Item2).ToArray());
 
-        foreach (var line in File.ReadAllLines($"{DataFolder}/Logic.txt"))
-        {
-            LogicHandler.AddLogic(line);
-        }
+        ApSlimeClient.GateLocks = File.ReadAllLines($"{DataFolder}/Gates.txt")
+                                      .Select(s => s.Split(';')).ToDictionary(arr => arr[0], arr => arr[1]);
+
+        foreach (var line in File.ReadAllLines($"{DataFolder}/Logic.txt")) LogicHandler.AddLogic(line);
+        Log.Msg("Main Logic Loaded");
+        foreach (var line in File.ReadAllLines($"{DataFolder}/RegionLogic.txt")) LogicHandler.AddRegion(line);
+        Log.Msg("Region Logic Loaded");
+        foreach (var line in File.ReadAllLines($"{DataFolder}/PlortLogic.txt")) LogicHandler.AddPlort(line);
+        Log.Msg("Plort Logic Loaded");
 
         ApSlimeClient.NoteLocations = new LoseFlag<string>("None");
         ApSlimeClient.NoteLocations.AddFlags(File.ReadAllLines($"{DataFolder}/NoteLocations.txt"));
@@ -116,12 +133,12 @@ public class Core : MelonMod
         MusicPatch.LoadSongs();
 
         Log.Msg("Initialized.");
-        
+
         if (DebugLevel <= 0) return;
-        KeyRegistry.AddKey(KeyCode.J, () =>
-        {
-            Log.Msg(TrapLoader.RunRandomTrap() ? "Ran a random trap" : "Failed to run random trap");
-        });
+        KeyRegistry.AddKey(
+            KeyCode.J,
+            () => { Log.Msg(TrapLoader.RunRandomTrap() ? "Ran a random trap" : "Failed to run random trap"); }
+        );
     }
 
     public override void OnUpdate()

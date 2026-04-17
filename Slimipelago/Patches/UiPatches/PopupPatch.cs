@@ -15,8 +15,15 @@ public static class PopupPatch
     [HarmonyPatch(typeof(PopupDirector), "Awake"), HarmonyPostfix]
     public static void Awake(PopupDirector __instance)
     {
-        PopupDirector = __instance;
-        PopupQueue = PopupDirector.GetPrivateField<Queue<PopupDirector.PopupCreator>>("popupQueue");
+        try
+        {
+            PopupDirector = __instance;
+            PopupQueue = PopupDirector.GetPrivateField<Queue<PopupDirector.PopupCreator>>("popupQueue");
+        }
+        catch (Exception e)
+        {
+            Core.Log.Error(e);
+        }
     }
 
     [HarmonyPatch(typeof(PopupDirector), "QueueForPopup"), HarmonyPrefix]
@@ -66,18 +73,25 @@ public class ApPopup(
 
     public override void Create()
     {
-        var popup = Object.Instantiate(SRSingleton<SceneContext>.Instance.GadgetDirector.gadgetPopupPrefab);
-        var popupUI = popup.GetComponent<BlueprintPopupUI>();
-        popupUI.SetPrivateField("timeOfDeath", Time.time + Timer);
-            
-        var container = popup.GetChild(0);
-        var panel = container.GetChild(0);
-        panel.GetChild(0).GetComponent<Image>().overrideSprite = Sprite;
-        panel.GetChild(1).GetChild(0).GetComponent<TextMeshProUGUI>().text = Item;
-        panel.GetChild(2).GetComponent<TextMeshProUGUI>().text = "Archipelago";
-        panel.GetChild(3).GetChild(0).GetComponent<TextMeshProUGUI>().text = ItemDialogue;
-        panel.GetChild(4).GetComponent<TextMeshProUGUI>().text = OtherPlayer;
-        OnPopup?.Invoke();
+        try
+        {
+            var popup = Object.Instantiate(SRSingleton<SceneContext>.Instance.GadgetDirector.gadgetPopupPrefab);
+            var popupUI = popup.GetComponent<BlueprintPopupUI>();
+            popupUI.SetPrivateField("timeOfDeath", Time.time + Timer);
+
+            var container = popup.GetChild(0);
+            var panel = container.GetChild(0);
+            panel.GetChild(0).GetComponent<Image>().overrideSprite = Sprite;
+            panel.GetChild(1).GetChild(0).GetComponent<TextMeshProUGUI>().text = Item;
+            panel.GetChild(2).GetComponent<TextMeshProUGUI>().text = "Archipelago";
+            panel.GetChild(3).GetChild(0).GetComponent<TextMeshProUGUI>().text = ItemDialogue;
+            panel.GetChild(4).GetComponent<TextMeshProUGUI>().text = OtherPlayer;
+            OnPopup?.Invoke();
+        }
+        catch (Exception e)
+        {
+            Core.Log.Error(e);
+        }
     }
 
     public override bool Equals(object other) { return other is ApPopup popup && popup.GetHashCode() == GetHashCode(); }

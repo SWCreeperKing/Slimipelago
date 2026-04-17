@@ -275,7 +275,6 @@
         <Compile Include="Archipelago\Logger.cs"/>
         <Compile Include="Archipelago\LogicHandler.cs"/>
         <Compile Include="Archipelago\TrapLoader.cs"/>
-        <Compile Include="Archipelago\ZoneConstants.cs"/>
         <Compile Include="Core.cs"/>
         <Compile Include="GameLoader.cs"/>
         <Compile Include="Helper.cs"/>
@@ -289,6 +288,7 @@
         <Compile Include="Patches\Interactables\MapFragmentPatch.cs"/>
         <Compile Include="Patches\Interactables\MarketPatch.cs"/>
         <Compile Include="Patches\Interactables\PodPatch.cs"/>
+        <Compile Include="Patches\Interactables\PuzzleSlotPatch.cs" />
         <Compile Include="Patches\PlayerPatches\GordoMarkerPatch.cs"/>
         <Compile Include="Patches\PlayerPatches\IntroPatch.cs"/>
         <Compile Include="Patches\PlayerPatches\JetpackPatch.cs"/>
@@ -312,7 +312,7 @@
 
     <ItemGroup>
         <Folder Include="Lib\"/>
-        <PackageReference Include="KaitoKid.ArchipelagoUtilities.AssetDownloader" Version="3.1.12"/>
+        <PackageReference Include="KaitoKid.ArchipelagoUtilities.AssetDownloader" Version="3.1.13" />
     </ItemGroup>
 
     <Target Name="CopyCustomContent" AfterTargets="AfterBuild">

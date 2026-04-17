@@ -19,69 +19,86 @@ public static class ItemHandler
 
     public static void ProcessItem(ItemInfo item)
     {
-        ItemNumberTracker++;
-        var firstTime = ItemNumberTracker > CurrentItemIndex;
-
-        var name = item.ItemName;
-        // Core.Log.Msg($"Handling Item: [{item.ItemName}]");
-        if (name.Contains("Region Unlock: "))
+        try
         {
-            RegionItem(name.Substring(15));
-        }
-        else
-        {
-            UpgradeItem(name, firstTime);
-        }
+            ItemNumberTracker++;
+            var firstTime = ItemNumberTracker > CurrentItemIndex;
 
-        if (!firstTime) return;
-        
-        var sprite =  item.Flags is ItemFlags.Trap ? GameLoader.Spritemap["got_trap"] : ItemImage(new AssetItem(item.ItemGame, item.ItemName, item.Flags));
-        
-        PopupPatch.AddItemToQueue(new ApPopup(sprite, "Item Received", item.ItemName,
-            $"from: {item.Player.Name}", () =>
-            {
-                if (ItemNumberTracker <= CurrentItemIndex) return;
-                Client.SendToStorage("new_item_index", ItemNumberTracker);
-            }));
+            var name = item.ItemName;
+            if (name.Contains("Region Unlock: ")) { RegionItem(name.Substring(15)); }
+            else { UpgradeItem(name, firstTime); }
+
+            if (!firstTime) return;
+
+            var sprite = item.Flags is ItemFlags.Trap ? GameLoader.Spritemap["got_trap"]
+                : ItemImage(new AssetItem(item.ItemGame, item.ItemName, item.Flags));
+            
+            PopupPatch.AddItemToQueue(
+                new ApPopup(
+                    sprite, "Item Received", item.ItemName,
+                    $"from: {item.Player.Name}", () =>
+                    {
+                        try
+                        {
+                            if (ItemNumberTracker <= CurrentItemIndex) return;
+                            Client.SendToStorage("new_item_index", ItemNumberTracker);
+                        }
+                        catch (Exception e)
+                        {
+                            Core.Log.Error(e);
+                        }
+                    }
+                )
+            );
+        }
+        catch (Exception e) { Core.Log.Error(e); }
     }
 
     public static void RegionItem(string region)
     {
-        if (PlayerTrackerPatch.ZoneTypeToName.ContainsValue(region))
+        try
         {
-            PlayerTrackerPatch.AllowedZones.Add(region);
-            if (region != "Dry Reef") return;
-            GameLoader.MakeTeleporterMarker(GameLoader.Reef);
-        }
-        else
-        {
-            switch (region)
+            if (PlayerTrackerPatch.ZoneTypeToName.ContainsValue(region))
             {
-                case "The Lab":
-                    AccessDoorPatch.LabDoor.CurrState = AccessDoor.State.OPEN;
-                    PlayerTrackerPatch.AllowedZones.Add(region);
-                    GameLoader.MakeTeleporterMarker(GameLoader.Lab);
-                    break;
-                case "The Overgrowth":
-                    AccessDoorPatch.OvergrowthDoor.CurrState = AccessDoor.State.OPEN;
-                    PlayerTrackerPatch.AllowedZones.Add(region);
-                    GameLoader.MakeTeleporterMarker(GameLoader.Overgrowth);
-                    break;
-                case "The Grotto":
-                    AccessDoorPatch.GrottoDoor.CurrState = AccessDoor.State.OPEN;
-                    PlayerTrackerPatch.AllowedZones.Add(region);
-                    GameLoader.MakeTeleporterMarker(GameLoader.Grotto);
-                    break;
+                PlayerTrackerPatch.AllowedZones.Add(region);
+                if (region != "Dry Reef") return;
+                GameLoader.MakeTeleporterMarker(GameLoader.Reef);
             }
+            else
+            {
+                switch (region)
+                {
+                    case "The Lab":
+                        AccessDoorPatch.LabDoor.CurrState = AccessDoor.State.OPEN;
+                        PlayerTrackerPatch.AllowedZones.Add(region);
+                        GameLoader.MakeTeleporterMarker(GameLoader.Lab);
+                        break;
+                    case "The Overgrowth":
+                        AccessDoorPatch.OvergrowthDoor.CurrState = AccessDoor.State.OPEN;
+                        PlayerTrackerPatch.AllowedZones.Add(region);
+                        GameLoader.MakeTeleporterMarker(GameLoader.Overgrowth);
+                        break;
+                    case "The Grotto":
+                        AccessDoorPatch.GrottoDoor.CurrState = AccessDoor.State.OPEN;
+                        PlayerTrackerPatch.AllowedZones.Add(region);
+                        GameLoader.MakeTeleporterMarker(GameLoader.Grotto);
+                        break;
+                    case "The Docks":
+                        AccessDoorPatch.DocksDoor.CurrState = AccessDoor.State.OPEN;
+                        PlayerTrackerPatch.AllowedZones.Add(region);
+                        break;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Core.Log.Error(e);
         }
     }
 
     public static void UpgradeItem(string name, bool firstReceive)
     {
-        if (name.StartsWith("Progressive") || name is TrapSlime)
-        {
-            ItemCache.TryAdd(name, 0);
-        }
+        if (name.StartsWith("Progressive") || name is TrapSlime) ItemCache.TryAdd(name, 0);
 
         try
         {
@@ -93,8 +110,7 @@ public static class ItemHandler
                 case LiquidSlot:
                     Model.ammoDict[PlayerState.AmmoMode.DEFAULT].IncreaseUsableSlots(5);
                     return;
-                case SureShot:
-                    return;
+                case SureShot: return;
                 case MaxHealth:
                     Model.maxHealth = 150 + 50 * ItemCache[name];
                     if ((double)Model.currHealth >= Model.maxHealth)
@@ -123,27 +139,32 @@ public static class ItemHandler
                         return;
                     }
 
-                    Model.energyRecoverAfter = Math.Min(Model.energyRecoverAfter,
-                        PlayerModelPatch.WorldModel.worldTime + 300.0);
+                    Model.energyRecoverAfter = Math.Min(
+                        Model.energyRecoverAfter,
+                        PlayerModelPatch.WorldModel.worldTime + 300.0
+                    );
                     ItemCache[name]++;
                     return;
                 case ProgJetpack:
+                    Core.Log.Msg($"def here: [{name}]");
+                    Core.Log.Msg($"def here 2 [{ItemCache[name]}]");
                     switch (ItemCache[name])
                     {
                         case 0:
-                            JetpackPatch.EnableJetpack = true;
-                            Model.jetpackEfficiency = 1f;
+                            Core.Log.Msg("Huh?");
+                            ApSlimeClient.EnableJetpack = true;
+                            Core.Log.Msg("try get model");
+                            Core.Log.Msg($"is it null? [{Model is null}]");
+                            Core.Log.Msg($"model: [{Model}]");
+                            Core.Log.Msg($"jetpack: [{Model?.jetpackEfficiency}]");
+                            Model?.jetpackEfficiency = 1f;
                             break;
-                        case 1:
-                            Model.jetpackEfficiency = .8f;
-                            break;
+                        case >=1: Model?.jetpackEfficiency = .8f; break;
                     }
-
+                
                     ItemCache[name]++;
                     return;
-                case ProgTreasure or ProgMarket or TrapSlime:
-                    ItemCache[name]++;
-                    break;
+                case ProgTreasure or ProgMarket or TrapSlime: ItemCache[name]++; break;
             }
 
             if (!firstReceive) return;
@@ -155,15 +176,9 @@ public static class ItemHandler
             else
                 switch (name)
                 {
-                    case ItemConstants.Drone:
-                        AddGadget(Gadget.Id.DRONE);
-                        break;
-                    case AdvDrone:
-                        AddGadget(Gadget.Id.DRONE_ADVANCED);
-                        break;
-                    case MarketLink:
-                        AddGadget(Gadget.Id.MARKET_LINK);
-                        break;
+                    case ItemConstants.Drone: AddGadget(Gadget.Id.DRONE); break;
+                    case AdvDrone: AddGadget(Gadget.Id.DRONE_ADVANCED); break;
+                    case MarketLink: AddGadget(Gadget.Id.MARKET_LINK); break;
                 }
         }
         catch (Exception e)
@@ -178,28 +193,31 @@ public static class ItemHandler
 
     public static Sprite ItemImage(AssetItem location)
     {
+
         var fallback = GameLoader.Spritemap[GameLoader.GetSpriteFromItemFlag(location.ItemFlags)];
         try
         {
-            if (!Data.UseCustomAssets) return fallback;
+            if (ItemSprites.TryGetValue(location.Uid, out var val)) return val;
+            try
+            {
+                if (!Data.UseCustomAssets) return fallback;
 
-            var res = Core.ItemSpritesManager.TryGetCustomAsset(location, "Slime Rancher", false, true,
-                out var spriteData);
+                var res = Core.ItemSpritesManager.TryGetCustomAsset(
+                    location, "Slime Rancher", false, true,
+                    out var spriteData
+                );
 
-            if (!res || spriteData is null) return fallback;
-            var file = spriteData.FilePath;
+                if (!res || spriteData is null) return fallback;
+                var file = spriteData.FilePath;
 
-            if (ItemSprites.TryGetValue(file, out var sprite)) return sprite;
+                var sprite = ItemSprites[location.Uid] = GameLoader.CreateSprite(file);
+                sprite.texture.filterMode = FilterMode.Point;
+                return sprite;
+            }
+            catch (Exception e) { Core.Log.Error(e); }
 
-            ItemSprites[file] = sprite = GameLoader.CreateSprite(file);
-            sprite.texture.filterMode = FilterMode.Point;
-            return sprite;
         }
-        catch (Exception e)
-        {
-            Core.Log.Error(e);
-        }
-
+        catch (Exception e) { Core.Log.Error(e); }
         return fallback;
     }
 }

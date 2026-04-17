@@ -107,8 +107,8 @@ public static class OptionsPatch
         {
             Core.Log.Msg("Try Connect");
 
-            ItemsWaiting.Clear();
             Items.Clear();
+            ItemCache.Clear();
 
             try
             {

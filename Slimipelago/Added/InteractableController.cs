@@ -31,12 +31,12 @@ public static class InteractableController
             var found = !ApSlimeClient.Client.MissingLocations.Contains(itemName);
             __instance.gameObject.SetActive(true);
 
-            if (markerName is "log") { found = found && ApSlimeClient.NoteLocations.HasFlag(hash); }
+            if (markerName is "log") found = found && ApSlimeClient.NoteLocations.HasFlag(hash);
 
             if (found) return;
 
             region = __instance.GetComponentInParent<Region>();
-            GameLoader.MakeMarker(markerName, __instance.transform.position, null, region.setId);
+            GameLoader.MakeMarker(markerName, __instance.transform.position, null, region.setId, markerName is "log");
             ApSlimeClient.QueueReLogic = true;
         }
         catch (Exception e) { Core.Log.Error(e); }
@@ -66,6 +66,7 @@ public static class InteractableController
             {
                 Core.Log.Error($"Problem with the hash: '{hash}' for note flags");
             }
+            ApSlimeClient.UpdateGoal();
         }
 
         if (!ApSlimeClient.LocationDictionary.TryGetValue(hash, out var itemName))
