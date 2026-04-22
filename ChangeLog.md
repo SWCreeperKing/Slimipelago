@@ -1,10 +1,38 @@
 v0.3.0
 
-- [ApWorld] Reworked the entirety of the logic (thank sterlia)
+- [ApWorld] Reworked the entirety of the logic (thank sterlia for logic 2.0)
+- [ApWorld] Added Yaml option `plortsanity`
+  - Selling a plort for the first time will send a check
+- [ApWorld] Added Yaml option `include_ogden`
+  - Include Ogden's Retreat
+- [ApWorld] Added Yaml option `include_mochi`
+  - Include Mochi's Manor
+- [ApWorld] Added Yaml option `include_viktor`
+  - Include Viktor's Workshop
+- [ApWorld] Added Yaml option `postgame`
+  - Include Post-Credit Locations, i.e. Item Vaults
+- [ApWorld] Added Yaml option `easy_skips`
+  - Enable Skips that many new players end up finding on their first playthrough
+- [ApWorld] Added Yaml option `precise_movement`
+  - Enable Skips that require tighter movement than average
+- [ApWorld] Added Yaml option `dangerous_skips`
+  - Enable Skips that have a high chance of taking damage or getting killed
+- [ApWorld] Added Yaml option `obscure_locations`
+  - Enable Skips that abuse the terrain, usually in unintuitive ways
+- [ApWorld] Added Yaml option `largo_jumps`
+  - EnableSkips where you jump off a largo midair
+- [ApWorld] Added Yaml option `jetpack_boosts`
+  - Enable Skips where you use the ability to get rid of jetpack's startup times through careful jumping, allowing for more energy conservation
 - [ApWorld] Changed how `treasure_cracker_checks` was checked
 - [Client] Added 2 missing note locations
 - [Client] You can no longer deposit quantum plorts for the Glass Desert teleporter if you don't have Glass Desert
+  - Same goes for the ruins transition door: for honey plorts needing moss blanket, and for rad plorts needing indigo quarry
+- [Client] Cleaned up jetpack patch
+- [Client] Purchasing Newbucks will no longer cost Newbucks
+- [Client] Added a Note Tracker to the UI if you have the Note Goal
+- [Client] Made DeathLink/TrapLink check another thing to make sure it doesn't send when its not supposed to 
 
+---
 v0.2.4
 
 - [Client] Fixed a bug with DeathLink having delayed deaths

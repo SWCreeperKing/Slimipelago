@@ -146,17 +146,10 @@ public static class ItemHandler
                     ItemCache[name]++;
                     return;
                 case ProgJetpack:
-                    Core.Log.Msg($"def here: [{name}]");
-                    Core.Log.Msg($"def here 2 [{ItemCache[name]}]");
                     switch (ItemCache[name])
                     {
                         case 0:
-                            Core.Log.Msg("Huh?");
-                            ApSlimeClient.EnableJetpack = true;
-                            Core.Log.Msg("try get model");
-                            Core.Log.Msg($"is it null? [{Model is null}]");
-                            Core.Log.Msg($"model: [{Model}]");
-                            Core.Log.Msg($"jetpack: [{Model?.jetpackEfficiency}]");
+                            EnableJetpack = true;
                             Model?.jetpackEfficiency = 1f;
                             break;
                         case >=1: Model?.jetpackEfficiency = .8f; break;
@@ -193,7 +186,6 @@ public static class ItemHandler
 
     public static Sprite ItemImage(AssetItem location)
     {
-
         var fallback = GameLoader.Spritemap[GameLoader.GetSpriteFromItemFlag(location.ItemFlags)];
         try
         {
@@ -219,5 +211,17 @@ public static class ItemHandler
         }
         catch (Exception e) { Core.Log.Error(e); }
         return fallback;
+    }
+
+    public static ScoutedItemInfo ScoutLocation(string locationName)
+    {
+        if (!ScoutedLocations.TryGetValue(locationName, out var itemInfo))
+        {
+            var loc = Client.ScoutLocation(locationName);
+            if (loc is null) return null;
+            itemInfo = ScoutedLocations[locationName] = loc;
+        }
+
+        return itemInfo;
     }
 }

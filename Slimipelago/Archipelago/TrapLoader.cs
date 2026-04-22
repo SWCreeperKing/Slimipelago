@@ -90,10 +90,6 @@ public static class TrapLoader
 
     public static void Update()
     {
-        if (!PlayerStatePatch.FirstUpdate) return;
-        if (SRSingleton<SceneContext>.Instance.TimeDirector.HasPauser()) return;
-        if (SRSingleton<SceneContext>.Instance.TimeDirector.IsFastForwarding()) return;
-
         if (TrapTimer > 0 && TrapReset is null && (TrapLinkTraps.Any() || GetTrapAmount() > TrapSlimesUsedCount))
         {
             TrapTimer -= Time.deltaTime;

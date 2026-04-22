@@ -99,6 +99,7 @@ public class Core : MelonMod
 
         ApSlimeClient.NoteLocations = new LoseFlag<string>("None");
         ApSlimeClient.NoteLocations.AddFlags(File.ReadAllLines($"{DataFolder}/NoteLocations.txt"));
+        ApSlimeClient.NoteCount = Convert.ToString((long)ApSlimeClient.NoteLocations.MaxFlag, 2).Count(c => c is '1');
 
         Log.Msg("Trapping Shenanigans");
 
@@ -137,14 +138,28 @@ public class Core : MelonMod
         if (DebugLevel <= 0) return;
         KeyRegistry.AddKey(
             KeyCode.J,
-            () => { Log.Msg(TrapLoader.RunRandomTrap() ? "Ran a random trap" : "Failed to run random trap"); }
+            () => Log.Msg(TrapLoader.RunRandomTrap() ? "Ran a random trap" : "Failed to run random trap")
         );
+        
+        KeyRegistry.AddKey(KeyCode.Backslash, () =>
+        {
+            var system = typeof(SECTR_AudioSystem).GetPrivateStaticField<SECTR_AudioSystem>("system");
+            if (system is null)
+            {
+                Log.Msg("Audio System not init");
+                return;
+            }
+            
+            var globalInstances = typeof(SECTR_AudioSystem).GetPrivateStaticField<object>("activeInstances");
+            var globalInstanceCount = globalInstances.CallPublicProperty<int>("Count");
+            
+            Log.Msg($"Global Instances Types: [{globalInstanceCount}], max: [{system.MaxInstances}]");
+        });
     }
 
     public override void OnUpdate()
     {
         KeyRegistry.Update();
         ApSlimeClient.Update();
-        TrapLoader.Update();
     }
 }

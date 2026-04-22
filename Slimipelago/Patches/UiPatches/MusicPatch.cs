@@ -21,42 +21,47 @@ public static class MusicPatch
     [HarmonyPatch(typeof(MusicDirector), "OnSceneLoaded"), HarmonyPostfix]
     private static void OnSceneLoaded(MusicDirector __instance, Scene scene, LoadSceneMode mode)
     {
-        if (!Data.MusicRando) return;
-        var songs = new Dictionary<string, SECTR_AudioCue[]>
+        try
         {
-            ["Ranch"] = [__instance.ranchMusic.background, __instance.ranchMusic.nightBackground],
-            ["Reef"] = [__instance.reefMusic.background, __instance.reefMusic.nightBackground],
-            ["Quarry"] = [__instance.quarryMusic.background, __instance.quarryMusic.nightBackground],
-            ["Moss"] = [__instance.mossMusic.background, __instance.mossMusic.nightBackground],
-            ["Desert"] = [__instance.desertMusic.background, __instance.desertMusic.nightBackground],
-            ["Sea"] = [__instance.seaMusic.background, __instance.seaMusic.nightBackground],
-            ["Ruins"] = [__instance.ruinsMusic.background, __instance.ruinsMusic.nightBackground],
-            ["Ruins Transition"] =
-                [__instance.ruinsTransMusic.background, __instance.ruinsTransMusic.nightBackground],
-            ["Tarr"] = [__instance.tarrMusic],
-            ["Firestorm"] = [__instance.firestormMusic],
-        };
+            if (!Data.MusicRando) return;
+            var songs = new Dictionary<string, SECTR_AudioCue[]>
+            {
+                ["Ranch"] = [__instance.ranchMusic.background, __instance.ranchMusic.nightBackground],
+                ["Reef"] = [__instance.reefMusic.background, __instance.reefMusic.nightBackground],
+                ["Quarry"] = [__instance.quarryMusic.background, __instance.quarryMusic.nightBackground],
+                ["Moss"] = [__instance.mossMusic.background, __instance.mossMusic.nightBackground],
+                ["Desert"] = [__instance.desertMusic.background, __instance.desertMusic.nightBackground],
+                ["Sea"] = [__instance.seaMusic.background, __instance.seaMusic.nightBackground],
+                ["Ruins"] = [__instance.ruinsMusic.background, __instance.ruinsMusic.nightBackground],
+                ["Ruins Transition"] =
+                [
+                    __instance.ruinsTransMusic.background, __instance.ruinsTransMusic.nightBackground
+                ],
+                ["Tarr"] = [__instance.tarrMusic], ["Firestorm"] = [__instance.firestormMusic],
+            };
 
-        foreach (var cue in songs.Values.SelectMany(cues => cues))
-        {
-            cue.PlaybackMode = SECTR_AudioCue.PlaybackModes.Random;
+            foreach (var cue in songs.Values.SelectMany(cues => cues))
+            {
+                cue.PlaybackMode = SECTR_AudioCue.PlaybackModes.Random;
+            }
+
+            var seed = Client.Seed;
+            Random = seed is null ? new Random() : new Random(RandoSeeds[seed]);
+
+            foreach (var region in RegionSongs)
+            {
+                if (region is "Any") continue;
+                AddSongs(songs[region][0], region, 0, true);
+                AddSongs(songs[region][1], region, 1, true);
+            }
+
+            foreach (var song in EventSongs) { AddSongs(songs[song][0], song, 0, false); }
         }
-
-        var seed = Client.Seed;
-        Random = seed is null ? new Random() : new Random(RandoSeeds[seed]);
-
-        foreach (var region in RegionSongs)
+        catch (Exception e)
         {
-            if (region is "Any") continue;
-            AddSongs(songs[region][0], region, 0, true);
-            AddSongs(songs[region][1], region, 1, true);
+            Core.Log.Error(e);
         }
-
-        foreach (var song in EventSongs)
-        {
-            AddSongs(songs[song][0], song, 0, false);
-        }
-
+         
         return;
 
         void AddSongs(SECTR_AudioCue cue, string region, int timeOfDay, bool any)

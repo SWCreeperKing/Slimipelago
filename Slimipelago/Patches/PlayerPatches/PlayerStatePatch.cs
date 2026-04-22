@@ -19,6 +19,7 @@ public static class PlayerStatePatch
     public static TeleportablePlayer PlayerTeleporter;
     public static vp_FPPlayerEventHandler PlayerEffects;
     public static GameObject HouseTrigger;
+    public static CameraDisabler Disabler;
     public static Camera PlayerCamera;
     public static LockOnDeath PlayerLockOnDeath;
     public static PlayerDamageable PlayerDamageable;
@@ -46,6 +47,7 @@ public static class PlayerStatePatch
             PlayerDamageable = PlayerInWorld.GetComponent<PlayerDamageable>();
             PlayerEffects = PlayerInWorld.GetComponent<vp_FPPlayerEventHandler>();
             PlayerCamera = PlayerInWorld.GetChild(0).GetComponent<Camera>();
+            Disabler = PlayerInWorld.GetComponent<CameraDisabler>();
             HouseTrigger = GameObject.Find("zoneRANCH/cellRanch_Home/Sector/Ranch Features/ranchHouse/interactTrigger");
             PlayerCamera.orthographicSize = 1;
             
@@ -64,6 +66,7 @@ public static class PlayerStatePatch
                 HouseTrigger = null;
                 PlayerTeleporter = null;
                 FirstUpdate = false;
+                Disabler = null;
             };
 
             Core.Log.Msg("Player Awake");

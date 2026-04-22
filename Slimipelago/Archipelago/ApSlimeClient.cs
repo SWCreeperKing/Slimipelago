@@ -13,6 +13,7 @@ using Slimipelago.Added;
 using Slimipelago.Patches.Interactables;
 using Slimipelago.Patches.PlayerPatches;
 using Slimipelago.Patches.UiPatches;
+using UnityEngine;
 using static Slimipelago.Archipelago.TrapLoader;
 using static Slimipelago.Patches.UiPatches.PersonalUpgradePatch;
 
@@ -39,13 +40,13 @@ public static class ApSlimeClient
     public static Dictionary<string, ScoutedItemInfo> ScoutedLocations = [];
     public static Dictionary<string, string> GateLocks = [];
     public static bool EnableJetpack = false;
+    public static int NoteCount;
+    public static int CurrentNotes;
 
     public static ApData Data = new();
     public static bool HackTheMarket = true;
     public static bool QueueReLogic;
-
     public static long CurrentItemIndex;
-
     public static string GameUUID = "";
 
     public static void Init()
@@ -82,6 +83,7 @@ public static class ApSlimeClient
             Client.SetGoalType((GoalType)(Client.SlotData.TryGetValue("goal_type", out var value1) ? (long)value1 : 0));
 
             NoteLocations.SetFlag(Client.GetFromStorage("note_locations", def: 0ul));
+            CurrentNotes = Convert.ToString((long)(ulong)NoteLocations, 2).Count(c => c is '1');
 
             LogicHandler.SkipLogic[SkipLogic.None] = true;
             LogicHandler.SkipLogic[SkipLogic.EasySkips] = Client.SlotData.TryGetValue("easy_skips", out var l)
@@ -112,6 +114,7 @@ public static class ApSlimeClient
             ItemHandler.ItemSprites.Clear();
             var list = UpgradeLocations.Values.Concat(LocationDictionary.Values)
                                        .Concat(CorporateLocations.Values.SelectMany(s => s))
+                                       .Concat(LogicHandler.PlortLocations.Values)
                                        .Where(s => Client.MissingLocations.Contains(s))
                                        .ToArray();
 
@@ -132,7 +135,7 @@ public static class ApSlimeClient
             }
         };
 
-        Client.OnConnectionErrorReceived += (e, s) => { Core.Log.Error(e); };
+        Client.OnConnectionErrorReceived += (e, s) => Core.Log.Error(e);
 
         Client.OnUnregisteredTrapLinkReceived +=
             (player, trap) => TrapLinkTraps.Enqueue(new TrapLinkTrap(trap, player));
@@ -203,9 +206,7 @@ public static class ApSlimeClient
                     QueueReLogic = false;
                 }
                 catch (Exception e) { Core.Log.Error(e); }
-
             }
-
 
             if (PlayerStatePatch.FirstUpdate)
             {
@@ -237,11 +238,14 @@ public static class ApSlimeClient
             else return;
 
             // Core.Log.Msg($"Update: [{QueuedDeathLink}]");
-            if (!QueuedDeathLink) return;
             // Core.Log.Msg(
             //     $"{SRSingleton<SceneContext>.Instance.TimeDirector.HasPauser()}, {SRSingleton<SceneContext>.Instance.TimeDirector.IsFastForwarding()}");
             if (SRSingleton<SceneContext>.Instance.TimeDirector.HasPauser()) return;
             if (SRSingleton<SceneContext>.Instance.TimeDirector.IsFastForwarding()) return;
+            if (PlayerStatePatch.Disabler is null) return;
+            if (PlayerStatePatch.Disabler.GetPrivateField<List<Component>>("blockers").Any()) return;
+            TrapLoader.Update();
+            if (!QueuedDeathLink) return;
             DeathHandler.Kill(PlayerStatePatch.PlayerInWorld, DeathHandler.Source.CHICKEN_VAMPIRISM, null, "DeathLink");
             QueuedDeathLink = false;
         }
@@ -263,7 +267,10 @@ public static class ApSlimeClient
             AccessDoorPatch.GrottoDoor.CurrState = AccessDoor.State.CLOSED;
             AccessDoorPatch.DocksDoor.CurrState = AccessDoor.State.CLOSED;
 
-            if (SRSingleton<GameContext>.Instance.AutoSaveDirector.IsNewGame()) { CurrentItemIndex = 0; }
+            if (SRSingleton<GameContext>.Instance.AutoSaveDirector.IsNewGame()) CurrentItemIndex = 0;
+
+            if (Core.DebugLevel < 1 && !Client.IsGoalType(GoalType.Notes)) return;
+            GameObject.Find("HUD Root/HudUI/UIContainer").AddComponent<UITracker>();
         }
         catch (Exception e) { Core.Log.Error(e); }
     }

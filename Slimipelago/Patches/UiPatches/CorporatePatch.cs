@@ -13,7 +13,6 @@ public static class CorporatePatch
     [HarmonyPatch(typeof(CorporatePartnerUI), "BuyLevel"), HarmonyPrefix]
     public static void BuyLevel(ProgressDirector progressDir, int level, int cost)
     {
-        Core.Log.Msg("Buying Level");
         try
         {
             var progress = progressDir.GetProgress(ProgressDirector.ProgressType.CORPORATE_PARTNER);
@@ -38,13 +37,11 @@ public static class CorporatePatch
             Client.TryGoal(GoalType.Corporate);
         }
         catch (Exception e) { Core.Log.Error(e); }
-        Core.Log.Msg($"Bought Level [{level}]");
     }
 
     [HarmonyPatch(typeof(CorporatePartnerUI), "EnableReward"), HarmonyPostfix]
     public static void EnableReward(CorporatePartnerUI __instance, int rank, int rewardIndex)
     {
-        if (Core.DebugLevel > 0) Core.Log.Msg($"Reward; [{rank},{rewardIndex}]");
         try
         {
             if (!CorporateLocations.TryGetValue(rank, out var locations)) return;
@@ -56,6 +53,5 @@ public static class CorporatePatch
             __instance.rewardIcons[rewardIndex].overrideSprite = ItemHandler.ItemImage(item);
         }
         catch (Exception e) { Core.Log.Error(e); }
-        if (Core.DebugLevel > 0) Core.Log.Msg($"Rewarded; [{rank},{rewardIndex}]");
     }
 }

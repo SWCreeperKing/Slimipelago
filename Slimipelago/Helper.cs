@@ -41,6 +41,15 @@ public static class Helper
         return fieldInfo is not null;
     }
     
+    public static TOut GetPrivateStaticField<TOut>(this Type type, string field)
+    {
+        var fieldInfo = type.GetField(field, BindingFlags.NonPublic | BindingFlags.Static);
+        if (fieldInfo is null) throw new ArgumentException($"Field [{field}] is null");
+        var value = fieldInfo.GetValue(null);
+        if (value is null) throw new ArgumentException($"Value for [{field}] is null");
+        return (TOut)value;
+    }
+    
     public static TOut GetPrivateField<TOut>(this object obj, string field)
     {
         var fieldInfo = obj.GetType().GetField(field, BindingFlags.NonPublic | BindingFlags.Instance);
@@ -56,6 +65,24 @@ public static class Helper
     public static TOut CallPrivateMethod<TOut>(this object obj, string methodName, params object[] param)
     {
         var methodInfo = obj.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
+        if (methodInfo is null) throw new ArgumentException($"Method [{methodName}] is null");
+        var value = methodInfo!.Invoke(obj, param);
+        if (value is null) throw new ArgumentException($"Value for [{methodName}] is null");
+        return (TOut)value;
+    }
+    
+    public static TOut CallPublicProperty<TOut>(this object obj, string methodName, params object[] param)
+    {
+        var methodInfo = obj.GetType().GetProperty(methodName, BindingFlags.Public | BindingFlags.Instance);
+        if (methodInfo is null) throw new ArgumentException($"Method [{methodName}] is null");
+        var value = methodInfo!.GetValue(obj, param);
+        if (value is null) throw new ArgumentException($"Value for [{methodName}] is null");
+        return (TOut)value;
+    }
+    
+    public static TOut CallPublicMethod<TOut>(this object obj, string methodName, params object[] param)
+    {
+        var methodInfo = obj.GetType().GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance);
         if (methodInfo is null) throw new ArgumentException($"Method [{methodName}] is null");
         var value = methodInfo!.Invoke(obj, param);
         if (value is null) throw new ArgumentException($"Value for [{methodName}] is null");

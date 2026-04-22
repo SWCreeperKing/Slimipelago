@@ -268,6 +268,7 @@
         <Compile Include="Added\ItemDisplayOnMap.cs"/>
         <Compile Include="Added\ItemMapMarker.cs"/>
         <Compile Include="Added\Playground.cs"/>
+        <Compile Include="Added\UITracker.cs" />
         <Compile Include="Archipelago\ApData.cs"/>
         <Compile Include="Archipelago\ApSlimeClient.cs"/>
         <Compile Include="Archipelago\ItemConstants.cs"/>
@@ -297,13 +298,13 @@
         <Compile Include="Patches\PlayerPatches\PlayerStatePatch.cs"/>
         <Compile Include="Patches\PlayerPatches\PlayerTrackerPatch.cs"/>
         <Compile Include="Patches\PlayerPatches\VacuumPatch.cs"/>
+        <Compile Include="Patches\UiPatches\AudioPatch.cs" />
         <Compile Include="Patches\UiPatches\CorporatePatch.cs"/>
         <Compile Include="Patches\UiPatches\CreditsPatch.cs"/>
         <Compile Include="Patches\UiPatches\KillTutorialPatch.cs"/>
         <Compile Include="Patches\UiPatches\MainMenuPatch.cs"/>
         <Compile Include="Patches\UiPatches\MusicPatch.cs"/>
         <Compile Include="Patches\UiPatches\OptionsPatch.cs"/>
-        <Compile Include="Patches\UiPatches\PauserPatch.cs"/>
         <Compile Include="Patches\UiPatches\PersonalUpgradePatch.cs"/>
         <Compile Include="Patches\UiPatches\PopupPatch.cs"/>
         <Compile Include="Patches\UiPatches\SaveErrorCheck.cs"/>

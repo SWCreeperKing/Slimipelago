@@ -6,6 +6,7 @@ namespace Slimipelago.Archipelago;
 
 public static class LogicHandler
 {
+    public static Dictionary<Identifiable.Id, string> PlortLocations = [];
     public static Dictionary<string, List<LogicLine>> LogicLines = [];
     public static Dictionary<string, List<RegionLine>> RegionLines = [];
     public static Dictionary<string, bool> LogicCache = [];
@@ -18,6 +19,9 @@ public static class LogicHandler
     {
         var split = line.Split(':');
         Plorts[split[0]] = split[1].Split([';'], StringSplitOptions.RemoveEmptyEntries);
+
+        if (split[2] is "0") return;
+        PlortLocations[(Identifiable.Id)int.Parse(split[2])] = $"Sell a {split[0]}";
     }
 
     public static void AddRegion(string line)
@@ -114,6 +118,9 @@ public static class LogicHandler
         return RegionCache[region] = RegionLines[region]
            .Any(line => line.UpdateLogic(currentlyHasJetpack, currentEnergyLevel));
     }
+
+    public static bool CheckPlorts(string[] plorts, bool hasJetpack, int energy) => plorts.Length == 0
+        || plorts.All(plort => Plorts[plort].Any(reg => CheckRegion(reg, hasJetpack, energy)));
 }
 
 public readonly struct LogicLine(int crackerLevel, bool needsJetpack, int energyLevel, SkipLogic skipLogic,
@@ -148,10 +155,7 @@ public readonly struct RegionLine(string from, bool needsJetpack, int energyLeve
     }
 
     public bool CanReach(bool jet, int energy)
-        => LogicHandler.CheckRegion(from, jet, energy)
-           && (plorts.Length == 0
-               || plorts.All(plort => LogicHandler.Plorts[plort].Any(reg => LogicHandler.CheckRegion(reg, jet, energy))
-               ));
+        => LogicHandler.CheckRegion(from, jet, energy) && LogicHandler.CheckPlorts(plorts, jet, energy);
 
     public bool HasUnlocks() => unlocks.Length == 0 || unlocks.All(PlayerTrackerPatch.AllowedZones.Contains);
 }

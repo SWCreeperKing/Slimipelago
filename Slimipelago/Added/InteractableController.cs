@@ -51,6 +51,7 @@ public static class InteractableController
             try
             {
                 ApSlimeClient.NoteLocations += hash;
+                ApSlimeClient.CurrentNotes = Convert.ToString((long)(ulong)ApSlimeClient.NoteLocations, 2).Count(c => c is '1');
                 ApSlimeClient.Client.SendToStorage("note_locations", (ulong)ApSlimeClient.NoteLocations);
 
                 if (Core.DebugLevel > 1)
