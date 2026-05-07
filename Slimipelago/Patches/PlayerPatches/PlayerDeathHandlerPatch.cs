@@ -13,7 +13,7 @@ public static class PlayerDeathHandlerPatch
 
     public static Dictionary<DeathHandler.Source, string> DeathMessages = new()
     {
-        [DeathHandler.Source.UNDEFINED] = "found the end of their adventure",
+        [DeathHandler.Source.UNDEFINED] = "found the end of their adventure, should've used more galvanized square steel",
         [DeathHandler.Source.SLIME_ATTACK] = "got a bit too curious about slimes",
         [DeathHandler.Source.SLIME_ATTACK_PLAYER] = "became a tasty morsel of a rampaging tarr",
         [DeathHandler.Source.SLIME_CRYSTAL_SPIKES] = "didn't look where they were walking",

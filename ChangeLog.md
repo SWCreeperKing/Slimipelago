@@ -1,3 +1,10 @@
+v0.3.1
+
+- [ApWorld] Added Yaml option `market_logic`
+- [ApWorld] Updated logic from spreadsheet
+- [Client] Failed to load Custom Assets now gets remembered to stop lag during gameplay
+
+---
 v0.3.0
 
 - [ApWorld] Reworked the entirety of the logic (thank sterlia for logic 2.0)

@@ -18,7 +18,7 @@ namespace Slimipelago;
 
 public class Core : MelonMod
 {
-    public const string VersionNumber = "0.3.0";
+    public const string VersionNumber = "0.3.1";
     public const string DataFolder = "Mods/SW_CreeperKing.Slimipelago/Data";
 
     public static int DebugLevel;
@@ -74,7 +74,7 @@ public class Core : MelonMod
                                         .ReadAllLines($"{DataFolder}/Upgrades.txt")
                                         .Select(s => s.Split(','))
                                         .ToDictionary(sArr => (PlayerState.Upgrade)int.Parse(sArr[1]), sArr => sArr[0]);
-
+        
         ApSlimeClient.CorporateLocations = File
                                           .ReadAllLines($"{DataFolder}/7Zee.txt")
                                           .Where(line => line.Trim() != "")
@@ -115,8 +115,7 @@ public class Core : MelonMod
 
         Log.Msg("Assets Loaded");
 
-        var classesToPatch = Assembly.GetAssembly(typeof(Core))
-                                     .GetTypes()
+        var classesToPatch = MelonAssembly.Assembly.GetTypes()
                                      .Where(t => t.GetCustomAttributes<PatchAll>().Any())
                                      .ToArray();
 

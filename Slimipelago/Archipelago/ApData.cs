@@ -14,7 +14,7 @@ public class ApData
     public bool MusicRandoRandomizeOnce = false;
     public bool UseCustomAssets = true;
 
-    public void Init()
+    public void Init() // backwards compatability
     {
         var fileText = File.ReadAllText("ApConnection.txt").Replace("\r", "").Split('\n');
         AddressPort = fileText[0];

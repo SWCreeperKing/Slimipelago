@@ -1,6 +1,7 @@
 using Slimipelago.Patches.PlayerPatches;
 using UnityEngine;
 using static Slimipelago.Archipelago.ItemConstants;
+using static Slimipelago.Archipelago.SkipLogic;
 
 namespace Slimipelago.Archipelago;
 
@@ -12,16 +13,20 @@ public static class LogicHandler
     public static Dictionary<string, bool> LogicCache = [];
     public static Dictionary<string, bool> RegionCache = [];
     public static Dictionary<string, string[]> Plorts = [];
+    public static Dictionary<string, string[]> PlortsMl = [];
     public static Dictionary<SkipLogic, bool> SkipLogic = [];
     public static Stack<string> PreviousLines = [];
 
     public static void AddPlort(string line)
     {
         var split = line.Split(':');
-        Plorts[split[0]] = split[1].Split([';'], StringSplitOptions.RemoveEmptyEntries);
+        var locations = split[1].Split([';'], StringSplitOptions.RemoveEmptyEntries);
+        if (split[3] is "0") Plorts[split[0]] = locations;
+        PlortsMl[split[0]] = locations;
 
         if (split[2] is "0") return;
-        PlortLocations[(Identifiable.Id)int.Parse(split[2])] = $"Sell a {split[0]}";
+        var id = (Identifiable.Id)int.Parse(split[2]);
+        if (!PlortLocations.ContainsKey(id)) PlortLocations[id] = $"Sell a {split[0]}";
     }
 
     public static void AddRegion(string line)
@@ -120,7 +125,9 @@ public static class LogicHandler
     }
 
     public static bool CheckPlorts(string[] plorts, bool hasJetpack, int energy) => plorts.Length == 0
-        || plorts.All(plort => Plorts[plort].Any(reg => CheckRegion(reg, hasJetpack, energy)));
+        || plorts.All(plort => (SkipLogic[MarketLogic] ? PlortsMl : Plorts)[plort]
+           .Any(reg => CheckRegion(reg, hasJetpack, energy))
+        );
 }
 
 public readonly struct LogicLine(int crackerLevel, bool needsJetpack, int energyLevel, SkipLogic skipLogic,
@@ -165,22 +172,23 @@ public enum SkipLogic
 {
     None = 0, EasySkips = 1, PreciseMovement = 1 << 1,
     ObscureLocations = 1 << 2, JetpackBoosts = 1 << 3, LargoJumps = 1 << 4,
-    DangerousSkips = 1 << 5
+    DangerousSkips = 1 << 5, MarketLogic = 1 << 6,
 }
 
 public static class SkipLogicHelper
 {
     public static bool HasSkip(this SkipLogic logic)
     {
-        if (logic is SkipLogic.None) return true;
+        if (logic is None) return true;
         List<bool> rules = [];
 
-        if (logic.HasFlag(SkipLogic.EasySkips)) rules.Add(LogicHandler.SkipLogic[SkipLogic.EasySkips]);
-        if (logic.HasFlag(SkipLogic.PreciseMovement)) rules.Add(LogicHandler.SkipLogic[SkipLogic.PreciseMovement]);
-        if (logic.HasFlag(SkipLogic.ObscureLocations)) rules.Add(LogicHandler.SkipLogic[SkipLogic.ObscureLocations]);
-        if (logic.HasFlag(SkipLogic.JetpackBoosts)) rules.Add(LogicHandler.SkipLogic[SkipLogic.JetpackBoosts]);
-        if (logic.HasFlag(SkipLogic.LargoJumps)) rules.Add(LogicHandler.SkipLogic[SkipLogic.LargoJumps]);
-        if (logic.HasFlag(SkipLogic.DangerousSkips)) rules.Add(LogicHandler.SkipLogic[SkipLogic.DangerousSkips]);
+        if (logic.HasFlag(EasySkips)) rules.Add(LogicHandler.SkipLogic[EasySkips]);
+        if (logic.HasFlag(PreciseMovement)) rules.Add(LogicHandler.SkipLogic[PreciseMovement]);
+        if (logic.HasFlag(ObscureLocations)) rules.Add(LogicHandler.SkipLogic[ObscureLocations]);
+        if (logic.HasFlag(JetpackBoosts)) rules.Add(LogicHandler.SkipLogic[JetpackBoosts]);
+        if (logic.HasFlag(LargoJumps)) rules.Add(LogicHandler.SkipLogic[LargoJumps]);
+        if (logic.HasFlag(DangerousSkips)) rules.Add(LogicHandler.SkipLogic[DangerousSkips]);
+        if (logic.HasFlag(MarketLogic)) rules.Add(LogicHandler.SkipLogic[MarketLogic]);
 
         return rules.All(b => b);
     }

@@ -65,6 +65,7 @@ public static class AccessDoorPatch
     [HarmonyPatch(typeof(SlimeGateActivator), "Activate"), HarmonyPrefix]
     public static bool Activate(AccessDoor ___gateDoor)
     {
+        if (LogicHandler.SkipLogic[SkipLogic.MarketLogic]) return true;
         var doorHash = ___gateDoor.gameObject.transform.position.HashPos();
 
         return !ApSlimeClient.GateLocks.TryGetValue(doorHash, out var region)

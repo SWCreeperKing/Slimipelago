@@ -78,6 +78,7 @@ public static class OptionsPatch
                     _ = Client.Tags + ArchipelagoTag.DeathLink;
                 }
             });
+        
         CreateCheckbox(__instance.modTogglePrefab, middleRow, Data.DeathLinkTrap, "Deathlink does Trap\ninstead of dying",
                 b => Data.DeathLinkTrap = b);
 

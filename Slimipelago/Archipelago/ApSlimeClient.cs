@@ -98,6 +98,9 @@ public static class ApSlimeClient
                                                            && (bool)l4;
             LogicHandler.SkipLogic[SkipLogic.DangerousSkips]
                 = Client.SlotData.TryGetValue("dangerous_skips", out var l5) && (bool)l5;
+            LogicHandler.SkipLogic[SkipLogic.MarketLogic] = Client.SlotData.TryGetValue("market_logic", out var l6)
+                                                            && (bool)l6;
+
 
             var seed = Client.Seed;
             if (seed is null)

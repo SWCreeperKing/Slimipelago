@@ -25,14 +25,14 @@ public static class ItemHandler
             var firstTime = ItemNumberTracker > CurrentItemIndex;
 
             var name = item.ItemName;
-            if (name.Contains("Region Unlock: ")) { RegionItem(name.Substring(15)); }
-            else { UpgradeItem(name, firstTime); }
+            if (name.Contains("Region Unlock: ")) RegionItem(name.Substring(15));
+            else UpgradeItem(name, firstTime);
 
             if (!firstTime) return;
 
             var sprite = item.Flags is ItemFlags.Trap ? GameLoader.Spritemap["got_trap"]
                 : ItemImage(new AssetItem(item.ItemGame, item.ItemName, item.Flags));
-            
+
             PopupPatch.AddItemToQueue(
                 new ApPopup(
                     sprite, "Item Received", item.ItemName,
@@ -43,10 +43,7 @@ public static class ItemHandler
                             if (ItemNumberTracker <= CurrentItemIndex) return;
                             Client.SendToStorage("new_item_index", ItemNumberTracker);
                         }
-                        catch (Exception e)
-                        {
-                            Core.Log.Error(e);
-                        }
+                        catch (Exception e) { Core.Log.Error(e); }
                     }
                 )
             );
@@ -90,10 +87,7 @@ public static class ItemHandler
                 }
             }
         }
-        catch (Exception e)
-        {
-            Core.Log.Error(e);
-        }
+        catch (Exception e) { Core.Log.Error(e); }
     }
 
     public static void UpgradeItem(string name, bool firstReceive)
@@ -152,9 +146,9 @@ public static class ItemHandler
                             EnableJetpack = true;
                             Model?.jetpackEfficiency = 1f;
                             break;
-                        case >=1: Model?.jetpackEfficiency = .8f; break;
+                        case >= 1: Model?.jetpackEfficiency = .8f; break;
                     }
-                
+
                     ItemCache[name]++;
                     return;
                 case ProgTreasure or ProgMarket or TrapSlime: ItemCache[name]++; break;
@@ -199,7 +193,7 @@ public static class ItemHandler
                     out var spriteData
                 );
 
-                if (!res || spriteData is null) return fallback;
+                if (!res || spriteData is null) return ItemSprites[location.Uid] = fallback;
                 var file = spriteData.FilePath;
 
                 var sprite = ItemSprites[location.Uid] = GameLoader.CreateSprite(file);
