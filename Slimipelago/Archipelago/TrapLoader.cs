@@ -165,10 +165,15 @@ public static class TrapLoader
 
     public static void EMERGENCY_END_TRAP()
     {
-        if (TrapReset is null) return;
+        if (TrapReset is null)
+        {
+            TrapTimer = 20;
+            return;
+        }
+        
         TrapReset();
         TrapReset = null;
-        TrapTimer = Playground.Random.Next(30, 60);
+        TrapTimer = Playground.Random.Next(40, 60);
     }
 }
 

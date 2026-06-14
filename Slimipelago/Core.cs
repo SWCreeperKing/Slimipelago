@@ -23,6 +23,7 @@ public class Core : MelonMod
 
     public static int DebugLevel;
     public static MelonLogger.Instance Log;
+    public static string[] NoteLocationHashes = [];
 
     public static ArchipelagoItemSprites ItemSpritesManager;
     private static Logger Logger;
@@ -45,7 +46,7 @@ public class Core : MelonMod
 
         var locationFileData = File
                               .ReadAllLines($"{DataFolder}/Locations.txt")
-                              .Select(s => s.Split(','))
+                              .Select(s => s.Split(';'))
                               .ToArray();
 
         foreach (var data in locationFileData)
@@ -72,7 +73,7 @@ public class Core : MelonMod
 
         ApSlimeClient.UpgradeLocations = File
                                         .ReadAllLines($"{DataFolder}/Upgrades.txt")
-                                        .Select(s => s.Split(','))
+                                        .Select(s => s.Split(';'))
                                         .ToDictionary(sArr => (PlayerState.Upgrade)int.Parse(sArr[1]), sArr => sArr[0]);
         
         ApSlimeClient.CorporateLocations = File
@@ -80,7 +81,7 @@ public class Core : MelonMod
                                           .Where(line => line.Trim() != "")
                                           .Select(s =>
                                                {
-                                                   var split = s.Split(',');
+                                                   var split = s.Split(';');
                                                    return (int.Parse(split[1]), split[0]);
                                                }
                                            )
@@ -98,7 +99,7 @@ public class Core : MelonMod
         Log.Msg("Plort Logic Loaded");
 
         ApSlimeClient.NoteLocations = new LoseFlag<string>("None");
-        ApSlimeClient.NoteLocations.AddFlags(File.ReadAllLines($"{DataFolder}/NoteLocations.txt"));
+        ApSlimeClient.NoteLocations.AddFlags(NoteLocationHashes = File.ReadAllLines($"{DataFolder}/NoteLocations.txt"));
         ApSlimeClient.NoteCount = Convert.ToString((long)ApSlimeClient.NoteLocations.MaxFlag, 2).Count(c => c is '1');
 
         Log.Msg("Trapping Shenanigans");
@@ -134,12 +135,14 @@ public class Core : MelonMod
 
         Log.Msg("Initialized.");
 
-        if (DebugLevel <= 0) return;
+        // if (DebugLevel <= 0) return;
         KeyRegistry.AddKey(
             KeyCode.J,
-            () => Log.Msg(TrapLoader.RunRandomTrap() ? "Ran a random trap" : "Failed to run random trap")
+            // () => Log.Msg(TrapLoader.RunRandomTrap() ? "Ran a random trap" : "Failed to run random trap")
+            () => Log.Msg(TrapLoader.RunTrap(TrapLoader.Trap.Tarr) ? "Ran a tarr trap" : "Failed to run random trap")
         );
         
+        if (DebugLevel <= 0) return;
         KeyRegistry.AddKey(KeyCode.Backslash, () =>
         {
             var system = typeof(SECTR_AudioSystem).GetPrivateStaticField<SECTR_AudioSystem>("system");

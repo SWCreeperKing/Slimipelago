@@ -3,6 +3,10 @@ v0.3.1
 - [ApWorld] Added Yaml option `market_logic`
 - [ApWorld] Updated logic from spreadsheet
 - [Client] Failed to load Custom Assets now gets remembered to stop lag during gameplay
+- [Client] Fixed a bug that I thought I accounted for with DeathLink  
+- [Client] Fixed a bug with location names containing , with the client being weird about it 
+- [Client] Autosave ends traps (this is to prevent save errors)
+- [Client] Changed how the save error is prevented
 
 ---
 v0.3.0

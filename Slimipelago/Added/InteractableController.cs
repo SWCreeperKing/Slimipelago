@@ -61,6 +61,12 @@ public static class InteractableController
                     var maxFlag = Convert.ToString((long)ApSlimeClient.NoteLocations.MaxFlag, 2);
                     Core.Log.Msg(
                         $"Note location checked [{hash}], flag: [{flag}], total: [{currentFlag}], max: [{maxFlag}]");
+
+                    var missing = Core.NoteLocationHashes.Where(h => !ApSlimeClient.NoteLocations.HasFlag(h))
+                                      .Select(h => ApSlimeClient.LocationDictionary[h])
+                                      .ToArray();
+                    
+                    if (missing.Any()) Core.Log.Msg($"Missing:\n{string.Join("\n", missing)}");
                 }
             }
             catch

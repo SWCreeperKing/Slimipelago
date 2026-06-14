@@ -28,36 +28,42 @@ public static class Playground
     public const string DefMessage =
         "According to all known laws of programming, there is no way an archipelago should be able to bk, the archipelago, of course, bks anyway";
 
-    [Trap(TrapLoader.Trap.Whoops,
+    [Trap(
+        TrapLoader.Trap.Whoops,
         [
             "Whoops!", "Ice Floor", "Icy Hot Pants", "Push", "Gravity", "Banana", "Jump", "Banana Peel",
             "Eject Ability", "Spring", "Slip", "Hiccup", "Whirlpool"
         ],
-        "Teleports the player into the sky")]
+        "Teleports the player into the sky"
+    )]
     public static bool Whoops(string trapName)
     {
         var beforePos = PlayerInWorld.transform.position;
 
-        return ActivateTrapWithReset(() =>
-        {
-            WasBanished = false;
-            var pos = PlayerInWorld.transform.position;
-            pos.y += 300;
-            PlayerInWorld.transform.position = pos;
-        }, () =>
-        {
-            if (WasBanished) return;
-            PlayerInWorld.transform.position = beforePos;
-        }, 5);
+        return ActivateTrapWithReset(
+            () =>
+            {
+                WasBanished = false;
+                var pos = PlayerInWorld.transform.position;
+                pos.y += 300;
+                PlayerInWorld.transform.position = pos;
+            }, () =>
+            {
+                if (WasBanished) return;
+                PlayerInWorld.transform.position = beforePos;
+            }, 5
+        );
     }
 
-    [Trap(TrapLoader.Trap.Text,
+    [Trap(
+        TrapLoader.Trap.Text,
         [
             "Text", "Ghost Chat", "Math Quiz", "Pinball", "Breakout", "Snake", "UNO Challenge", "PONG Challenge",
             "Pong", "Trivia Trap", "Laughter", "Cutscene", "Literature", "Phone", "Aaa", "Tip", "Omo", "Spam",
             "Tutorial", "Exposition", "Help", "Hey!"
         ],
-        "Puts text on the screen")]
+        "Puts text on the screen"
+    )]
     public static bool Note(string trapName)
     {
         if (NoteObj is not null)
@@ -83,9 +89,11 @@ public static class Playground
         return true;
     }
 
-    [Trap(TrapLoader.Trap.Ranch,
+    [Trap(
+        TrapLoader.Trap.Ranch,
         ["Ranch", "Home", "Resistance", "Sleep", "Instant Death", "Get Out", "Clear Image", "Undo", "Teleport"],
-        "Teleports the player back to the Ranch")]
+        "Teleports the player back to the Ranch"
+    )]
     public static bool BanishPlayer(string trapName = "")
     {
         TeleportPlayer(GameLoader.Home, RegionRegistry.RegionSetId.HOME);
@@ -93,39 +101,40 @@ public static class Playground
         return true;
     }
 
-    [Trap(TrapLoader.Trap.Tarr,
+    [Trap(
+        TrapLoader.Trap.Tarr,
         [
             "Tarr", "Fishin' Boo", "Buyon", "Gooey", "Army", "Thwimp", "Bomb", "Ghost", "Animal", "Bonk", "Fear", "Nut",
-            "Pie", "Bee", "Police", "Meteor", "Rockfall", "Spike Ball", "TNT Barrel", "Chaser", "Banner",
-            "Ninja", "Person", "TNT"
+            "Pie", "Bee", "Police", "Meteor", "Rockfall", "Spike Ball", "TNT Barrel", "Chaser", "Banner", "Ninja",
+            "Person", "TNT"
         ],
-        "Spawns 1 to 5 Tarrs on top of the player (unless . . . ???)")]
+        "Spawns 1 to 5 Tarrs on top of the player (unless . . . ???)"
+    )]
     public static bool SpawnTarr(string trapName)
     {
         List<GameObject> spawned = [];
 
-        return ActivateTrapWithReset(() =>
-        {
-            for (var i = 0; i < (trapName == "Bee" ? 10 : Random.Next(1, 5)); i++)
+        return ActivateTrapWithReset(
+            () =>
             {
-                spawned.Add(SpawnTarr(trapName == "Bee" ? .4f : 2f / (i + 1)));
-            }
-        }, () => spawned.ForEach(tarr =>
-        {
-            try
-            {
-                tarr.GetComponentInChildren<SRBehaviour>().RequestDestroy("TarrTrap.Reset");
-                return;
-            }
-            catch
-            {
-            }
-            Destroyer.Destroy(tarr, "TarrTrap.Reset");
-        }), 15);
+                for (var i = 0; i < (trapName == "Bee" ? 10 : Random.Next(1, 5)); i++)
+                {
+                    spawned.Add(SpawnTarr(trapName == "Bee" ? .4f : 2f / (i + 1)));
+                }
+            }, () => spawned.ForEach(tarr =>
+                {
+                    try { Destroyer.DestroyActor(tarr, "TarrTrap.Reset"); }
+                    catch (NullReferenceException) { }
+                    catch (Exception e) { Core.Log.Error(e); }
+                }
+            ), 15
+        );
     }
 
-    [Trap(TrapLoader.Trap.MarketCrash, ["Market Crash", "Expensive Stocks", "Empty Item Box"],
-        "Crashes the market prices")]
+    [Trap(
+        TrapLoader.Trap.MarketCrash, ["Market Crash", "Expensive Stocks", "Empty Item Box"],
+        "Crashes the market prices"
+    )]
     public static bool MarketCrash(string trapName)
     {
         if (MarketPatch.Crash) return false;
@@ -133,19 +142,24 @@ public static class Playground
         return true;
     }
 
-    [Trap(TrapLoader.Trap.Zoom, ["Zoom", "Deisometric", "Spooky", "Zoom In", "Zoom Out"],
-        "Zooms the camera in, in a strange way")]
+    [Trap(
+        TrapLoader.Trap.Zoom, ["Zoom", "Deisometric", "Spooky", "Zoom In", "Zoom Out"],
+        "Zooms the camera in, in a strange way"
+    )]
     public static bool Zoom(string trapName)
         => ActivateTrapWithReset(() => PlayerCamera.orthographic = true, () => PlayerCamera.orthographic = false);
 
-    [Trap(TrapLoader.Trap.ScreenFlip,
+    [Trap(
+        TrapLoader.Trap.ScreenFlip,
         [
             "Screen Flip", "Flip", "Mirror", "Monkey Mash", "Reversal", "Camera Rotate", "Confound", "Confuse",
             "Confusion", "Reverse", "Flip Horizontal", "Flip Vertical", "Gas", "Inverted Mouse", "Reverse Controls"
         ],
-        "Flips the camera horizontally")]
+        "Flips the camera horizontally"
+    )]
     public static bool CameraFlip(string trapName)
-        => ActivateTrapWithReset(() =>
+        => ActivateTrapWithReset(
+            () =>
             {
                 PlayerCamera.projectionMatrix *= CameraFlipMatrix4X4;
                 GL.invertCulling = true;
@@ -154,100 +168,125 @@ public static class Playground
             {
                 PlayerCamera.projectionMatrix *= CameraFlipMatrix4X4;
                 GL.invertCulling = false;
-            }, 20);
+            }, 20
+        );
 
     [Trap(TrapLoader.Trap.Smol, ["Tiny"], "Makes the player tiny")]
     public static bool Smol(string trapName)
-        => ActivateTrapWithReset(() => PlayerInWorld.transform.DOScale(SmolScale, 1),
-            () => PlayerInWorld.transform.DOScale(NormalScale, 1), 20);
+        => ActivateTrapWithReset(
+            () => PlayerInWorld.transform.DOScale(SmolScale, 1),
+            () => PlayerInWorld.transform.DOScale(NormalScale, 1), 20
+        );
 
     [Trap(TrapLoader.Trap.Wide, ["W I D E", "Squash", "Paper"], "Makes the player W I D E")]
     public static bool Wide(string trapName)
-        => ActivateTrapWithReset(() => PlayerInWorld.transform.DOScale(WideScale, 1),
-            () => PlayerInWorld.transform.DOScale(NormalScale, 1));
+        => ActivateTrapWithReset(
+            () => PlayerInWorld.transform.DOScale(WideScale, 1),
+            () => PlayerInWorld.transform.DOScale(NormalScale, 1)
+        );
 
-    [Trap(TrapLoader.Trap.Damage, ["Damage", "Blue Balls Curse", "One Hit KO", "Instant Crystal", "Explosion"],
-        "Hurts the player, lots")]
+    [Trap(
+        TrapLoader.Trap.Damage, ["Damage", "Blue Balls Curse", "One Hit KO", "Instant Crystal", "Explosion"],
+        "Hurts the player, lots"
+    )]
     public static bool Damage(string trapName)
     {
         PlayerStatePatch.PlayerDamageable.Damage(PlayerStatePatch.PlayerState.GetCurrHealth() - 1, null);
         return true;
     }
 
-    [Trap(TrapLoader.Trap.Radiation,
+    [Trap(
+        TrapLoader.Trap.Radiation,
         ["Radiation", "Fire", "Electrocution", "Double Damage", "Burn", "Poison", "Poison Mushroom"],
-        "Gives the player max radiation")]
+        "Gives the player max radiation"
+    )]
     public static bool Radiation(string trapName)
     {
         PlayerStatePatch.PlayerState.SetRad(100);
         return true;
     }
 
-    [Trap(TrapLoader.Trap.EnergyDrain, ["Energy Drain", "No Stocks", "Depletion", "SvC Effect", "Dry", "Mana Drain"],
-        "Sets player's energy to 0")]
+    [Trap(
+        TrapLoader.Trap.EnergyDrain, ["Energy Drain", "No Stocks", "Depletion", "SvC Effect", "Dry", "Mana Drain"],
+        "Sets player's energy to 0"
+    )]
     public static bool EnergyDrain(string trapName)
     {
         PlayerStatePatch.PlayerState.SetEnergy(0);
         return true;
     }
 
-    [Trap(TrapLoader.Trap.Freeze,
+    [Trap(
+        TrapLoader.Trap.Freeze,
         [
             "Freeze", "Input Sequence", "Paralysis", "Paralyze", "Chaos Control", "Bubble", "Stun", "Ice", "Frozen",
             "Frost"
         ],
-        "Freezes the player in place")]
+        "Freezes the player in place"
+    )]
     public static bool Freeze(string trapName)
         => ActivateTrapWithReset(() => PlayerLockOnDeath.Freeze(), () => PlayerLockOnDeath.Unfreeze());
 
-    [Trap(TrapLoader.Trap.NoVac,
+    [Trap(
+        TrapLoader.Trap.NoVac,
         [
             "No Vac", " No Guarding", "No Petals", "No Revivals", "Disable A", "Disable B", "Disable C Up",
             "Disable Tag", "Disable Z", "Disarm", "Tool Swap"
         ],
-        "Disables the vacuum")]
+        "Disables the vacuum"
+    )]
     public static bool NoVac(string trapName)
-        => ActivateTrapWithReset(() =>
+        => ActivateTrapWithReset(
+            () =>
             {
                 PlayerVacuum.DropAllVacced();
                 PlayerVacuum.gameObject.SetActive(false);
             },
-            () => PlayerVacuum.gameObject.SetActive(true));
+            () => PlayerVacuum.gameObject.SetActive(true)
+        );
 
-    [Trap(TrapLoader.Trap.FrameSlime, ["Frame Slime", "PowerPoint", "Bullet Time"],
-        "Forcefully feeds a frame slime some of your frames per second")]
+    [Trap(
+        TrapLoader.Trap.FrameSlime, ["Frame Slime", "PowerPoint", "Bullet Time"],
+        "Forcefully feeds a frame slime some of your frames per second"
+    )]
     public static bool FrameSlime(string trapName)
-        => ActivateTrapWithReset(() =>
-        {
-            VSync = QualitySettings.vSyncCount;
-            Fps = Application.targetFrameRate;
-            QualitySettings.vSyncCount = 0;
-            Application.targetFrameRate = 15;
-        }, () =>
-        {
-            QualitySettings.vSyncCount = VSync;
-            Application.targetFrameRate = Fps;
-        });
+        => ActivateTrapWithReset(
+            () =>
+            {
+                VSync = QualitySettings.vSyncCount;
+                Fps = Application.targetFrameRate;
+                QualitySettings.vSyncCount = 0;
+                Application.targetFrameRate = 15;
+            }, () =>
+            {
+                QualitySettings.vSyncCount = VSync;
+                Application.targetFrameRate = Fps;
+            }
+        );
 
-    [Trap(TrapLoader.Trap.Underwater,
+    [Trap(
+        TrapLoader.Trap.Underwater,
         [
             "Underwater", "Sticky Floor", "Rail", "Sticky Hands", "Honey", "Iron Boots", "Slow", "Slowness", "Fishing",
             "Sandstorm"
         ],
-        "Gives you underwater effects")]
+        "Gives you underwater effects"
+    )]
     public static bool Underwater(string trapName)
     {
         if (PlayerEffects.Underwater.Active) return false;
-        return ActivateTrapWithReset(() =>
-        {
-            PlayerEffects.Underwater.TryStart();
-            PlayerEffects.Underwater.NextAllowedStopTime = Time.time + 9;
-            SRSingleton<SceneContext>.Instance.AmbianceDirector.EnterWater();
-        }, () =>
-        {
-            PlayerEffects.Underwater.TryStop();
-            SRSingleton<SceneContext>.Instance.AmbianceDirector.ExitWater();
-        });
+        return ActivateTrapWithReset(
+            () =>
+            {
+                PlayerEffects.Underwater.TryStart();
+                PlayerEffects.Underwater.NextAllowedStopTime = Time.time + 9;
+                SRSingleton<SceneContext>.Instance.AmbianceDirector.EnterWater();
+            }, () =>
+            {
+                PlayerEffects.Underwater.TryStop();
+                SRSingleton<SceneContext>.Instance.AmbianceDirector.ExitWater();
+            }
+        );
     }
 
     public static bool ActivateTrapWithReset(Action trapAction, Action trapResetAction, float resetTime = 10)
@@ -264,16 +303,18 @@ public static class Playground
             Core.Log.Error(e);
         }
 
-        return TrapLoader.SetTrapReSetter(() =>
-        {
-            try { trapResetAction(); }
-            catch (Exception e)
+        return TrapLoader.SetTrapReSetter(
+            () =>
             {
-                Core.Log.Error("Error correcting trap");
-                Core.Log.Error(e);
-            }
-            HouseTrigger.SetActive(true);
-        }, resetTime);
+                try { trapResetAction(); }
+                catch (Exception e)
+                {
+                    Core.Log.Error("Error correcting trap");
+                    Core.Log.Error(e);
+                }
+                HouseTrigger.SetActive(true);
+            }, resetTime
+        );
     }
 
     public static GameObject SpawnTarr(float scale)

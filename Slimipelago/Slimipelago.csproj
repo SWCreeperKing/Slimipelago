@@ -290,6 +290,7 @@
         <Compile Include="Patches\Interactables\MarketPatch.cs"/>
         <Compile Include="Patches\Interactables\PodPatch.cs"/>
         <Compile Include="Patches\Interactables\PuzzleSlotPatch.cs" />
+        <Compile Include="Patches\PlayerPatches\CameraDisablerPatch.cs" />
         <Compile Include="Patches\PlayerPatches\GordoMarkerPatch.cs"/>
         <Compile Include="Patches\PlayerPatches\IntroPatch.cs"/>
         <Compile Include="Patches\PlayerPatches\JetpackPatch.cs"/>

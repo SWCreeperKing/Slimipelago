@@ -159,7 +159,6 @@ public static class ApSlimeClient
             {
                 QueuedDeathLink = true;
                 PlayerDeathHandlerPatch.DeathlinkRecieved = true;
-                Core.Log.Msg($"DL queued: [{QueuedDeathLink}],[{PlayerDeathHandlerPatch.DeathlinkRecieved}]");
             }
         };
 
@@ -240,13 +239,9 @@ public static class ApSlimeClient
             }
             else return;
 
-            // Core.Log.Msg($"Update: [{QueuedDeathLink}]");
-            // Core.Log.Msg(
-            //     $"{SRSingleton<SceneContext>.Instance.TimeDirector.HasPauser()}, {SRSingleton<SceneContext>.Instance.TimeDirector.IsFastForwarding()}");
             if (SRSingleton<SceneContext>.Instance.TimeDirector.HasPauser()) return;
             if (SRSingleton<SceneContext>.Instance.TimeDirector.IsFastForwarding()) return;
-            if (PlayerStatePatch.Disabler is null) return;
-            if (PlayerStatePatch.Disabler.GetPrivateField<List<Component>>("blockers").Any()) return;
+            if (CameraDisablerPatch.DisablerBlockers is not null && CameraDisablerPatch.DisablerBlockers.Any()) return;
             TrapLoader.Update();
             if (!QueuedDeathLink) return;
             DeathHandler.Kill(PlayerStatePatch.PlayerInWorld, DeathHandler.Source.CHICKEN_VAMPIRISM, null, "DeathLink");
