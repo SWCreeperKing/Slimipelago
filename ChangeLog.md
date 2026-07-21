@@ -1,5 +1,9 @@
-v0.3.1
+v0.4.0
+- [ApWorld] Added McGuffin Hunt
+- [Client] Updated Item Handler
 
+---
+v0.3.1
 - [ApWorld] Added Yaml option `market_logic`
 - [ApWorld] Updated logic from spreadsheet
 - [Client] Failed to load Custom Assets now gets remembered to stop lag during gameplay
@@ -10,7 +14,6 @@ v0.3.1
 
 ---
 v0.3.0
-
 - [ApWorld] Reworked the entirety of the logic (thank sterlia for logic 2.0)
 - [ApWorld] Added Yaml option `plortsanity`
   - Selling a plort for the first time will send a check

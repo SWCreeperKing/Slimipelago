@@ -64,7 +64,7 @@ public static class SaveErrorCheck
             }
             catch (Exception)
             {
-                Core.Log.Msg($"Skipping Actor: [{actor.actorId}]|[{actor.currRegionSetId}]|{allActor.Value.ident}");
+                Core.Log.Error($"Skipping Actor: [{actor.actorId}]|[{actor.currRegionSetId}]|{allActor.Value.ident}");
             }
         }
         return false;

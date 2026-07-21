@@ -33,6 +33,8 @@ public class UITracker : MonoBehaviour
 
         if (Core.DebugLevel > 0) Sb.Append(PlayerModelPatch.Model.position.HashPos()).Append('\n');
         if (Client.IsGoalType(GoalType.Notes)) Sb.Append("Notes: ").Append(CurrentNotes).Append('/').Append(NoteCount);
+        if (Client.IsGoalType(GoalType.Mails))
+            Sb.Append("Letters: ").Append(McguffinCount).Append('/').Append(McguffinCountNeeded);
 
         UiText.text = Sb.ToString();
     }

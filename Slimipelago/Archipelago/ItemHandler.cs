@@ -25,7 +25,12 @@ public static class ItemHandler
             var firstTime = ItemNumberTracker > CurrentItemIndex;
 
             var name = item.ItemName;
-            if (name.Contains("Region Unlock: ")) RegionItem(name.Substring(15));
+            if (name is "Casey's Letter")
+            {
+                McguffinCount++;
+                if (McguffinCount >= McguffinCountNeeded) Client.TryGoal(GoalType.Mails);
+            }
+            else if (name.Contains("Region Unlock: ")) RegionItem(name.Substring(15));
             else UpgradeItem(name, firstTime);
 
             if (!firstTime) return;

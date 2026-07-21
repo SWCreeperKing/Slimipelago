@@ -22,6 +22,7 @@ namespace Slimipelago.Archipelago;
 public enum GoalType
 {
     Notes = 0, Corporate = 1, Credits = 2,
+    Mails = 3,
 }
 
 public static class ApSlimeClient
@@ -42,6 +43,8 @@ public static class ApSlimeClient
     public static bool EnableJetpack = false;
     public static int NoteCount;
     public static int CurrentNotes;
+    public static int McguffinCount;
+    public static long McguffinCountNeeded;
 
     public static ApData Data = new();
     public static bool HackTheMarket = true;
@@ -81,6 +84,8 @@ public static class ApSlimeClient
 
             HackTheMarket = !Client.SlotData.TryGetValue("fix_market_rates", out var value) || (bool)value;
             Client.SetGoalType((GoalType)(Client.SlotData.TryGetValue("goal_type", out var value1) ? (long)value1 : 0));
+            McguffinCount = 0;
+            McguffinCountNeeded = Client.SlotData.TryGetValue("mail_count", out var value2) ? (long)value2 : 0;
 
             NoteLocations.SetFlag(Client.GetFromStorage("note_locations", def: 0ul));
             CurrentNotes = Convert.ToString((long)(ulong)NoteLocations, 2).Count(c => c is '1');
@@ -170,6 +175,15 @@ public static class ApSlimeClient
                                .ToArray();
             QueueReLogic = true;
         };
+
+        Client.ItemHandler.OnItemReceived += (item, index) =>
+        {
+            if (Core.DebugLevel > 0) { Core.Log.Msg($"Handling Item: [{item.ItemName}] | [{index + 1}]"); }
+            ItemHandler.ProcessItem(item);
+            if (Core.DebugLevel > 0) { Core.Log.Msg($"Handled Item: [{item.ItemName}] | [{index + 1}]"); }
+            Items.Add(item);
+            QueueReLogic = true;
+        };
     }
 
     [CanBeNull]
@@ -210,33 +224,7 @@ public static class ApSlimeClient
                 catch (Exception e) { Core.Log.Error(e); }
             }
 
-            if (PlayerStatePatch.FirstUpdate)
-            {
-                var items = Client.GetOutstandingItems();
-                if (items.Length > 0)
-                {
-                    for (var index = 0; index < items.Length; index++)
-                    {
-                        var item = items[index];
-                        if (Core.DebugLevel > 0)
-                        {
-                            Core.Log.Msg(
-                                $"Handling Item: [{item.ItemName}] | [{index + 1}/{items.Length + Items.Count}]"
-                            );
-                        }
-                        ItemHandler.ProcessItem(item);
-                        if (Core.DebugLevel > 0)
-                        {
-                            Core.Log.Msg(
-                                $"Handled Item: [{item.ItemName}] | [{index + 1}/{items.Length + Items.Count}]"
-                            );
-                        }
-                    }
-                    Items.AddRange(items);
-                    QueueReLogic = true;
-                    Core.Log.Msg($"Handled all [{items.Length}] items");
-                }
-            }
+            if (PlayerStatePatch.FirstUpdate) Client.UpdateItemHandler();
             else return;
 
             if (SRSingleton<SceneContext>.Instance.TimeDirector.HasPauser()) return;
@@ -267,7 +255,7 @@ public static class ApSlimeClient
 
             if (SRSingleton<GameContext>.Instance.AutoSaveDirector.IsNewGame()) CurrentItemIndex = 0;
 
-            if (Core.DebugLevel < 1 && !Client.IsGoalType(GoalType.Notes)) return;
+            if (Core.DebugLevel < 1 && !(Client.IsGoalType(GoalType.Notes) || Client.IsGoalType(GoalType.Mails))) return;
             GameObject.Find("HUD Root/HudUI/UIContainer").AddComponent<UITracker>();
         }
         catch (Exception e) { Core.Log.Error(e); }

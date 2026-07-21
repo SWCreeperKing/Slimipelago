@@ -24,7 +24,7 @@ public static class PlayerStatePatch
     public static PlayerDamageable PlayerDamageable;
     public static Map PlayerMap;
     public static Button SaveAndQuitButton;
-    public static bool FirstUpdate { get; private set; }
+    public static bool FirstUpdate { get; private set; } // true if happened
 
     [CanBeNull] public static event Action OnFirstUpdate;
 

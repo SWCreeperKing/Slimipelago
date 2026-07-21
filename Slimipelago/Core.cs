@@ -18,7 +18,7 @@ namespace Slimipelago;
 
 public class Core : MelonMod
 {
-    public const string VersionNumber = "0.3.1";
+    public const string VersionNumber = "0.4.0";
     public const string DataFolder = "Mods/SW_CreeperKing.Slimipelago/Data";
 
     public static int DebugLevel;
