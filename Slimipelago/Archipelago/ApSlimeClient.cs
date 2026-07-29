@@ -176,7 +176,7 @@ public static class ApSlimeClient
             QueueReLogic = true;
         };
 
-        Client.ItemHandler.OnItemReceived += (item, index) =>
+        Client.ItemHandlerInitialized += handler => handler.OnItemReceived += (item, index) =>
         {
             if (Core.DebugLevel > 0) { Core.Log.Msg($"Handling Item: [{item.ItemName}] | [{index + 1}]"); }
             ItemHandler.ProcessItem(item);
@@ -255,7 +255,8 @@ public static class ApSlimeClient
 
             if (SRSingleton<GameContext>.Instance.AutoSaveDirector.IsNewGame()) CurrentItemIndex = 0;
 
-            if (Core.DebugLevel < 1 && !(Client.IsGoalType(GoalType.Notes) || Client.IsGoalType(GoalType.Mails))) return;
+            if (Core.DebugLevel < 1
+                && !(Client.IsGoalType(GoalType.Notes) || Client.IsGoalType(GoalType.Mails))) return;
             GameObject.Find("HUD Root/HudUI/UIContainer").AddComponent<UITracker>();
         }
         catch (Exception e) { Core.Log.Error(e); }

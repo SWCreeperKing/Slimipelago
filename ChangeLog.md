@@ -1,4 +1,4 @@
-v0.4.0
+v0.3.2
 - [ApWorld] Added McGuffin Hunt
 - [Client] Updated Item Handler
 
