@@ -95,7 +95,7 @@ public static class LogicHandler
                         if (marker.LocationName == "Null") return Color.red;
 
                         var isNote = marker.IsNote;
-                        var isLocGotten = !ApSlimeClient.Client.MissingLocations.Contains(marker.LocationName);
+                        var isLocGotten = !ApSlimeClient.Client.IsMissingLocation(marker.LocationName);
 
                         var color = !ApSlimeClient.HintedItems.Contains(marker.LocationName)
                             ? Color.white

@@ -1,6 +1,5 @@
-
-
 ---
+
 ### DISCLAIMER: THIS MOD WILL >>NOT<< GIVE YOU THE PAID DLC FOR FREE
 
 ---
@@ -11,16 +10,19 @@
 
 1. Make sure to have [.Net6.0](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) installed
 2. Download and Install [Melon Loader](https://melonwiki.xyz/#/?id=automated-installation).
-    - The default Slime Rancher install directory (for steam): C:\Program Files (x86)\Steam\steamapps\common\Slime Rancher
-    - Make sure to use melon version: 7.1 NOT 7.2
+    - The default Slime Rancher install directory (for steam): C:\Program Files (x86)\Steam\steamapps\common\Slime
+      Rancher
+    - Make sure to use melon version: 7.3
 3. Launch the game and close it. This will finalize the Melon installation.
     - If melon doesn't correctly install, then something is interferring with it like an antivirus/antimalware
-4. Download and extract the `Slimipelago.zip` from the [latest release page](https://github.com/SWCreeperKing/Slimipelago/releases).
+4. Download and extract the `Slimipelago.zip` from
+   the [latest release page](https://github.com/SWCreeperKing/Slimipelago/releases).
     - Copy the `Mods` and `UserLibs` folders from the zip into the game's directory.
     - To verify this is done correctly, the mod's path should be `Slime Rancher/Mods/Slimipelago.dll`
 5. Launch the game again and you should see no new or load game options!
     - There should be the archipelago connection menu in the options
-    - If melon is fine but the mod doesn't load check to make sure there isn't a `~` infront of `SW_CreeperKing.Slimipelago`, if so remove it
+    - If melon is fine but the mod doesn't load check to make sure there isn't a `~` infront of
+      `SW_CreeperKing.Slimipelago`, if so remove it
 6. To uninstall the mod, either remove/delete the `Mods/SW_CreeperKing.Slimipelago` folder
 
 > [!Note]
@@ -34,7 +36,8 @@
 <details>
 <summary><h1 style="display: inline">Randomizer Information</h1></summary>
 
-<h3><a href="https://docs.google.com/spreadsheets/d/15PdrnGmkYdocX9RU-D5U_9OgihRNN9axX71mm-jOPUQ">Logic Spread Sheet</h3>
+<h3><a href="https://docs.google.com/spreadsheets/d/15PdrnGmkYdocX9RU-D5U_9OgihRNN9axX71mm-jOPUQ">Logic Spread
+Sheet</h3>
 > Ctrl + Click to open link in new tab
 
 ---
@@ -43,13 +46,13 @@
 
 - Personal Upgrades
 - 7Zee Rewards
-  - Yaml Option (default off)
-  - The 3 upgrades' locations will be checked when buying the reward
+    - Yaml Option (default off)
+    - The 3 upgrades' locations will be checked when buying the reward
 - Map Fragments
-  - Map regions still unveil when interacting
+    - Map regions still unveil when interacting
 - Treasure Pods
-  - Treasure pod rewards are still given
-  - DLC Style Treasure pods (if you own the dlc and the yaml setting is on)
+    - Treasure pod rewards are still given
+    - DLC Style Treasure pods (if you own the dlc and the yaml setting is on)
 - Hobson's Notes
 
 </details>
@@ -58,17 +61,17 @@
 <details>
 <summary><h3 style="display: inline">Features</h3></summary>
 
-- Saves are handled differently 
-  - You cannot make or load a save until connecting
-  - Only saves that are made with the same seed appear
+- Saves are handled differently
+    - You cannot make or load a save until connecting
+    - Only saves that are made with the same seed appear
 - Disables Tutorials
 - Disables Vanilla Popups
 - Custom Map Markers for most locations
-  - Darkened: Out of Logic
-  - Not Darkened: In Logic
-  - Yellow: Hinted
-  - the marker `|>|>` is a fast travel marker
-    - will only appear if you open their respective slime gate, except for reef
+    - Darkened: Out of Logic
+    - Not Darkened: In Logic
+    - Yellow: Hinted
+    - the marker `|>|>` is a fast travel marker
+        - will only appear if you open their respective slime gate, except for reef
 - Entering an area you aren't supposed to be teleports you back to the ranch
 - All buildings *should* refund all their costs when demolishing
 - Drones do not need water
@@ -108,8 +111,8 @@ Treasure Cracker Upgrades require the `Region Unlock: The Lab`
 <details>
 <summary><h3 style="display:inline">Music Rando</h3></summary>
 
-Inorder to refresh the music options the game must be restarted
-the music rando folders only appear after the first launch with the mod
+Inorder to refresh the music options the game must be restarted the music rando folders only appear after the first
+launch with the mod
 
 the folders for music rando is first made into areas then time of day (`day`/`night`/`both`)
 
@@ -142,7 +145,7 @@ you can remove all if you like, just be aware that there is a default hard coded
       It shows hinted items in green.
       It however does not show shop or 7zee, which you can just check yourself.
   </details>
-  
+
   <details>
   <summary><h3 style="display: inline">Why am i getting teleported out of the ancient ruins while i have the item</h3></summary>
       Ancient ruins and ancient ruins transition are 2 seperate locations.
@@ -150,7 +153,7 @@ you can remove all if you like, just be aware that there is a default hard coded
       Ancient ruins transition has the slime statues to open the slime door.
       In order to enter ancient ruins, you need both items.
   </details>
-  
+
 </details>
 
 ---
@@ -159,17 +162,43 @@ you can remove all if you like, just be aware that there is a default hard coded
 
 - <details>
   <summary><h3 style="display: inline">Audio starts to die after some time</h3></summary>
-  
-    > Description: The longer you play the more some sounds start to not play or get shortened
-  
-    > Cause: Unknown  
-  
-    > Solution: Quit to Main Menu and you can go back into the game, "Turn it off and then on again"
+
+  > Description: The longer you play the more some sounds start to not play or get shortened
+
+  > Cause: Unknown
+
+  > Solution: Quit to Main Menu and you can go back into the game, "Turn it off and then on again"
   </details>
 
 </details>
 
 ---
+Player Autotracking:
+zone: (key: "Slot:[slot #]:Current Map")
+
+```cs
+public enum Zone
+{
+    NONE = -1,
+    RANCH = 0,
+    REEF = 1,
+    QUARRY = 2,
+    MOSS = 3,
+    DESERT = 4,
+    SEA = 5,
+    RUINS = 7,
+    RUINS_TRANSITION = 8,
+    WILDS = 9,
+    OGDEN_RANCH = 10,
+    VALLEY = 11,
+    MOCHI_RANCH = 12,
+    SLIMULATIONS = 13,
+    VIKTOR_LAB = 14
+}
+```
+
+---
+
 ### Special Thanks
 
 - Sterlia - Logic Slave

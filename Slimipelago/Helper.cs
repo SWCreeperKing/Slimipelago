@@ -50,6 +50,15 @@ public static class Helper
         return (TOut)value;
     }
     
+    public static TOut CallPrivateStaticMethod<TOut>(this Type type, string methodName, params object[] param)
+    {
+        var methodInfo = type.GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Static);
+        if (methodInfo is null) throw new ArgumentException($"Method [{methodName}] is null");
+        var value = methodInfo!.Invoke(null, param);
+        if (value is null) throw new ArgumentException($"Value for [{methodName}] is null");
+        return (TOut)value;
+    }
+    
     public static TOut GetPrivateField<TOut>(this object obj, string field)
     {
         var fieldInfo = obj.GetType().GetField(field, BindingFlags.NonPublic | BindingFlags.Instance);

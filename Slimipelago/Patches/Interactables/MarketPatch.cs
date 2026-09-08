@@ -49,7 +49,7 @@ public static class MarketPatch
         {
             var plort = entries.Key;
             if (!LogicHandler.PlortLocations.TryGetValue(plort.id, out var loc)) continue;
-            if (!ApSlimeClient.Client.MissingLocations.Contains(loc)) continue;
+            if (!ApSlimeClient.Client.IsMissingLocation(loc)) continue;
 
             var priceEntry = entries.Value.GetComponent<PriceEntry>();
             var marketItem = priceEntry.gameObject.AddComponent<MarketItem>();
@@ -64,7 +64,7 @@ public static class MarketPatch
     public static void PlortSold(Identifiable.Id id)
     {
         if (!LogicHandler.PlortLocations.TryGetValue(id, out var loc)) return;
-        if (!ApSlimeClient.Client.MissingLocations.Contains(loc)) return;
+        if (!ApSlimeClient.Client.IsMissingLocation(loc)) return;
         ApSlimeClient.SendItem("Plort Sold", loc);
     }
 }
@@ -81,7 +81,7 @@ public class MarketItem : MonoBehaviour
     private void Update()
     {
         if (Ended) return;
-        if (!ApSlimeClient.Client.MissingLocations.Contains(Location))
+        if (!ApSlimeClient.Client.IsMissingLocation(Location))
         {
             Ended = true;
             Entry.itemIcon.overrideSprite = null;

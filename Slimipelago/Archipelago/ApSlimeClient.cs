@@ -80,14 +80,14 @@ public static class ApSlimeClient
             PlayerDeathHandlerPatch.DeathlinkRecieved = false;
             HintedItems = [];
             GameUUID = (string)Client.SlotData["uuid"];
-            CurrentItemIndex = Client.GetFromStorage("new_item_index", def: 0L);
+            CurrentItemIndex = Client.GetFromStorage("new_item_index", Scope.Slot, 0L);
 
             HackTheMarket = !Client.SlotData.TryGetValue("fix_market_rates", out var value) || (bool)value;
             Client.SetGoalType((GoalType)(Client.SlotData.TryGetValue("goal_type", out var value1) ? (long)value1 : 0));
             McguffinCount = 0;
             McguffinCountNeeded = Client.SlotData.TryGetValue("mail_count", out var value2) ? (long)value2 : 0;
 
-            NoteLocations.SetFlag(Client.GetFromStorage("note_locations", def: 0ul));
+            NoteLocations.SetFlag(Client.GetFromStorage("note_locations", Scope.Slot, 0ul));
             CurrentNotes = Convert.ToString((long)(ulong)NoteLocations, 2).Count(c => c is '1');
 
             LogicHandler.SkipLogic[SkipLogic.None] = true;
@@ -123,7 +123,7 @@ public static class ApSlimeClient
             var list = UpgradeLocations.Values.Concat(LocationDictionary.Values)
                                        .Concat(CorporateLocations.Values.SelectMany(s => s))
                                        .Concat(LogicHandler.PlortLocations.Values)
-                                       .Where(s => Client.MissingLocations.Contains(s))
+                                       .Where(s => Client.IsMissingLocation(s))
                                        .ToArray();
 
             foreach (var loc in list)
@@ -167,7 +167,7 @@ public static class ApSlimeClient
             }
         };
 
-        Client.HintsTrackedEvent += hints =>
+        Client.HintsTrackedEvent += (hints, _) =>
         {
             var player = Client.PlayerSlot;
             HintedItems = hints.Where(hint => hint.Status is HintStatus.Priority && hint.FindingPlayer == player)

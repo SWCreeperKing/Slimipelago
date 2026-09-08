@@ -1,5 +1,7 @@
+using Archipelago.MultiClient.Net.Enums;
 using HarmonyLib;
 using Slimipelago.Added;
+using Slimipelago.Archipelago;
 using Slimipelago.Patches.UiPatches;
 using static Slimipelago.GameLoader;
 
@@ -18,6 +20,7 @@ public static class PlayerTrackerPatch
         try
         {
             if (!PlayerStatePatch.FirstUpdate) return;
+            ApSlimeClient.Client.SendToStorage("Current Map", (int)zone, Scope.Slot);
             if (!ZoneTypeToName.TryGetValue(zone, out var zoneString)) return;
             if (AllowedZones.Contains(zoneString)) return;
             Core.Log.Msg($"Player Entered Restricted Area: [{zone}]");

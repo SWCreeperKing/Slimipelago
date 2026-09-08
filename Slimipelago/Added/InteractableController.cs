@@ -1,3 +1,4 @@
+using Archipelago.MultiClient.Net.Enums;
 using MonomiPark.SlimeRancher.Regions;
 using Slimipelago.Archipelago;
 using Slimipelago.Patches.PlayerPatches;
@@ -28,7 +29,7 @@ public static class InteractableController
                 return;
             }
 
-            var found = !ApSlimeClient.Client.MissingLocations.Contains(itemName);
+            var found = !ApSlimeClient.Client.IsMissingLocation(itemName);
             __instance.gameObject.SetActive(true);
 
             if (markerName is "log") found = found && ApSlimeClient.NoteLocations.HasFlag(hash);
@@ -52,7 +53,7 @@ public static class InteractableController
             {
                 ApSlimeClient.NoteLocations += hash;
                 ApSlimeClient.CurrentNotes = Convert.ToString((long)(ulong)ApSlimeClient.NoteLocations, 2).Count(c => c is '1');
-                ApSlimeClient.Client.SendToStorage("note_locations", (ulong)ApSlimeClient.NoteLocations);
+                ApSlimeClient.Client.SendToStorage("note_locations", (ulong)ApSlimeClient.NoteLocations, Scope.Slot);
 
                 if (Core.DebugLevel > 1)
                 {
@@ -86,7 +87,7 @@ public static class InteractableController
             return;
         }
 
-        if (!ApSlimeClient.Client.MissingLocations.Contains(itemName)) return;
+        if (!ApSlimeClient.Client.IsMissingLocation(itemName)) return;
         ApSlimeClient.SendItem($"{itemFound} Found", itemName);
         // __instance.gameObject.SetActive(false);
     }

@@ -1,3 +1,9 @@
+
+v.0.4.0
+- [ApWorld] Fixed logic for `Buy Personal Upgrade (Treasure Cracker lv.X)` checks
+- [Client] Added data storage key for current location 
+
+---
 v0.3.2
 - [ApWorld] Added McGuffin Hunt
 - [Client] Updated Item Handler

@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Reflection;
+using Archipelago.MultiClient.Net.Enums;
 using JetBrains.Annotations;
 using Slimipelago.Added;
 using Slimipelago.Patches.Interactables;
@@ -76,7 +77,8 @@ public static class TrapLoader
         if (!Directory.Exists("mod dev/Slimipelago")) return;
         if (File.Exists("mod dev/Slimipelago/Traps.md")) return;
 
-        File.WriteAllText("mod dev/Slimipelago/Traps.md",
+        File.WriteAllText(
+            "mod dev/Slimipelago/Traps.md",
             $"""
              | Trap | Description | Acceptable from TrapLink |
              |:-----|:-----------:|:------------------------|
@@ -85,7 +87,8 @@ public static class TrapLoader
              | TrapLink Trap | Gets Converted to |
              |:--------------|:-----------------|
              {string.Join("\n", TrapAttributes.SelectMany(att => att.TrapNames, (attribute, s) => $"|{s}|{attribute.TrapNames[0]}|").OrderBy(s => s))}
-             """);
+             """
+        );
     }
 
     public static void Update()
@@ -105,7 +108,7 @@ public static class TrapLoader
             if (RunTrap(trap.Trap))
             {
                 TrapTimer = Playground.Random.Next(12, 60);
-                ApSlimeClient.Client.SendToStorage("used_traps", ++TrapSlimesUsedCount);
+                ApSlimeClient.Client.SendToStorage("used_traps", ++TrapSlimesUsedCount, Scope.Slot);
             }
             else { TrapTimer += 3; }
         }
@@ -125,7 +128,7 @@ public static class TrapLoader
         TrapTimer = 60;
         TrapReset = null;
         TrapLinkTraps = [];
-        TrapSlimesUsedCount = ApSlimeClient.Client.GetFromStorage("used_traps", def: 0L);
+        TrapSlimesUsedCount = ApSlimeClient.Client.GetFromStorage("used_traps", Scope.Slot, 0L);
         Playground.WasBanished = false;
         MarketPatch.Crash = false;
     }
@@ -170,7 +173,7 @@ public static class TrapLoader
             TrapTimer = 20;
             return;
         }
-        
+
         TrapReset();
         TrapReset = null;
         TrapTimer = Playground.Random.Next(40, 60);

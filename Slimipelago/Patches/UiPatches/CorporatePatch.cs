@@ -18,19 +18,11 @@ public static class CorporatePatch
             var progress = progressDir.GetProgress(ProgressDirector.ProgressType.CORPORATE_PARTNER);
             if (progress >= level || progress < level - 1 || PlayerStatePatch.PlayerState.GetCurrency() < cost) return;
 
-            SendItems(
-                "Ranked Up!", Client.MissingLocations.Where(loc =>
-                    {
-                        try
-                        {
-                            if (!loc.Contains("7Zee")) return false;
-                            var dot = loc.IndexOf('.');
-                            return int.Parse(loc.Substring(dot + 1, loc.IndexOf(':') - dot - 1)) <= level;
-                        }
-                        catch (Exception e) { Core.Log.Error(e); }
-                        return false;
-                    }
-                ).ToArray()
+            SendItems("Ranked Up!",
+                [
+                    .. Core.CorporateLocationStrings.Take(level + 1).SelectMany(arr => arr)
+                           .Where(Client.IsMissingLocation),
+                ]
             );
 
             if (level < 28) return;
@@ -46,7 +38,7 @@ public static class CorporatePatch
         {
             if (!CorporateLocations.TryGetValue(rank, out var locations)) return;
             var location = locations[rewardIndex];
-            if (!Client.MissingLocations.Contains(location)) return;
+            if (!Client.IsMissingLocation(location)) return;
 
             AssetItem item = ScoutedLocations[location];
             __instance.rewardTitles[rewardIndex].text = item.ItemName;

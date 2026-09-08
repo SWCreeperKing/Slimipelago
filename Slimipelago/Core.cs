@@ -26,13 +26,14 @@ public class Core : MelonMod
     public static string[] NoteLocationHashes = [];
 
     public static ArchipelagoItemSprites ItemSpritesManager;
+    public static string[][] CorporateLocationStrings;
     private static Logger Logger;
 
     public override void OnInitializeMelon()
     {
         // AchievementsDirector // for achievements
         // ProgressDirector // for progression
-        
+
         Log = LoggerInstance;
         if (File.Exists("debug.txt"))
         {
@@ -75,18 +76,20 @@ public class Core : MelonMod
                                         .ReadAllLines($"{DataFolder}/Upgrades.txt")
                                         .Select(s => s.Split(';'))
                                         .ToDictionary(sArr => (PlayerState.Upgrade)int.Parse(sArr[1]), sArr => sArr[0]);
-        
-        ApSlimeClient.CorporateLocations = File
-                                          .ReadAllLines($"{DataFolder}/7Zee.txt")
-                                          .Where(line => line.Trim() != "")
-                                          .Select(s =>
-                                               {
-                                                   var split = s.Split(';');
-                                                   return (int.Parse(split[1]), split[0]);
-                                               }
-                                           )
-                                          .GroupBy(t => t.Item1)
-                                          .ToDictionary(g => g.Key, g => g.Select(t => t.Item2).ToArray());
+
+        var rawConversion = File
+                           .ReadAllLines($"{DataFolder}/7Zee.txt")
+                           .Where(line => line.Trim() != "")
+                           .Select(s =>
+                                {
+                                    var split = s.Split(';');
+                                    return (int.Parse(split[1]), split[0]);
+                                }
+                            )
+                           .GroupBy(t => t.Item1).ToArray();
+        ApSlimeClient.CorporateLocations = rawConversion
+           .ToDictionary(g => g.Key, g => g.Select(t => t.Item2).ToArray());
+        CorporateLocationStrings = [.. rawConversion.OrderBy(g => g.Key).Select(g => g.Select(t => t.Item2).ToArray())];
 
         ApSlimeClient.GateLocks = File.ReadAllLines($"{DataFolder}/Gates.txt")
                                       .Select(s => s.Split(';')).ToDictionary(arr => arr[0], arr => arr[1]);
@@ -117,8 +120,8 @@ public class Core : MelonMod
         Log.Msg("Assets Loaded");
 
         var classesToPatch = MelonAssembly.Assembly.GetTypes()
-                                     .Where(t => t.GetCustomAttributes<PatchAll>().Any())
-                                     .ToArray();
+                                          .Where(t => t.GetCustomAttributes<PatchAll>().Any())
+                                          .ToArray();
 
         Log.Msg($"Loading [{classesToPatch.Length}] Class patches");
 
@@ -141,22 +144,24 @@ public class Core : MelonMod
             // () => Log.Msg(TrapLoader.RunRandomTrap() ? "Ran a random trap" : "Failed to run random trap")
             () => Log.Msg(TrapLoader.RunTrap(TrapLoader.Trap.Tarr) ? "Ran a tarr trap" : "Failed to run random trap")
         );
-        
+
         if (DebugLevel <= 0) return;
-        KeyRegistry.AddKey(KeyCode.Backslash, () =>
-        {
-            var system = typeof(SECTR_AudioSystem).GetPrivateStaticField<SECTR_AudioSystem>("system");
-            if (system is null)
+        KeyRegistry.AddKey(
+            KeyCode.Backslash, () =>
             {
-                Log.Msg("Audio System not init");
-                return;
+                var system = typeof(SECTR_AudioSystem).GetPrivateStaticField<SECTR_AudioSystem>("system");
+                if (system is null)
+                {
+                    Log.Msg("Audio System not init");
+                    return;
+                }
+
+                var globalInstances = typeof(SECTR_AudioSystem).GetPrivateStaticField<object>("activeInstances");
+                var globalInstanceCount = globalInstances.CallPublicProperty<int>("Count");
+
+                Log.Msg($"Global Instances Types: [{globalInstanceCount}], max: [{system.MaxInstances}]");
             }
-            
-            var globalInstances = typeof(SECTR_AudioSystem).GetPrivateStaticField<object>("activeInstances");
-            var globalInstanceCount = globalInstances.CallPublicProperty<int>("Count");
-            
-            Log.Msg($"Global Instances Types: [{globalInstanceCount}], max: [{system.MaxInstances}]");
-        });
+        );
     }
 
     public override void OnUpdate()

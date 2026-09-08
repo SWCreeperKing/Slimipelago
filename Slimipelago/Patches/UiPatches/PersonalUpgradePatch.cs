@@ -20,7 +20,7 @@ public static class PersonalUpgradePatch
         try
         {
             if (!UpgradeLocations.TryGetValue(upgrade, out var location)) return true;
-            if (!Client.MissingLocations.Contains(location)) return false;
+            if (!Client.IsMissingLocation(location)) return false;
             SendItem("Upgrade Bought", location);
         }
         catch (Exception e)

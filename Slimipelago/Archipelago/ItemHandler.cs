@@ -46,7 +46,7 @@ public static class ItemHandler
                         try
                         {
                             if (ItemNumberTracker <= CurrentItemIndex) return;
-                            Client.SendToStorage("new_item_index", ItemNumberTracker);
+                            Client.SendToStorage("new_item_index", ItemNumberTracker, Scope.Slot);
                         }
                         catch (Exception e) { Core.Log.Error(e); }
                     }
