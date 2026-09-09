@@ -13,16 +13,15 @@ public static class CorporatePatch
     [HarmonyPatch(typeof(CorporatePartnerUI), "BuyLevel"), HarmonyPrefix]
     public static void BuyLevel(ProgressDirector progressDir, int level, int cost)
     {
+        if (!Is7zeeEnabled) return;
         try
         {
             var progress = progressDir.GetProgress(ProgressDirector.ProgressType.CORPORATE_PARTNER);
             if (progress >= level || progress < level - 1 || PlayerStatePatch.PlayerState.GetCurrency() < cost) return;
 
-            SendItems("Ranked Up!",
-                [
-                    .. Core.CorporateLocationStrings.Take(level + 1).SelectMany(arr => arr)
-                           .Where(Client.IsMissingLocation),
-                ]
+            SendItems(
+                "Ranked Up!",
+                [.. Core.CorporateLocationStrings.Take(level).SelectMany(arr => arr).Where(Client.IsMissingLocation),]
             );
 
             if (level < 28) return;
@@ -34,11 +33,11 @@ public static class CorporatePatch
     [HarmonyPatch(typeof(CorporatePartnerUI), "EnableReward"), HarmonyPostfix]
     public static void EnableReward(CorporatePartnerUI __instance, int rank, int rewardIndex)
     {
+        if (!Is7zeeEnabled) return;
         try
         {
             if (!CorporateLocations.TryGetValue(rank, out var locations)) return;
             var location = locations[rewardIndex];
-            if (!Client.IsMissingLocation(location)) return;
 
             AssetItem item = ScoutedLocations[location];
             __instance.rewardTitles[rewardIndex].text = item.ItemName;

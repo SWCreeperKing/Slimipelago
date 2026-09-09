@@ -123,7 +123,8 @@ public static class ItemHandler
                     ItemCache[name]++;
                     return;
                 case MaxAmmo:
-                    Model.maxAmmo = PlayerModel.DEFAULT_MAX_AMMO[ItemCache[name] + 1];
+                    if (PlayerModel.DEFAULT_MAX_AMMO.Length < ItemCache[name] + 1)
+                        Model.maxAmmo = PlayerModel.DEFAULT_MAX_AMMO[ItemCache[name] + 1];
                     ItemCache[name]++;
                     return;
                 case RunEfficency:

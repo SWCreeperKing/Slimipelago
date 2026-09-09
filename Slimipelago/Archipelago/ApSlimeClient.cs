@@ -39,12 +39,13 @@ public static class ApSlimeClient
     public static bool QueuedDeathLink = false;
     public static LoseFlag<string> NoteLocations;
     public static Dictionary<string, ScoutedItemInfo> ScoutedLocations = [];
-    public static Dictionary<string, string> GateLocks = [];
+    public static Dictionary<string, string[]> GateLocks = [];
     public static bool EnableJetpack = false;
     public static int NoteCount;
     public static int CurrentNotes;
     public static int McguffinCount;
     public static long McguffinCountNeeded;
+    public static bool Is7zeeEnabled;
 
     public static ApData Data = new();
     public static bool HackTheMarket = true;
@@ -86,6 +87,7 @@ public static class ApSlimeClient
             Client.SetGoalType((GoalType)(Client.SlotData.TryGetValue("goal_type", out var value1) ? (long)value1 : 0));
             McguffinCount = 0;
             McguffinCountNeeded = Client.SlotData.TryGetValue("mail_count", out var value2) ? (long)value2 : 0;
+            Is7zeeEnabled = Client.SlotData.TryGetValue("include_7z", out var value3) && (bool)value3;
 
             NoteLocations.SetFlag(Client.GetFromStorage("note_locations", Scope.Slot, 0ul));
             CurrentNotes = Convert.ToString((long)(ulong)NoteLocations, 2).Count(c => c is '1');

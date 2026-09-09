@@ -50,7 +50,7 @@ public static class AccessDoorPatch
     }
 
     [HarmonyPatch(typeof(AccessDoor), "Update"), HarmonyPrefix]
-    public static void Update(AccessDoor __instance) { RunDoorCheck(__instance); }
+    public static void Update(AccessDoor __instance) => RunDoorCheck(__instance);
 
     public static void RunDoorCheck(AccessDoor door)
     {
@@ -65,10 +65,14 @@ public static class AccessDoorPatch
     [HarmonyPatch(typeof(SlimeGateActivator), "Activate"), HarmonyPrefix]
     public static bool Activate(AccessDoor ___gateDoor)
     {
-        if (LogicHandler.SkipLogic[SkipLogic.MarketLogic]) return true;
+        if (LogicHandler.SkipLogic[SkipLogic.MarketLogic])
+        {
+            if (Core.DebugLevel > 0) Core.Log.Msg("Open gate b/c of market logic");
+            return true;
+        }
         var doorHash = ___gateDoor.gameObject.transform.position.HashPos();
 
-        return !ApSlimeClient.GateLocks.TryGetValue(doorHash, out var region)
-               || PlayerTrackerPatch.AllowedZones.Contains(region);
+        return !ApSlimeClient.GateLocks.TryGetValue(doorHash, out var regions)
+               || regions.All(r => PlayerTrackerPatch.AllowedZones.Contains(r));
     }
 }

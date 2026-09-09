@@ -18,7 +18,7 @@ namespace Slimipelago;
 
 public class Core : MelonMod
 {
-    public const string VersionNumber = "0.3.2";
+    public const string VersionNumber = "0.4.0";
     public const string DataFolder = "Mods/SW_CreeperKing.Slimipelago/Data";
 
     public static int DebugLevel;
@@ -92,7 +92,7 @@ public class Core : MelonMod
         CorporateLocationStrings = [.. rawConversion.OrderBy(g => g.Key).Select(g => g.Select(t => t.Item2).ToArray())];
 
         ApSlimeClient.GateLocks = File.ReadAllLines($"{DataFolder}/Gates.txt")
-                                      .Select(s => s.Split(';')).ToDictionary(arr => arr[0], arr => arr[1]);
+                                      .Select(s => s.Split(';')).ToDictionary(arr => arr[0], arr => arr.Skip(1).ToArray());
 
         foreach (var line in File.ReadAllLines($"{DataFolder}/Logic.txt")) LogicHandler.AddLogic(line);
         Log.Msg("Main Logic Loaded");

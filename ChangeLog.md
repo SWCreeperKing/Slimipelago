@@ -1,7 +1,9 @@
-
 v.0.4.0
 - [ApWorld] Fixed logic for `Buy Personal Upgrade (Treasure Cracker lv.X)` checks
-- [Client] Added data storage key for current location 
+- [Client] Updated Melon Loader version from 7.1 to 7.3
+- [Client] Added data storage key for current location
+- [Client] Disable 7zee patches if not enabled
+- [Client] Fixed slime gates checking one region instead of both regions
 
 ---
 v0.3.2
