@@ -4,6 +4,7 @@ v.0.4.0
 - [Client] Added data storage key for current location
 - [Client] Disable 7zee patches if not enabled
 - [Client] Fixed slime gates checking one region instead of both regions
+- [Client] Updated connection UI a little and added trap toggles
 
 ---
 v0.3.2

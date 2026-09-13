@@ -75,7 +75,11 @@ public static class OptionsPatch
             b => Data.MusicRandoRandomizeOnce = b
         );
 
-        CreateButton("Link Configs", middleRow, () => ConfigUpdater.WindowOpen = !ConfigUpdater.WindowOpen, out _);
+        CreateButton("Link Configs", middleRow, () =>
+        {
+            ConfigUpdater.WindowOpen = !ConfigUpdater.WindowOpen;
+            SaveFile();
+        }, out _);
 
         var g6 = CreateHorizontalGroup(panel).gameObject;
         CreateCheckbox(

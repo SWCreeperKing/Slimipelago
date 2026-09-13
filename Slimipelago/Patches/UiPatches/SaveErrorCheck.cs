@@ -21,6 +21,7 @@ public static class SaveErrorCheck
     [HarmonyPatch(typeof(GameModel), "AllActors"), HarmonyPostfix]
     public static void ActorFix(GameModel __instance, ref Dictionary<long, ActorModel> __result)
     {
+        if (!ApSlimeClient.Data.TrapConfigs.TryGetValue("Tarr", out var tarrVal) || tarrVal is 0) return;
         __result = __result.Where(allActor =>
             {
                 var ident = allActor.Value.ident;
@@ -49,6 +50,7 @@ public static class SaveErrorCheck
      HarmonyPrefix]
     private static bool Pull(SavedGame __instance, GameModel gameModel, List<ActorDataV09> actors, WorldV22 world)
     {
+        if (!ApSlimeClient.Data.TrapConfigs.TryGetValue("Tarr", out var tarrVal) || tarrVal is 0) return true;
         foreach (var allActor in gameModel.AllActors())
         {
             var actor = allActor.Value;
