@@ -45,6 +45,8 @@ public static class TrapLoader
     public static List<TrapAttribute> TrapAttributes = [];
     public static ConcurrentQueue<TrapLinkTrap> TrapLinkTraps = [];
     public static long TrapSlimesUsedCount;
+    public static string[] TrapTypesAvailable;
+    public static string[] TrapTypesReceiveAvailable;
 
     private static Action TrapReset = null;
     private static float ResetTimer = 0;
@@ -94,13 +96,11 @@ public static class TrapLoader
     public static void Update()
     {
         if (TrapTimer > 0 && TrapReset is null && (TrapLinkTraps.Any() || GetTrapAmount() > TrapSlimesUsedCount))
-        {
             TrapTimer -= Time.deltaTime;
-        }
         else if (TrapReset is null && TrapLinkTraps.TryPeek(out var traplink))
         {
-            if (RunTrap(traplink.Trap, traplink.Player)) { TrapLinkTraps.TryDequeue(out _); }
-            else { TrapTimer += 3; }
+            if (RunTrap(traplink.Trap, traplink.Player)) TrapLinkTraps.TryDequeue(out _);
+            else TrapTimer += 3;
         }
         else if (TrapTimer <= 0 && TrapReset is null && GetTrapAmount() > TrapSlimesUsedCount)
         {
@@ -110,7 +110,7 @@ public static class TrapLoader
                 TrapTimer = Playground.Random.Next(12, 60);
                 ApSlimeClient.Client.SendToStorage("used_traps", ++TrapSlimesUsedCount, Scope.Slot);
             }
-            else { TrapTimer += 3; }
+            else TrapTimer += 3;
         }
 
         if (TrapReset is null) return;
@@ -131,24 +131,39 @@ public static class TrapLoader
         TrapSlimesUsedCount = ApSlimeClient.Client.GetFromStorage("used_traps", Scope.Slot, 0L);
         Playground.WasBanished = false;
         MarketPatch.Crash = false;
+        ReLoadAvailableTraps();
     }
 
-    public static bool RunRandomTrap()
+    public static void ReLoadAvailableTraps()
     {
-        var traps = TrapTypeToName.Values.ToArray();
-        return RunTrap(traps[new Random().Next(traps.Length)]);
+        (string, int)[] trapAndIndex =
+        [
+            .. TrapTypeToName.Select(t =>
+                {
+                    if (!ApSlimeClient.Data.TrapConfigs.TryGetValue(t.Value, out var i)) i = t.Key is Trap.Tarr ? 0 : 2;
+                    return (t.Value, i);
+                }
+            )
+        ];
+
+        TrapTypesAvailable = [.. trapAndIndex.Where(t => t.Item2 is 2).Select(t => t.Item1)];
+        TrapTypesReceiveAvailable = [.. trapAndIndex.Where(t => t.Item2 > 0).Select(t => t.Item1)];
     }
+
+    public static string GetRandomTrap() => TrapTypesAvailable[new Random().Next(TrapTypesAvailable.Length)];
+    public static string GetRandomReceiveTrap() => TrapTypesReceiveAvailable[new Random().Next(TrapTypesReceiveAvailable.Length)];
+    public static bool RunRandomTrap() => RunTrap(TrapTypesAvailable[new Random().Next(TrapTypesAvailable.Length)]);
 
     public static bool RunTrap(Trap trap, [CanBeNull] string player = null) => RunTrap(TrapTypeToName[trap], player);
 
     public static bool RunTrap(string trap, [CanBeNull] string player = null)
     {
-        if (RandomTrapNames.Contains(trap))
-            return RunTrap(AllTrapTypes[new Random().Next(AllTrapTypes.Length)], player);
-        if (!Traps.ContainsKey(trap)) return ApSlimeClient.Data.TrapLinkRandom && RunTrap("Chaos", player);
+        if (!Traps.ContainsKey(trap)) trap = "Chaos";
+        if (player is not null && !TrapTypesReceiveAvailable.Contains(trap)) trap = GetRandomReceiveTrap();
+        if (RandomTrapNames.Contains(trap)) trap = GetRandomTrap();
         if (TrapReset is not null) return false;
         PopupPatch.AddItemToQueue(new ApPopup(Spritemap["got_trap"], "Trapped", $"{trap} Trap", $"From [{player}]"));
-        if (player is null && ApSlimeClient.Data.TrapLink) { ApSlimeClient.Client.SendTrapLink($"{trap} Trap"); }
+        if (player is null && ApSlimeClient.Data.TrapLink) ApSlimeClient.Client.SendTrapLink($"{trap} Trap");
 
         return Traps[trap](trap);
     }

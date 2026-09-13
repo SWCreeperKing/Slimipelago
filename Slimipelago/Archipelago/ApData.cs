@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+
 namespace Slimipelago.Archipelago;
 
 public class ApData
@@ -13,6 +15,7 @@ public class ApData
     public bool MusicRando = false;
     public bool MusicRandoRandomizeOnce = false;
     public bool UseCustomAssets = true;
+    public Dictionary<string, int> TrapConfigs = [];
 
     public void Init() // backwards compatability
     {
@@ -31,6 +34,8 @@ public class ApData
         MusicRandoRandomizeOnce = StrBool(boolArr[5]);
         if (boolArr.Length > 6) UseCustomAssets = StrBool(boolArr[6]);
     }
-    
+
+    public bool ToEnableDeathLink() => DeathLink || DeathLinkTrap;
+
     private static bool StrBool(char c) => c == '1';
 }

@@ -92,7 +92,9 @@ public class Core : MelonMod
         CorporateLocationStrings = [.. rawConversion.OrderBy(g => g.Key).Select(g => g.Select(t => t.Item2).ToArray())];
 
         ApSlimeClient.GateLocks = File.ReadAllLines($"{DataFolder}/Gates.txt")
-                                      .Select(s => s.Split(';')).ToDictionary(arr => arr[0], arr => arr.Skip(1).ToArray());
+                                      .Select(s => s.Split(';')).ToDictionary(
+                                           arr => arr[0], arr => arr.Skip(1).ToArray()
+                                       );
 
         foreach (var line in File.ReadAllLines($"{DataFolder}/Logic.txt")) LogicHandler.AddLogic(line);
         Log.Msg("Main Logic Loaded");
@@ -105,14 +107,14 @@ public class Core : MelonMod
         ApSlimeClient.NoteLocations.AddFlags(NoteLocationHashes = File.ReadAllLines($"{DataFolder}/NoteLocations.txt"));
         ApSlimeClient.NoteCount = Convert.ToString((long)ApSlimeClient.NoteLocations.MaxFlag, 2).Count(c => c is '1');
 
-        Log.Msg("Trapping Shenanigans");
-
-        TrapLoader.Init();
-
         Log.Msg("Finalizing Shenanigans");
 
         ApSlimeClient.Init();
 
+        Log.Msg("Trapping Shenanigans");
+
+        TrapLoader.Init();
+        
         Log.Msg("Shenanigans finished");
 
         LoadSprites();

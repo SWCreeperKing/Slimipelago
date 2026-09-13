@@ -40,7 +40,7 @@ public static class Helper
         var fieldInfo = obj.GetType().GetField(field, BindingFlags.NonPublic | BindingFlags.Instance);
         return fieldInfo is not null;
     }
-    
+
     public static TOut GetPrivateStaticField<TOut>(this Type type, string field)
     {
         var fieldInfo = type.GetField(field, BindingFlags.NonPublic | BindingFlags.Static);
@@ -49,7 +49,7 @@ public static class Helper
         if (value is null) throw new ArgumentException($"Value for [{field}] is null");
         return (TOut)value;
     }
-    
+
     public static TOut CallPrivateStaticMethod<TOut>(this Type type, string methodName, params object[] param)
     {
         var methodInfo = type.GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Static);
@@ -58,7 +58,7 @@ public static class Helper
         if (value is null) throw new ArgumentException($"Value for [{methodName}] is null");
         return (TOut)value;
     }
-    
+
     public static TOut GetPrivateField<TOut>(this object obj, string field)
     {
         var fieldInfo = obj.GetType().GetField(field, BindingFlags.NonPublic | BindingFlags.Instance);
@@ -79,7 +79,7 @@ public static class Helper
         if (value is null) throw new ArgumentException($"Value for [{methodName}] is null");
         return (TOut)value;
     }
-    
+
     public static TOut CallPublicProperty<TOut>(this object obj, string methodName, params object[] param)
     {
         var methodInfo = obj.GetType().GetProperty(methodName, BindingFlags.Public | BindingFlags.Instance);
@@ -88,7 +88,7 @@ public static class Helper
         if (value is null) throw new ArgumentException($"Value for [{methodName}] is null");
         return (TOut)value;
     }
-    
+
     public static TOut CallPublicMethod<TOut>(this object obj, string methodName, params object[] param)
     {
         var methodInfo = obj.GetType().GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance);
@@ -180,10 +180,8 @@ public static class Helper
         return button;
     }
 
-    public static Toggle CreateCheckbox(
-        GameObject prefab, GameObject parent, bool setting, string name,
-        UnityAction<bool> valueChanged
-    )
+    public static Toggle CreateCheckbox(GameObject prefab, GameObject parent, bool setting, string name,
+        UnityAction<bool> valueChanged)
     {
         var gameObject = UnityEngine.Object.Instantiate(prefab, parent.transform, false);
         var component = gameObject.GetComponent<Toggle>();

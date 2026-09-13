@@ -153,15 +153,7 @@ public static class ApSlimeClient
         Client.OnDeathLinkPacketReceived += (group, player, message) =>
         {
             Core.Log.Msg($"DeathLink from [{player}], [{group}]: [{message}] ({Data.DeathLinkTrap})");
-            if (Data.DeathLinkTrap)
-            {
-                TrapLinkTraps.Enqueue(
-                    new TrapLinkTrap(
-                        BaseTrapNames[Playground.Random.Next(BaseTrapNames.Count)],
-                        $"(DeathLink) {player}"
-                    )
-                );
-            }
+            if (Data.DeathLinkTrap) TrapLinkTraps.Enqueue(new TrapLinkTrap(GetRandomTrap(), $"(DeathLink) {player}"));
             else
             {
                 QueuedDeathLink = true;
