@@ -119,7 +119,43 @@ public static class ApSlimeClient
             using var sha = SHA1.Create();
             RandoSeeds[seed!] = BitConverter.ToInt32(sha.ComputeHash(Encoding.UTF8.GetBytes(seed)), 0);
             LoadTrapData();
-            MainMenuPatch.LocationsLoader.LoadScoutLocations();
+
+            try
+            {
+                ScoutedLocations.Clear();
+                ItemHandler.ItemSprites.Clear();
+                var list = UpgradeLocations.Values.Concat(LocationDictionary.Values)
+                                           .Concat(CorporateLocations.Values.SelectMany(s => s))
+                                           .Concat(LogicHandler.PlortLocations.Values)
+                                           .Where(s => Client.IsMissingLocation(s))
+                                           .ToArray();
+
+                var i = 0;
+                var milestone = 0;
+                var locationsToScout = list.Length;
+                foreach (var loc in list)
+                {
+                    try
+                    {
+                        if (!ScoutedLocations.TryGetValue(loc, out var itemInfo))
+                        {
+                            var scoutedLoc = Client.ScoutLocation(loc);
+                            if (scoutedLoc is null) continue;
+                            itemInfo = ScoutedLocations[loc] = scoutedLoc;
+                        }
+
+                        if (Data.UseCustomAssets) ItemHandler.ItemImage(itemInfo);
+                    }
+                    catch { Core.Log.Error($"Could not scout location: [{loc}]"); }
+                    i++;
+                    var curMilestone = (int)(Math.Floor((double)i / locationsToScout * 10));
+                    if (milestone == curMilestone) continue;
+                    milestone = curMilestone;
+                    Core.Log.Msg($"Loaded: {i}/{locationsToScout} ({(double)i / locationsToScout * 100:##0.00})%");
+                }
+            }
+            catch (Exception e) { Core.Log.Error(e); }
+            Core.Log.Msg("Loaded all Locations");
         };
 
         Client.OnConnectionErrorReceived += (e, s) => Core.Log.Error(e);
