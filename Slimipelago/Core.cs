@@ -28,7 +28,7 @@ public class Core : MelonMod
     public static ArchipelagoItemSprites ItemSpritesManager;
     public static string[][] CorporateLocationStrings;
     private static Logger Logger;
-
+    
     public override void OnInitializeMelon()
     {
         // AchievementsDirector // for achievements
@@ -170,5 +170,11 @@ public class Core : MelonMod
     {
         KeyRegistry.Update();
         ApSlimeClient.Update();
+    }
+
+    public override void OnSceneWasLoaded(int buildIndex, string sceneName)
+    {
+        if (DebugLevel == 0) return;
+        Log.Msg($"Scene Loaded: [{sceneName}]");
     }
 }

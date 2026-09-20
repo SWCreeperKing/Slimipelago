@@ -119,30 +119,7 @@ public static class ApSlimeClient
             using var sha = SHA1.Create();
             RandoSeeds[seed!] = BitConverter.ToInt32(sha.ComputeHash(Encoding.UTF8.GetBytes(seed)), 0);
             LoadTrapData();
-
-            ScoutedLocations.Clear();
-            ItemHandler.ItemSprites.Clear();
-            var list = UpgradeLocations.Values.Concat(LocationDictionary.Values)
-                                       .Concat(CorporateLocations.Values.SelectMany(s => s))
-                                       .Concat(LogicHandler.PlortLocations.Values)
-                                       .Where(s => Client.IsMissingLocation(s))
-                                       .ToArray();
-
-            foreach (var loc in list)
-            {
-                try
-                {
-                    if (!ScoutedLocations.TryGetValue(loc, out var itemInfo))
-                    {
-                        var scoutedLoc = Client.ScoutLocation(loc);
-                        if (scoutedLoc is null) continue;
-                        itemInfo = ScoutedLocations[loc] = scoutedLoc;
-                    }
-
-                    if (Data.UseCustomAssets) ItemHandler.ItemImage(itemInfo);
-                }
-                catch { Core.Log.Error($"Could not scout location: [{loc}]"); }
-            }
+            MainMenuPatch.LocationsLoader.LoadScoutLocations();
         };
 
         Client.OnConnectionErrorReceived += (e, s) => Core.Log.Error(e);

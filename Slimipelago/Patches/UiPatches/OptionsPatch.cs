@@ -6,10 +6,10 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using Widgitpelago.Archipelago.CustGui;
+using Slimipelago.Archipelago.CustGui;
 using static Slimipelago.Helper;
 using static Slimipelago.Archipelago.ApSlimeClient;
-using Label = Widgitpelago.Archipelago.CustGui.Label;
+using Label = Slimipelago.Archipelago.CustGui.Label;
 
 namespace Slimipelago.Patches.UiPatches;
 
@@ -133,8 +133,7 @@ public static class OptionsPatch
                 }
                 catch (Exception e) { Core.Log.Error(e); }
 
-                MainMenuPatch.NewGameButton.gameObject.SetActive(Client.IsConnected);
-                MainMenuPatch.LoadButton.gameObject.SetActive(Client.IsConnected);
+                MainMenuPatch.UpdateButtonStatuses();
             }
         );
         panel.transform.localPosition = Vector3.zero;

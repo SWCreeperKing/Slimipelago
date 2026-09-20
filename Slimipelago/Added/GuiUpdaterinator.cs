@@ -1,5 +1,5 @@
 using UnityEngine;
-using Widgitpelago.Archipelago.CustGui;
+using Slimipelago.Archipelago.CustGui;
 
 namespace Slimipelago.Added;
 

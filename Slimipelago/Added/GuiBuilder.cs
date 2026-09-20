@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Widgitpelago.Archipelago.CustGui;
+namespace Slimipelago.Archipelago.CustGui;
 
 public abstract class GuiBuilder
 {

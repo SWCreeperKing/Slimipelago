@@ -196,7 +196,7 @@ public static class ItemHandler
 
                 var res = Core.ItemSpritesManager.TryGetCustomAsset(
                     location, "Slime Rancher", false, true,
-                    out var spriteData
+                    out var spriteData, false
                 );
 
                 if (!res || spriteData is null) return ItemSprites[location.Uid] = fallback;
