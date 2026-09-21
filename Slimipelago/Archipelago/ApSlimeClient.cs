@@ -38,6 +38,7 @@ public static class ApSlimeClient
     public static ApClient Client = new(new TimeSpan(0, 1, 0));
     public static bool QueuedDeathLink = false;
     public static LoseFlag<string> NoteLocations;
+    public static HashSet<string> HintedLocations = [];
     public static Dictionary<string, ScoutedItemInfo> ScoutedLocations = [];
     public static Dictionary<string, string[]> GateLocks = [];
     public static bool EnableJetpack = false;
@@ -119,12 +120,13 @@ public static class ApSlimeClient
             using var sha = SHA1.Create();
             RandoSeeds[seed!] = BitConverter.ToInt32(sha.ComputeHash(Encoding.UTF8.GetBytes(seed)), 0);
             LoadTrapData();
+            HintedLocations.Clear();
+            ScoutedLocations.Clear();
+            ItemHandler.ItemSprites.Clear();
 
             var i = 0;
             try
             {
-                ScoutedLocations.Clear();
-                ItemHandler.ItemSprites.Clear();
 
                 Core.Log.Msg("Scouting Needed Locations");
                 var scoutedLocations = Client.ScoutLocations([.. Client.Locations.Select(kv => kv.Key)])

@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Archipelago.MultiClient.Net.Enums;
 using HarmonyLib;
 using Slimipelago.Archipelago;
 using Slimipelago.Patches.PlayerPatches;
@@ -42,6 +43,9 @@ public static class CorporatePatch
             AssetItem item = ScoutedLocations[location];
             __instance.rewardTitles[rewardIndex].text = item.ItemName;
             __instance.rewardIcons[rewardIndex].overrideSprite = ItemHandler.ItemImage(item);
+
+            if (!Client.IsMissingLocation(location) || !HintedLocations.Add(location)) return;
+            Client.ScoutLocation(location, HintCreationPolicy.CreateAndAnnounceOnce);
         }
         catch (Exception e) { Core.Log.Error(e); }
     }

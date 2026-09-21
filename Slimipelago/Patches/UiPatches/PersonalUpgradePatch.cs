@@ -1,3 +1,4 @@
+using Archipelago.MultiClient.Net.Enums;
 using HarmonyLib;
 using MonomiPark.SlimeRancher.DataModel;
 using Slimipelago.Archipelago;
@@ -43,6 +44,9 @@ public static class PersonalUpgradePatch
             __instance.selectedTitle.text = locationName;
             __instance.selectedDesc.text = $"{scout.ItemName}\nfor [{scout.Player.Name}]";
             __instance.selectedImg.sprite = ItemHandler.ItemImage(scout);
+            
+            if (!Client.IsMissingLocation(locationName) || !HintedLocations.Add(locationName)) return;
+            Client.ScoutLocation(locationName, HintCreationPolicy.CreateAndAnnounceOnce);
         }
         catch (Exception e)
         {
