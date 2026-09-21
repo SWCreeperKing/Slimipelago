@@ -207,14 +207,18 @@ public static class ItemHandler
         catch (Exception e) { Core.Log.Error(e); }
         return fallback;
     }
-    
+
     public static ScoutedItemInfo ScoutLocation(string locationName)
     {
         if (ScoutedLocations.TryGetValue(locationName, out var itemInfo)) return itemInfo;
         if (Core.DebugLevel > 0) Core.Log.Msg($"Scouting [{locationName}]");
-        var loc = Client.ScoutLocation(locationName);
+        try
+        {
+            var loc = Client.ScoutLocation(locationName);
+            itemInfo = ScoutedLocations[locationName] = loc;
+        }
+        catch (Exception e) { itemInfo = ScoutedLocations[locationName] = null; }
         if (Core.DebugLevel > 0) Core.Log.Msg($"Finished Scouting [{locationName}]");
-        itemInfo = ScoutedLocations[locationName] = loc;
         return itemInfo;
     }
 }

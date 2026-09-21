@@ -120,20 +120,19 @@ public static class ApSlimeClient
             RandoSeeds[seed!] = BitConverter.ToInt32(sha.ComputeHash(Encoding.UTF8.GetBytes(seed)), 0);
             LoadTrapData();
 
+            var i = 0;
             try
             {
                 ScoutedLocations.Clear();
-                ItemHandler.ItemSprites.Clear();          
-                // string[] list = [.. Client.Locations.Select(kv => kv.Key).Where(s => Client.IsMissingLocation(s))];
-                string[] list = [.. Client.Locations.Select(kv => kv.Key)];
+                ItemHandler.ItemSprites.Clear();
 
                 Core.Log.Msg("Scouting Needed Locations");
-                var scoutedLocations = Client.ScoutLocations(list);
+                var scoutedLocations = Client.ScoutLocations([.. Client.Locations.Select(kv => kv.Key)])
+                                             .Where(l => l is not null).ToArray();
                 Core.Log.Msg("Locations Scouted, caching");
 
-                var i = 0;
                 var milestone = 0;
-                var locationsToScout = list.Length;
+                var locationsToScout = scoutedLocations.Length;
                 foreach (var scout in scoutedLocations)
                 {
                     try
@@ -153,7 +152,7 @@ public static class ApSlimeClient
                 }
             }
             catch (Exception e) { Core.Log.Error(e); }
-            Core.Log.Msg("Loaded all Locations");
+            Core.Log.Msg($"Loaded [{i}] Locations");
         };
 
         Client.OnConnectionErrorReceived += (e, s) => Core.Log.Error(e);
@@ -175,9 +174,11 @@ public static class ApSlimeClient
         Client.HintsTrackedEvent += (hints, _) =>
         {
             var player = Client.PlayerSlot;
-            HintedItems = hints.Where(hint => hint.Status is HintStatus.Priority && hint.FindingPlayer == player)
-                               .Select(hint => Client.LocationIdToLocationName(hint.LocationId, player))
-                               .ToArray();
+            HintedItems =
+            [
+                .. hints.Where(hint => hint.Status is HintStatus.Priority && hint.FindingPlayer == player)
+                        .Select(hint => Client.LocationIdToLocationName(hint.LocationId, player)),
+            ];
             QueueReLogic = true;
         };
 
