@@ -189,39 +189,32 @@ public static class ItemHandler
         var fallback = GameLoader.Spritemap[GameLoader.GetSpriteFromItemFlag(location.ItemFlags)];
         try
         {
+            if (!Data.UseCustomAssets) return fallback;
             if (ItemSprites.TryGetValue(location.Uid, out var val)) return val;
-            try
-            {
-                if (!Data.UseCustomAssets) return fallback;
 
-                var res = Core.ItemSpritesManager.TryGetCustomAsset(
-                    location, "Slime Rancher", false, true,
-                    out var spriteData, false
-                );
+            var res = Core.ItemSpritesManager.TryGetCustomAsset(
+                location, "Slime Rancher", false, true,
+                out var spriteData, false
+            );
 
-                if (!res || spriteData is null) return ItemSprites[location.Uid] = fallback;
-                var file = spriteData.FilePath;
+            if (!res || spriteData is null) return ItemSprites[location.Uid] = fallback;
+            var file = spriteData.FilePath;
 
-                var sprite = ItemSprites[location.Uid] = GameLoader.CreateSprite(file);
-                sprite.texture.filterMode = FilterMode.Point;
-                return sprite;
-            }
-            catch (Exception e) { Core.Log.Error(e); }
-
+            var sprite = ItemSprites[location.Uid] = GameLoader.CreateSprite(file);
+            sprite.texture.filterMode = FilterMode.Point;
+            return sprite;
         }
         catch (Exception e) { Core.Log.Error(e); }
         return fallback;
     }
-
+    
     public static ScoutedItemInfo ScoutLocation(string locationName)
     {
-        if (!ScoutedLocations.TryGetValue(locationName, out var itemInfo))
-        {
-            var loc = Client.ScoutLocation(locationName);
-            if (loc is null) return null;
-            itemInfo = ScoutedLocations[locationName] = loc;
-        }
-
+        if (ScoutedLocations.TryGetValue(locationName, out var itemInfo)) return itemInfo;
+        if (Core.DebugLevel > 0) Core.Log.Msg($"Scouting [{locationName}]");
+        var loc = Client.ScoutLocation(locationName);
+        if (Core.DebugLevel > 0) Core.Log.Msg($"Finished Scouting [{locationName}]");
+        itemInfo = ScoutedLocations[locationName] = loc;
         return itemInfo;
     }
 }

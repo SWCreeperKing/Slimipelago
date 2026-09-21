@@ -123,30 +123,28 @@ public static class ApSlimeClient
             try
             {
                 ScoutedLocations.Clear();
-                ItemHandler.ItemSprites.Clear();
-                var list = UpgradeLocations.Values.Concat(LocationDictionary.Values)
-                                           .Concat(CorporateLocations.Values.SelectMany(s => s))
-                                           .Concat(LogicHandler.PlortLocations.Values)
-                                           .Where(s => Client.IsMissingLocation(s))
-                                           .ToArray();
+                ItemHandler.ItemSprites.Clear();          
+                // string[] list = [.. Client.Locations.Select(kv => kv.Key).Where(s => Client.IsMissingLocation(s))];
+                string[] list = [.. Client.Locations.Select(kv => kv.Key)];
+
+                Core.Log.Msg("Scouting Needed Locations");
+                var scoutedLocations = Client.ScoutLocations(list);
+                Core.Log.Msg("Locations Scouted, caching");
 
                 var i = 0;
                 var milestone = 0;
                 var locationsToScout = list.Length;
-                foreach (var loc in list)
+                foreach (var scout in scoutedLocations)
                 {
                     try
                     {
-                        if (!ScoutedLocations.TryGetValue(loc, out var itemInfo))
-                        {
-                            var scoutedLoc = Client.ScoutLocation(loc);
-                            if (scoutedLoc is null) continue;
-                            itemInfo = ScoutedLocations[loc] = scoutedLoc;
-                        }
-
-                        if (Data.UseCustomAssets) ItemHandler.ItemImage(itemInfo);
+                        ScoutedLocations[scout.LocationName] = scout;
+                        if (Data.UseCustomAssets) ItemHandler.ItemImage(scout);
                     }
-                    catch { Core.Log.Error($"Could not scout location: [{loc}]"); }
+                    catch
+                    {
+                        if (Core.DebugLevel > 0) Core.Log.Error($"Could not scout location: [{scout.LocationName}]");
+                    }
                     i++;
                     var curMilestone = (int)(Math.Floor((double)i / locationsToScout * 10));
                     if (milestone == curMilestone) continue;
